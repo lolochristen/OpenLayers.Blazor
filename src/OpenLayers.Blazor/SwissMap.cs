@@ -27,11 +27,11 @@ public class SwissMap : Map
     /// e.g. ch.astra.wanderland-sperrungen_umleitungen
     /// </summary>
     /// <param name="layerId"></param>
-    public void AddLayer(string layerId)
+    public async Task AddSwissGeoLayer(string layerId, double opacity = 1)
     {
         Layers.Add(new TileLayer()
         {
-            Opacity = .8,
+            Opacity = opacity,
             Source = new TileSource()
             {
                 SourceType = SourceType.TileWMS,
@@ -39,5 +39,6 @@ public class SwissMap : Map
             }
         });
         
+        await UpdateLayers();
     }
 }

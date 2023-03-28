@@ -1,5 +1,7 @@
 ﻿@page "/"
 @using System.Text.Json
+@using System.Xml.Linq
+@using System.Collections.Immutable
 
 <h1>Swiss Map</h1>
 <h2>Coordinates in VL95</h2>
@@ -31,6 +33,16 @@
 <button @onclick="CenterLocation">Center to current location</button>
 <button @onclick="AddMarkLocation">Add Mark at current location</button>
 
+<select @bind="_selectedLayer">
+    @if (_layerIds != null)
+    {
+        @foreach (var layerid in _layerIds)
+        {
+            <option value="@layerid.Key">@layerid.Value</option>
+        }
+    }
+</select>
+<button @onclick="AddSelectedLayer">Add Layer</button>
 <code>@_featureInfo</code>
 
 
@@ -39,26 +51,25 @@
     private Coordinate? _lastPosition;
     private double _zoom = 2;
     private string _featureInfo;
-
+    private IDictionary<string, string> _layerIds;
+    private string _selectedLayer;
     [Inject] private HttpClient HttpClient { get; set; }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _map.AddLayer("ch.astra.wanderland-sperrungen_umleitungen");
-
             _map.Shapes.Add(new ShapeCircle(new Coordinate(1197279.0774135895, 2770557.824138796), 5) { BackgroundColor = "#2222AA66"});
+            await LoadSwissGeoLayersIds();
         }
     }
 
-    private void OnMapClick(Coordinate coordinate)
+    private async Task OnMapClick(Coordinate coordinate)
     {
         _map.Markers.Clear();
-
         //_map.Markers.Add(new MarkerFlag(coordinate, "Here I am") { Popup = true });
         _map.Markers.Add(new MarkerPin(coordinate) { Popup = true });
-        //_map.Markers.Add(new MarkerPin(coordinate));
+        await _map.UpdateMarkers();
     }
 
     private void OnPointerMove(Coordinate coordinate)
@@ -88,6 +99,22 @@
     {
         var coord = await _map.GetCurrentGeoLocation();
         _map.Markers.Add(new MarkerPin(coord));
+        await _map.UpdateMarkers();
+    }
+
+    private async Task LoadSwissGeoLayersIds()
+    {
+        var stream = await HttpClient.GetStreamAsync("https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities");
+        var xdoc = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
+        var ns = xdoc.Root.GetDefaultNamespace();
+        var layers = xdoc.Root.Element(ns + "Capability").Elements(ns + "Layer");
+        _layerIds = layers.Elements(ns + "Layer")
+            .ToImmutableSortedDictionary(p => p.Element(ns + "Name").Value, p => p.Element(ns + "Title").Value);
+    }
+
+    private Task AddSelectedLayer()
+    {
+        return _map.AddSwissGeoLayer(_selectedLayer, .7);
     }
 
 }

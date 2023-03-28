@@ -14,7 +14,7 @@ public class BingMap : Map
     /// <summary>
     ///  Your Bing Maps Key from https://www.bingmapsportal.com/ 
     /// </summary>
-    public string Key { get; set; }
+    public string? Key { get; set; }
 
     public BingMapImagerySet ImagerySet { get; set; }
 

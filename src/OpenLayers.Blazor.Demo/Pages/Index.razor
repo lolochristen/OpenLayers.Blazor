@@ -1,0 +1,93 @@
+﻿@page "/"
+@using System.Text.Json
+
+<h1>Swiss Map</h1>
+<h2>Coordinates in VL95</h2>
+
+<input type="range" min="1" max="15" @bind-value="_zoom"> @_zoom @_map?.Center
+
+<div style="border:1px solid silver;height:800px; margin-left: 50px; margin-right: 50px">
+
+    <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" OnFeatureClick="OnFeatureClicked">
+        <Popup>
+            <div id="popup" class="ol-box">
+                @if (context is Marker marker)
+                {
+                    <h3>@marker.Title</h3>
+                    <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
+                }
+            </div>
+        </Popup>
+    </SwissMap>
+
+</div>
+<p>
+    @if (_lastPosition != null)
+    {
+        <code>@_lastPosition.Y / @_lastPosition.X</code>
+    }
+</p>
+<button @onclick="LoadGeoJson">Load geojson</button>
+<button @onclick="CenterLocation">Center to current location</button>
+<button @onclick="AddMarkLocation">Add Mark at current location</button>
+
+<code>@_featureInfo</code>
+
+
+@code {
+    private SwissMap _map = null!;
+    private Coordinate? _lastPosition;
+    private double _zoom = 2;
+    private string _featureInfo;
+
+    [Inject] private HttpClient HttpClient { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _map.AddLayer("ch.astra.wanderland-sperrungen_umleitungen");
+
+            _map.Shapes.Add(new ShapeCircle(new Coordinate(1197279.0774135895, 2770557.824138796), 5) { BackgroundColor = "#2222AA66"});
+        }
+    }
+
+    private void OnMapClick(Coordinate coordinate)
+    {
+        _map.Markers.Clear();
+
+        //_map.Markers.Add(new MarkerFlag(coordinate, "Here I am") { Popup = true });
+        _map.Markers.Add(new MarkerPin(coordinate) { Popup = true });
+        //_map.Markers.Add(new MarkerPin(coordinate));
+    }
+
+    private void OnPointerMove(Coordinate coordinate)
+    {
+        _lastPosition = coordinate;
+    }
+
+    private async Task LoadGeoJson(MouseEventArgs obj)
+    {
+        // https://labs.karavia.ch/swiss-boundaries-geojson/
+        // or https://api3.geo.admin.ch/services/sdiservices.html
+        var json = await HttpClient.GetFromJsonAsync<object>("swissBOUNDARIES3D_1_3_TLM_LANDESGEBIET.geojson");
+        await _map.LoadGeoJson(json);
+    }
+
+    private void OnFeatureClicked(Feature feature)
+    {
+        _featureInfo = JsonSerializer.Serialize(feature);
+    }
+
+    private async Task CenterLocation()
+    {
+        await _map.CenterToCurrentGeoLocation();
+    }
+
+    private async Task AddMarkLocation()
+    {
+        var coord = await _map.GetCurrentGeoLocation();
+        _map.Markers.Add(new MarkerPin(coord));
+    }
+
+}

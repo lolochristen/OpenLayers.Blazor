@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Company>Isolutions</Company>
+		<Authors>Laurent Christen</Authors>
+		<Version>1.0.0</Version>
+		<Copyright>2023 by Laurent Christen</Copyright>
+		<PackageId>OpenLayers.Blazor</PackageId>
+		<PublishRelease>true</PublishRelease>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<OutputType>Library</OutputType>
+		<IsPackable>true</IsPackable>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\..\LICENSE" Link="LICENSE">
+		  <Pack>True</Pack>
+		  <PackagePath></PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<DefineConstants>$(DefineConstants);NET6_0</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+		<DefineConstants>$(DefineConstants);NET7_0</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.*" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.*" />
+	</ItemGroup>
+
+</Project>

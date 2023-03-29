@@ -20,7 +20,7 @@ public class SwissMap : Map
         });
         Center = new Coordinate { X = 2660013.54, Y = 1185171.98 }; // Swiss Center
         Zoom = 2.4;
-        Defaults.CoordinatesProjection = "EPSG:2056"; // VT95 // VT03="EPSG:21781" // WG83 "EPSG:4326";
+        Defaults.CoordinatesProjection = "EPSG:2056"; // VT95
     }
 
     /// <summary>
@@ -39,7 +39,5 @@ public class SwissMap : Map
                 Url = $"https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS={layerId}&LANG=en"
             }
         });
-        
-        await UpdateLayers();
     }
 }

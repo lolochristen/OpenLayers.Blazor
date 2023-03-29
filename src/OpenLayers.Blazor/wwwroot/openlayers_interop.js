@@ -44,6 +44,14 @@ export function MapOLSetLayers(mapId, layers) {
     _MapOL[mapId].setLayers(layers);
 }
 
+export function MapOLRemoveLayer(mapId, layer) {
+    _MapOL[mapId].removeLayer(layer);
+}
+
+export function MapOLAddLayer(mapId, layer) {
+    _MapOL[mapId].addLayer(layer);
+}
+
 // --- MapOL ----------------------------------------------------------------------------//
 
 function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
@@ -237,6 +245,23 @@ MapOL.prepareLayers = function (layers) {
 
 MapOL.prototype.setLayers = function (layers) {
      this.Map.setLayers(MapOL.prepareLayers(layers));
+}
+
+MapOL.prototype.removeLayer = function (layer) {
+    this.Map.getAllLayers().forEach((l) => {
+        try {
+            const source = l.getSource();
+            if (source.urls[0] == layer.source.url) {
+                this.Map.removeLayer(l);
+            }
+        }
+        catch { }
+    });
+}
+
+MapOL.prototype.addLayer = function (layer) {
+    var ollayers = MapOL.prepareLayers([layer])
+    this.Map.addLayer(ollayers[0]);
 }
 
 MapOL.prototype.setMarkers = function (markers) {

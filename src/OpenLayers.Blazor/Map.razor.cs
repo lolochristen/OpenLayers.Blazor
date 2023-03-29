@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -41,9 +43,9 @@ public partial class Map : IAsyncDisposable
 
     [Parameter] public EventCallback<double> ZoomChanged { get; set; }
 
-    [Parameter] public List<Marker> Markers { get; set; } = new();
+    [Parameter] public ObservableCollection<Marker> Markers { get; set; } = new();
 
-    [Parameter] public List<Shape> Shapes { get; set; } = new();
+    [Parameter] public ObservableCollection<Shape> Shapes { get; set; } = new();
 
     [Parameter] public EventCallback<Feature> OnFeatureClick { get; set; }
 
@@ -57,7 +59,7 @@ public partial class Map : IAsyncDisposable
 
     [Parameter] public RenderFragment<Feature?>? Popup { get; set; }
 
-    [Parameter] public List<TileLayer> Layers { get; set; } = new();
+    [Parameter] public ObservableCollection<TileLayer> Layers { get; set; } = new();
 
     public Defaults Defaults { get; } = new();
 
@@ -76,6 +78,50 @@ public partial class Map : IAsyncDisposable
         if (_module != null)
             await _module.DisposeAsync();
         _module = null;
+
+        Markers.CollectionChanged -= MarkersOnCollectionChanged;
+        Shapes.CollectionChanged -= ShapesOnCollectionChanged;
+        Layers.CollectionChanged -= LayersOnCollectionChanged;
+    }
+
+    private INotifyCollectionChanged? _markersCollectionRef;
+    private INotifyCollectionChanged? _shapeCollectionRef;
+    private INotifyCollectionChanged? _layerCollectionRef;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_markersCollectionRef != null)
+        {
+            _markersCollectionRef.CollectionChanged -= MarkersOnCollectionChanged;
+            if (!ReferenceEquals(_markersCollectionRef, Markers))
+            {
+                await SetMarkers();
+            }
+        }
+        Markers.CollectionChanged += MarkersOnCollectionChanged;
+        _markersCollectionRef = Markers;
+
+        if (_shapeCollectionRef != null)
+        {
+            _shapeCollectionRef.CollectionChanged -= ShapesOnCollectionChanged;
+            if (!ReferenceEquals(_shapeCollectionRef, Shapes))
+            {
+                await SetShapes();
+            }
+        }
+        Shapes.CollectionChanged += ShapesOnCollectionChanged;
+        _shapeCollectionRef = Shapes;
+
+        if (_layerCollectionRef != null)
+        {
+            _layerCollectionRef.CollectionChanged -= LayersOnCollectionChanged;
+            if (!ReferenceEquals(_layerCollectionRef, Layers))
+            {
+                await SetLayers();
+            }
+        }
+        Layers.CollectionChanged += LayersOnCollectionChanged;
+        _layerCollectionRef = Layers;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -131,13 +177,6 @@ public partial class Map : IAsyncDisposable
         return CenterChanged.InvokeAsync(_center);
     }
 
-    public ValueTask UpdateMarkers() => _module?.InvokeVoidAsync("MapOLMarkers", _mapId, Markers) ?? ValueTask.CompletedTask;
-
-    public ValueTask UpdateShapes() => _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, Shapes) ?? ValueTask.CompletedTask;
-
-    public ValueTask UpdateLayers() => _module?.InvokeVoidAsync("MapOLSetLayers", _mapId, Layers) ?? ValueTask.CompletedTask;
-
-
     public async Task SetCenter(Coordinate center)
     {
         _center = center;
@@ -162,5 +201,46 @@ public partial class Map : IAsyncDisposable
     public ValueTask<Coordinate?> GetCurrentGeoLocation()
     {
         return _module?.InvokeAsync<Coordinate?>("MapOLGetCurrentGeoLocation", _mapId) ?? ValueTask.FromResult<Coordinate?>(null);
+    }
+
+    public ValueTask SetMarkers() => _module?.InvokeVoidAsync("MapOLMarkers", _mapId, Markers) ?? ValueTask.CompletedTask;
+
+    public ValueTask SetShapes() => _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, Shapes) ?? ValueTask.CompletedTask;
+
+    public ValueTask SetLayers() => _module?.InvokeVoidAsync("MapOLSetLayers", _mapId, Layers) ?? ValueTask.CompletedTask;
+
+    private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (_module == null)
+            return;
+
+        Task.Run(async () =>
+        {
+            if (e.OldItems != null)
+            {
+                foreach (var oldLayer in e.OldItems.OfType<TileLayer>())
+                {
+                    await _module.InvokeVoidAsync("MapOLRemoveLayer", _mapId, oldLayer);
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (var newLayer in e.NewItems.OfType<TileLayer>())
+                {
+                    await _module.InvokeVoidAsync("MapOLAddLayer", _mapId, newLayer);
+                }
+            }
+        });
+    }
+
+    private void ShapesOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        _ = SetShapes();
+    }
+
+    private void MarkersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        _ = SetMarkers();
     }
 }

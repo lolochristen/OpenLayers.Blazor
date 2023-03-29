@@ -8,6 +8,22 @@
 
 <input type="range" min="1" max="15" @bind-value="_zoom"> @_zoom @_map?.Center
 
+<br/>
+<button @onclick="LoadGeoJson">Load geojson</button>
+<button @onclick="CenterLocation">Center to current location</button>
+<button @onclick="AddMarkLocation">Add Mark at current location</button>
+
+<select @bind="_selectedLayer">
+    @if (_layerIds != null)
+    {
+        @foreach (var layerid in _layerIds)
+        {
+            <option value="@layerid.Key">@layerid.Value</option>
+        }
+    }
+</select>
+<button @onclick="AddSelectedLayer">Add Layer</button>
+
 <div style="border:1px solid silver;height:800px; margin-left: 50px; margin-right: 50px">
 
     <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" OnFeatureClick="OnFeatureClicked">
@@ -29,20 +45,7 @@
         <code>@_lastPosition.Y / @_lastPosition.X</code>
     }
 </p>
-<button @onclick="LoadGeoJson">Load geojson</button>
-<button @onclick="CenterLocation">Center to current location</button>
-<button @onclick="AddMarkLocation">Add Mark at current location</button>
 
-<select @bind="_selectedLayer">
-    @if (_layerIds != null)
-    {
-        @foreach (var layerid in _layerIds)
-        {
-            <option value="@layerid.Key">@layerid.Value</option>
-        }
-    }
-</select>
-<button @onclick="AddSelectedLayer">Add Layer</button>
 <code>@_featureInfo</code>
 
 
@@ -69,7 +72,6 @@
         _map.Markers.Clear();
         //_map.Markers.Add(new MarkerFlag(coordinate, "Here I am") { Popup = true });
         _map.Markers.Add(new MarkerPin(coordinate) { Popup = true });
-        await _map.UpdateMarkers();
     }
 
     private void OnPointerMove(Coordinate coordinate)
@@ -99,7 +101,6 @@
     {
         var coord = await _map.GetCurrentGeoLocation();
         _map.Markers.Add(new MarkerPin(coord));
-        await _map.UpdateMarkers();
     }
 
     private async Task LoadSwissGeoLayersIds()
@@ -114,6 +115,8 @@
 
     private Task AddSelectedLayer()
     {
+        if (_map.Layers.Count > 1)
+            _map.Layers.RemoveAt(1);
         return _map.AddSwissGeoLayer(_selectedLayer, .7);
     }
 

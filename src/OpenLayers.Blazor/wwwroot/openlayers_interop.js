@@ -100,72 +100,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
         }
     );
 
-    const ollayers = new Array();
-
-    layers.forEach((l, i, arr) => {
-
-        let source;
-        if (l.extent == null) l.extent = undefined;
-        if (l.className == null) l.className = undefined;
-        if (l.minResolution == null) l.minResolution = undefined;
-        if (l.maxResolution == null) l.maxResolution = undefined;
-        if (l.maxZoom == null) l.maxZoom = undefined;
-        if (l.minZoom == null) l.minZoom = undefined;
-        if (l.source.url == null) l.source.url = undefined;
-        if (l.source.urls == null) l.source.urls = undefined;
-        if (l.source.cacheSize == null) l.source.cacheSize = undefined;
-        if (l.source.crossOrigin == null) l.source.crossOrigin = undefined;
-        if (l.source.transition == null) l.source.transition = undefined;
-        if (l.source.key == null) l.source.key = undefined;
-        if (l.source.serverType == null) l.source.serverType = undefined;
-        if (l.zIndex == null) l.zIndex= undefined;
-        if (l.source.reprojectionErrorThreshold == null) l.source.reprojectionErrorThreshold = undefined;
-
-        switch (l.source.sourceType) {
-            case 'TileImage':
-                source = new ol.source.TileImage(l.source);
-                break;
-            case 'BingMaps':
-                source = new ol.source.BingMaps(l.source);
-                break;
-            case 'OGCMapTile':
-                source = new ol.source.OGCMapTile(l.source);
-                break;
-            case 'TileArcGISRest':
-                source = new ol.source.TileArcGISRest(l.source);
-                break;
-            case 'TileJSON':
-                source = new ol.source.TileJSON(l.source);
-                break;
-            case 'TileWMS':
-                source = new ol.source.TileWMS(l.source);
-                break;
-            case 'WMTS':
-                source = new ol.source.WMTS(l.source);
-                break;
-            case 'Zoomify':
-                source = new ol.source.Zoomify(l.source);
-                break;
-            case 'OSM':
-                source = new ol.source.OSM(l.source);
-                break;
-            case 'XYZ':
-                source = new ol.source.XYZ(l.source);
-                break;
-            case 'CartoDB':
-                source = new ol.source.CartoDB(l.source);
-                break;
-            case 'Stamen':
-                source = new ol.source.Stamen(l.source);
-                break;
-            case 'TileDebug':
-                source = new ol.source.TileDebug(l.source);
-                break;
-        }
-
-        l.source = source;
-        ollayers.push(new ol.layer.Tile(l));
-    });
+    const ollayers = MapOL.prepareLayers(layers);
 
     let viewProjection = undefined;
     let viewExtent = ollayers[0].getExtent();
@@ -229,8 +164,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     this.setShapes(shapes);
 }
 
-MapOL.prototype.setLayers = function (layers) {
-
+MapOL.prepareLayers = function (layers) {
     const ollayers = new Array();
 
     layers.forEach((l, i, arr) => {
@@ -298,7 +232,11 @@ MapOL.prototype.setLayers = function (layers) {
         ollayers.push(new ol.layer.Tile(l));
     });
 
-    this.Map.setLayers(ollayers);
+    return ollayers;
+}
+
+MapOL.prototype.setLayers = function (layers) {
+     this.Map.setLayers(MapOL.prepareLayers(layers));
 }
 
 MapOL.prototype.setMarkers = function (markers) {

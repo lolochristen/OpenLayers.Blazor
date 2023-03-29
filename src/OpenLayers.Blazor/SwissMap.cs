@@ -25,6 +25,7 @@ public class SwissMap : Map
 
     /// <summary>
     /// e.g. ch.astra.wanderland-sperrungen_umleitungen
+    /// https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities
     /// </summary>
     /// <param name="layerId"></param>
     public async Task AddSwissGeoLayer(string layerId, double opacity = 1)
@@ -35,7 +36,7 @@ public class SwissMap : Map
             Source = new TileSource()
             {
                 SourceType = SourceType.TileWMS,
-                Url = $"https://wms0.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS={layerId}&LANG=en"
+                Url = $"https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS={layerId}&LANG=en"
             }
         });
         

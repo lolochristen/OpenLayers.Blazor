@@ -2,7 +2,7 @@
 
 public class ShapeCircle : Shape
 {
-    private Coordinate _coordinate;
+    private Coordinate? _coordinate;
 
     public ShapeCircle()
     {
@@ -21,7 +21,7 @@ public class ShapeCircle : Shape
         Radius = radius * 1000;
     }
 
-    public Coordinate Coordinate
+    public Coordinate? Coordinate
     {
         get => _coordinate;
         set

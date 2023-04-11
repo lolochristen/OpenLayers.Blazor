@@ -53,16 +53,17 @@ public partial class Map : IAsyncDisposable
 
     [Parameter] public RenderFragment<Feature?>? Popup { get; set; }
 
-    [Parameter] public RenderFragment Layers { get; set; }
-    [Parameter] public RenderFragment Features { get; set; }
+    [Parameter] public RenderFragment? Layers { get; set; }
+
+    [Parameter] public RenderFragment? Features { get; set; }
 
     public ObservableCollection<Layer> LayersList { get; } = new();
 
     public Defaults Defaults { get; } = new();
 
-    [Parameter] public string Class { get; set; }
+    [Parameter] public string? Class { get; set; }
 
-    [Parameter] public string Style { get; set; }
+    [Parameter] public string? Style { get; set; }
 
     public bool IsInitialized => _module != null;
 

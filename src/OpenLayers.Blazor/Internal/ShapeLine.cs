@@ -12,7 +12,7 @@ public class ShapeLine : Shape
     public ShapeLine(params Coordinate[] point)
     {
         Geometry = new Geometry("LineString");
-        Points = new List<Coordinate>(point);
+        Points = point;
     }
 
     public IEnumerable<Coordinate> Points

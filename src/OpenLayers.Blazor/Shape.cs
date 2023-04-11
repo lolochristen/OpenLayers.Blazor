@@ -78,7 +78,7 @@ public class Shape : Feature, IDisposable
     public void Dispose()
     {
         if (this is Marker)
-            ParentMap?.MarkersList.Remove(this as Marker);
+            ParentMap?.MarkersList.Remove((Marker)this);
         else
             ParentMap?.ShapesList.Remove(this);
     }
@@ -87,7 +87,7 @@ public class Shape : Feature, IDisposable
     {
         base.OnInitialized();
         if (this is Marker)
-            ParentMap?.MarkersList.Add(this as Marker);
+            ParentMap?.MarkersList.Add((Marker)this);
         else
             ParentMap?.ShapesList.Add(this);
     }

@@ -26,7 +26,7 @@ public class Feature : ComponentBase
     protected Internal.Feature InternalFeature { get; set; }
 
     [Parameter]
-    public dynamic Geometry
+    public dynamic? Geometry
     {
         get => InternalFeature.Geometry;
         set => InternalFeature.Geometry = value;

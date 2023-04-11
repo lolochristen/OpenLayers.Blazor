@@ -24,7 +24,7 @@ public class SwissMap : Map
     ///     https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities
     /// </summary>
     /// <param name="layerId"></param>
-    public async Task AddSwissGeoLayer(string layerId, double opacity = 1)
+    public Task AddSwissGeoLayer(string layerId, double opacity = 1)
     {
         LayersList.Add(new Layer
         {
@@ -32,5 +32,6 @@ public class SwissMap : Map
             SourceType = SourceType.TileWMS,
             Url = $"https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS={layerId}&LANG=en"
         });
+        return Task.CompletedTask;
     }
 }

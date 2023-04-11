@@ -17,7 +17,7 @@ public class Circle : Shape<ShapeCircle>
     }
 
     [Parameter]
-    public Coordinate Coordinate
+    public Coordinate? Coordinate
     {
         get => InternalFeature.Coordinate;
         set => InternalFeature.Coordinate = value;

@@ -6,73 +6,82 @@
 @using Layer = OpenLayers.Blazor.Layer
 @using Feature = OpenLayers.Blazor.Feature
 
-<h1>OpenLayers.Blazor.Map</h1>
-<h3>Coordinates in VL95</h3>
+<header>
 
-<input type="range" min="1" max="15" @bind-value="_zoom"> @_zoom @_map?.Center
+    <h1>OpenLayers.Blazor.Map</h1>
+    <h3>Coordinates in VL95</h3>
 
-<br/>
-<button @onclick="LoadGeoJson">Load geojson</button>
-<button @onclick="CenterLocation">Center to current location</button>
-<button @onclick="AddMarkLocation">Add Mark at current location</button>
-
-<select @bind="_selectedLayer">
-    @if (_layerIds != null)
-    {
-        @foreach (var layerid in _layerIds)
-        {
-            <option value="@layerid.Key">@layerid.Value</option>
-        }
-    }
-</select>
-<button @onclick="AddSelectedLayer">Add Layer</button>
-
-<div style="margin: 30px">
-
-    <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" OnFeatureClick="OnFeatureClicked" Style="border:1px solid silver;height:800px;">
-        <Popup>
-            <div id="popup" class="ol-box">
-                @if (context is Marker marker)
+    <div class="m-2">
+        <button class="btn btn-primary" @onclick="CenterLocation">Center to current location</button>
+        <button class="btn btn-primary" @onclick="AddMarkLocation">Add Mark at current location</button>
+        <button class="btn btn-primary" @onclick="LoadGeoJson">Load geojson</button>
+        <input type="range" min="1" max="15" @bind-value="_zoom"><code>@_zoom @_map?.Center</code>
+    </div>
+    <div class="m-2">
+        <select @bind="_selectedLayer" on>
+            @if (_layerIds != null)
+            {
+                @foreach (var layerId in _layerIds)
                 {
-                    <h3>@marker.Title</h3>
-                    <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
+                    <option value="@layerId.Key">@layerId.Value</option>
                 }
-            </div>
-        </Popup>
-        <Features>
-            <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
-            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933"></Marker>
-            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
-        </Features>
-    </SwissMap>
+            }
+        </select>
+        <button class="btn btn-secondary" @onclick="LoadSwissGeoLayersIds">Load Layer List</button>
+        <button class="btn btn-primary" @onclick="AddSelectedLayer">Add Layer</button>
+    </div>
 
-</div>
-<p>
-    @if (_lastPosition != null)
-    {
-        <code>@_lastPosition.X / @_lastPosition.Y</code>
-    }
-</p>
+</header>
 
-<code>@_featureInfo</code>
+<main>
+    <div class="container">
 
-<OpenStreetMap Style="height:480px; width:640px" Zoom="5" Center="new Coordinate(51,0)">
-    <Layers>
-        <Layer SourceType="SourceType.TileWMS"
-               Url="https://sedac.ciesin.columbia.edu/geoserver/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=gpw-v3%3Agpw-v3-population-density_2000&LANG=en"
-               Opacity=".3"
-               CrossOrigin="anonymous"></Layer>
-    </Layers>
-</OpenStreetMap>
+        <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" OnFeatureClick="OnFeatureClicked" Style="border:1px solid silver;height:800px;">
+            <Popup>
+                <div id="popup" class="ol-box">
+                    @if (context is Marker marker)
+                    {
+                        <h3>@marker.Title</h3>
+                        <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
+                    }
+                </div>
+            </Popup>
+            <Features>
+                <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
+                <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933"></Marker>
+                <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+            </Features>
+        </SwissMap>
 
+    </div>
+    <p>
+        @if (_lastPosition != null)
+        {
+            <code>@_lastPosition.X / @_lastPosition.Y</code>
+        }
+    </p>
 
+    <code>@_featureInfo</code>
+
+    <div class="container">
+        <OpenStreetMap Style="height:480px; width:640px" Zoom="5" Center="new Coordinate(51,0)">
+            <Layers>
+                <Layer SourceType="SourceType.TileWMS"
+                       Url="https://sedac.ciesin.columbia.edu/geoserver/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=gpw-v3%3Agpw-v3-population-density_2000&LANG=en"
+                       Opacity=".3"
+                       CrossOrigin="anonymous"></Layer>
+            </Layers>
+        </OpenStreetMap>
+    </div>
+
+</main>
 @code {
     private SwissMap _map = null!;
     private Coordinate? _lastPosition;
     private double _zoom = 2;
     private string _featureInfo;
-    private IDictionary<string, string> _layerIds;
-    private string _selectedLayer;
+    private IDictionary<string, string>? _layerIds;
+    private string? _selectedLayer;
     [Inject] private HttpClient HttpClient { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -80,7 +89,6 @@
         if (firstRender)
         {
             _map.ShapesList.Add(new Circle(new Coordinate(1197279.0774135895, 2770557.824138796), 5) { BackgroundColor = "#2222AA66"});
-            await LoadSwissGeoLayersIds();
         }
     }
 

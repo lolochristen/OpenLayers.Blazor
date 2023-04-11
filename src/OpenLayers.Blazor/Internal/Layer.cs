@@ -1,6 +1,6 @@
-﻿namespace OpenLayers.Blazor;
+﻿namespace OpenLayers.Blazor.Internal;
 
-public class TileLayer
+public class Layer
 {
     public string? ClassName { get; set; }
     public double Opacity { get; set; } = 1;
@@ -12,9 +12,8 @@ public class TileLayer
     public double? MinZoom { get; set; }
     public double? MaxZoom { get; set; }
     public double Preload { get; set; } = 0;
-    public TileSource Source { get; set; }
+    public TileSource Source { get; set; } = new();
     public bool UseInterimTilesOnError { get; set; } = true;
 
     public Dictionary<string, object>? Properties { get; set; }
-
 }

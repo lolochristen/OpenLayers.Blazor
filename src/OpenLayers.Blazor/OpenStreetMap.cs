@@ -4,15 +4,11 @@ public class OpenStreetMap : Map
 {
     public OpenStreetMap()
     {
-        Layers.Add(new TileLayer()
+        LayersList.Add(new Layer
         {
-            Source =
-                new TileSource()
-                {
-                    SourceType = SourceType.OSM,
-                }
+            SourceType = SourceType.OSM
         });
-        Center = new Coordinate(0,0);
+        Center = new Coordinate(0, 0);
         Zoom = 10;
     }
 }

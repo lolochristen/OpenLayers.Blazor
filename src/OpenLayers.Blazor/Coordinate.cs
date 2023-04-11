@@ -10,7 +10,7 @@ using OpenLayers.Blazor.Model;
 
 namespace OpenLayers.Blazor;
 
-public class Coordinate
+public class Coordinate : IEquatable<Coordinate>
 {
     public Coordinate()
     {
@@ -52,6 +52,13 @@ public class Coordinate
     ///     Coordinate in OpenLayers Style: [Longitude, Latitude]
     /// </summary>
     public double[] Coordinates { get; set; } = new double[2] { 0, 0 };
+
+    public bool Equals(Coordinate? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Coordinates.Equals(other.Coordinates);
+    }
 
     public override string ToString()
     {
@@ -108,5 +115,18 @@ public class Coordinate
         lon2 *= 180 / Math.PI;
 
         return new Coordinate(lat2, lon2);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((Coordinate)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Coordinates.GetHashCode();
     }
 }

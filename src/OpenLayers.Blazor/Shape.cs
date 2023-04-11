@@ -1,69 +1,94 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace OpenLayers.Blazor;
 
-public class Shape : Feature
+public class Shape<T> : Shape where T : Internal.Shape, new()
 {
-    public Shape()
+    public Shape() : base(new T())
     {
-        Kind = GetType().Name;
-        ID = Guid.NewGuid();
     }
 
-    public string Kind { get; set; }
-
-    public Guid ID { get; set; }
-
-    public bool Popup { get; set; }
-
-    [JsonIgnore]
-    public string? Label
+    public Shape(T shape) : base(shape)
     {
-        get => GetProperty<string>("label");
-        set => Properties["label"] = value;
     }
 
-    [JsonIgnore]
+    internal new T InternalFeature => (T)base.InternalFeature;
+}
+
+public class Shape : Feature, IDisposable
+{
+    internal Shape(Internal.Shape shape) : base(shape)
+    {
+    }
+
+    internal new Internal.Shape InternalFeature => (Internal.Shape)base.InternalFeature;
+
+    [CascadingParameter] public Map? ParentMap { get; set; }
+
+    [Parameter]
     public string? Title
     {
-        get => GetProperty<string>("title");
-        set => Properties["title"] = value;
+        get => InternalFeature.Title;
+        set => InternalFeature.Title = value;
     }
 
-    [JsonIgnore]
-    public string? Content
+    [Parameter]
+    public bool Popup
     {
-        get => GetProperty<string>("content");
-        set => Properties["content"] = value;
+        get => InternalFeature.Popup;
+        set => InternalFeature.Popup = value;
     }
 
-    public double TextScale { get; set; } = 1;
-
-    public string Color { get; set; } = "#FFFFFF";
-
-    public string BorderColor { get; set; } = "#FFFFFF";
-
-    public int BorderSize { get; set; } = 1;
-
-    public string BackgroundColor { get; set; } = "#000000";
-
-    public double Radius { get; set; }
-
-    private T? GetProperty<T>(string key)
+    [Parameter]
+    public double Radius
     {
-        if (Properties.ContainsKey(key))
-        {
-            if (Properties[key] is JsonElement jsonElement)
-            {
-                return jsonElement.Deserialize<T>();
-            }
-            else
-            {
-                return (T)Properties[key];
-            }
-        }
+        get => InternalFeature.Radius / 1000;
+        set => InternalFeature.Radius = value * 1000;
+    }
 
-        return default;
+    [Parameter]
+    public string Color
+    {
+        get => InternalFeature.Color;
+        set => InternalFeature.Color = value;
+    }
+
+    [Parameter]
+    public string BorderColor
+    {
+        get => InternalFeature.BorderColor;
+        set => InternalFeature.BorderColor = value;
+    }
+
+
+    [Parameter]
+    public string BackgroundColor
+    {
+        get => InternalFeature.BackgroundColor;
+        set => InternalFeature.BackgroundColor = value;
+    }
+
+    [Parameter]
+    public double Scale
+    {
+        get => InternalFeature.Scale;
+        set => InternalFeature.Scale = value;
+    }
+
+    public void Dispose()
+    {
+        if (this is Marker)
+            ParentMap?.MarkersList.Remove(this as Marker);
+        else
+            ParentMap?.ShapesList.Remove(this);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (this is Marker)
+            ParentMap?.MarkersList.Add(this as Marker);
+        else
+            ParentMap?.ShapesList.Add(this);
     }
 }

@@ -1,12 +1,34 @@
-﻿namespace OpenLayers.Blazor;
+﻿using Microsoft.AspNetCore.Components;
 
-public class Feature
+namespace OpenLayers.Blazor;
+
+public class Feature<T> : Feature where T : Internal.Feature
 {
-    // { Type = this.GetType().Name; }
+    public Feature(T value) : base(value)
+    {
+    }
 
-    public string Type { get; set; } = "Feature";
+    internal new T InternalFeature => (T)base.InternalFeature;
+}
 
-    public Geometry Geometry { get; set; }
+public class Feature : ComponentBase
+{
+    public Feature()
+    {
+        InternalFeature = new Internal.Feature();
+    }
 
-    public Dictionary<string, dynamic> Properties { get; set; } = new();
+    internal Feature(Internal.Feature feature)
+    {
+        InternalFeature = feature;
+    }
+
+    protected Internal.Feature InternalFeature { get; set; }
+
+    [Parameter]
+    public dynamic Geometry
+    {
+        get => InternalFeature.Geometry;
+        set => InternalFeature.Geometry = value;
+    }
 }

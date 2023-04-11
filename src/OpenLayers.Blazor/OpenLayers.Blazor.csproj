@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Company>Isolutions</Company>
 		<Authors>Laurent Christen</Authors>
-		<Version>1.0.0</Version>
+		<Version>0.1.0</Version>
 		<Copyright>2023 by Laurent Christen</Copyright>
 		<PackageId>OpenLayers.Blazor</PackageId>
 		<PublishRelease>true</PublishRelease>
@@ -17,10 +17,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\LICENSE" Link="LICENSE">
-		  <Pack>True</Pack>
-		  <PackagePath></PackagePath>
-	  </None>
+		<None Include="..\..\LICENSE" Link="LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
 	</ItemGroup>
 
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">

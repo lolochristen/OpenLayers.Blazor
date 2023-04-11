@@ -1,3 +1,9 @@
-﻿<div id="@_mapId" class="map-container @Class" style="@Style">
-    <div id="@_popupId">@Popup?.Invoke(_popupContext)</div>
-</div>
+﻿<CascadingValue Value="@(this)" IsFixed>
+    <div id="@_mapId" class="map-container @Class" style="@Style">
+        <div id="@_popupId">@Popup?.Invoke(_popupContext)</div>
+    </div>
+</CascadingValue>
+<CascadingValue Value="@(this)" IsFixed>
+    @Layers
+    @Features
+</CascadingValue>

@@ -1,4 +1,4 @@
-﻿namespace OpenLayers.Blazor;
+﻿namespace OpenLayers.Blazor.Internal;
 
 public class ShapeCircle : Shape
 {

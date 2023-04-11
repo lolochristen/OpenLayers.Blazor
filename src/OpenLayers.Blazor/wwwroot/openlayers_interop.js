@@ -111,8 +111,8 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     const ollayers = MapOL.prepareLayers(layers);
 
     let viewProjection = undefined;
-    let viewExtent = ollayers[0].getExtent();
-    let viewCenter = center.coordinates;
+    let viewExtent = (ollayers.length > 0) ? ollayers[0].getExtent() : undefined;
+    let viewCenter = (center && center.coordinates) ? center.coordinates : undefined;
     if (this.Defaults.coordinatesProjection == 'EPSG:2056') {
         viewProjection = projectionLV95;
     }
@@ -120,7 +120,8 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
         viewProjection = projectionLV03;
     }
     else if (this.Defaults.coordinatesProjection == 'EPSG:4326') {
-        viewCenter = ol.proj.transform(center.coordinates, 'EPSG:4326', 'EPSG:3857');
+        if (viewCenter)
+            viewCenter = ol.proj.transform(viewCenter, 'EPSG:4326', 'EPSG:3857');
     }
 
     this.Map = new ol.Map({
@@ -305,8 +306,6 @@ MapOL.prototype.setShapes = function (shapes) {
     if (!shapes) return;
 
     shapes.forEach((shape) => {
-
-
         var feature;
         var viewProjection = this.Map.getView().getProjection().getCode();
         switch (shape.kind) {
@@ -529,11 +528,11 @@ MapOL.prototype.pinStyle = function (marker) {
     return [
         new ol.style.Style({
             image: new ol.style.Icon({
-                anchor: [0, 21],
-                size: [56, 21],
+                anchor: [0, 60],
+                size: [160, 60],
                 offset: [0, 0],
                 opacity: 1,
-                scale: 1,
+                scale: marker.scale,
                 anchorXUnits: 'pixels',
                 anchorYUnits: 'pixels',
                 src: './_content/OpenLayers.Blazor/img/pin-back.png'
@@ -541,11 +540,11 @@ MapOL.prototype.pinStyle = function (marker) {
         }),
         new ol.style.Style({
             image: new ol.style.Icon({
-                anchor: [400, 790],
-                size: [800, 800],
+                anchor: [100, 198],
+                size: [200, 200],
                 offset: [0, 0],
                 opacity: 1,
-                scale: .08,
+                scale: marker.scale,
                 anchorXUnits: 'pixels',
                 anchorYUnits: 'pixels',
                 src: src

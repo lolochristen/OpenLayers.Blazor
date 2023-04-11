@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Components;
+using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
-public class Marker : Shape<Internal.Marker>
+public class Circle : Shape<ShapeCircle>
 {
-    public Marker() : base(new Internal.Marker())
+    public Circle()
     {
     }
 
-    [Parameter]
-    public MarkerType Type
+    public Circle(Coordinate center, double radius)
     {
-        get => Enum.Parse<MarkerType>(InternalFeature.Kind);
-        set => InternalFeature.Kind = value.ToString();
+        Geometry = new Geometry("Point");
+        Coordinate = center;
+        Radius = radius;
     }
 
     [Parameter]

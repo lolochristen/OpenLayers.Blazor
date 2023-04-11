@@ -7,15 +7,19 @@ using Microsoft.JSInterop;
 namespace OpenLayers.Blazor;
 
 /// <summary>
-/// Component to show OpenLayers Maps
+///     Component to show OpenLayers Maps
 /// </summary>
 public partial class Map : IAsyncDisposable
 {
-    private Coordinate _center;
-    private double _zoom = 5;
-    private Feature? _popupContext;
+    private static IJSObjectReference? _module;
+    private Coordinate? _internalCenter;
+    private double? _internalZoom;
+    private INotifyCollectionChanged? _layerCollectionRef;
     private string _mapId;
+    private INotifyCollectionChanged? _markersCollectionRef;
+    private Feature? _popupContext;
     private string _popupId;
+    private INotifyCollectionChanged? _shapeCollectionRef;
 
     public Map()
     {
@@ -25,33 +29,23 @@ public partial class Map : IAsyncDisposable
 
     [Inject] private IJSRuntime JSRuntime { get; set; }
 
-    [Parameter]
-    public Coordinate Center
-    {
-        get => _center;
-        set => SetCenter(value);
-    }
+    [Parameter] public Coordinate Center { get; set; } = new(0, 0);
 
     [Parameter] public EventCallback<Coordinate> CenterChanged { get; set; }
 
-    [Parameter]
-    public double Zoom
-    {
-        get => _zoom;
-        set => SetZoom(value);
-    }
+    [Parameter] public double Zoom { get; set; } = 2;
 
     [Parameter] public EventCallback<double> ZoomChanged { get; set; }
 
-    [Parameter] public ObservableCollection<Marker> Markers { get; set; } = new();
+    public ObservableCollection<Marker> MarkersList { get; } = new();
 
-    [Parameter] public ObservableCollection<Shape> Shapes { get; set; } = new();
+    public ObservableCollection<Shape> ShapesList { get; } = new();
 
     [Parameter] public EventCallback<Feature> OnFeatureClick { get; set; }
 
     [Parameter] public EventCallback<Marker> OnMarkerClick { get; set; }
 
-    [Parameter] public EventCallback<Shape> OnShapeClick { get; set; }
+    [Parameter] public EventCallback<Internal.Shape> OnShapeClick { get; set; }
 
     [Parameter] public EventCallback<Coordinate> OnClick { get; set; }
 
@@ -59,7 +53,10 @@ public partial class Map : IAsyncDisposable
 
     [Parameter] public RenderFragment<Feature?>? Popup { get; set; }
 
-    [Parameter] public ObservableCollection<TileLayer> Layers { get; set; } = new();
+    [Parameter] public RenderFragment Layers { get; set; }
+    [Parameter] public RenderFragment Features { get; set; }
+
+    public ObservableCollection<Layer> LayersList { get; } = new();
 
     public Defaults Defaults { get; } = new();
 
@@ -69,8 +66,6 @@ public partial class Map : IAsyncDisposable
 
     public bool IsInitialized => _module != null;
 
-    private IJSObjectReference? _module;
-
     private DotNetObjectReference<Map>? Instance { get; set; }
 
     public async ValueTask DisposeAsync()
@@ -79,49 +74,43 @@ public partial class Map : IAsyncDisposable
             await _module.DisposeAsync();
         _module = null;
 
-        Markers.CollectionChanged -= MarkersOnCollectionChanged;
-        Shapes.CollectionChanged -= ShapesOnCollectionChanged;
-        Layers.CollectionChanged -= LayersOnCollectionChanged;
+        MarkersList.CollectionChanged -= MarkersOnCollectionChanged;
+        ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
+        LayersList.CollectionChanged -= LayersOnCollectionChanged;
     }
-
-    private INotifyCollectionChanged? _markersCollectionRef;
-    private INotifyCollectionChanged? _shapeCollectionRef;
-    private INotifyCollectionChanged? _layerCollectionRef;
 
     protected override async Task OnParametersSetAsync()
     {
         if (_markersCollectionRef != null)
         {
             _markersCollectionRef.CollectionChanged -= MarkersOnCollectionChanged;
-            if (!ReferenceEquals(_markersCollectionRef, Markers))
-            {
-                await SetMarkers();
-            }
+            if (!ReferenceEquals(_markersCollectionRef, MarkersList)) await SetMarkers();
         }
-        Markers.CollectionChanged += MarkersOnCollectionChanged;
-        _markersCollectionRef = Markers;
+
+        MarkersList.CollectionChanged += MarkersOnCollectionChanged;
+        _markersCollectionRef = MarkersList;
 
         if (_shapeCollectionRef != null)
         {
             _shapeCollectionRef.CollectionChanged -= ShapesOnCollectionChanged;
-            if (!ReferenceEquals(_shapeCollectionRef, Shapes))
-            {
-                await SetShapes();
-            }
+            if (!ReferenceEquals(_shapeCollectionRef, ShapesList)) await SetShapes();
         }
-        Shapes.CollectionChanged += ShapesOnCollectionChanged;
-        _shapeCollectionRef = Shapes;
+
+        ShapesList.CollectionChanged += ShapesOnCollectionChanged;
+        _shapeCollectionRef = ShapesList;
 
         if (_layerCollectionRef != null)
         {
             _layerCollectionRef.CollectionChanged -= LayersOnCollectionChanged;
-            if (!ReferenceEquals(_layerCollectionRef, Layers))
-            {
-                await SetLayers();
-            }
+            if (!ReferenceEquals(_layerCollectionRef, LayersList)) await SetLayers();
         }
-        Layers.CollectionChanged += LayersOnCollectionChanged;
-        _layerCollectionRef = Layers;
+
+        LayersList.CollectionChanged += LayersOnCollectionChanged;
+        _layerCollectionRef = LayersList;
+
+        if (!Center.Equals(_internalCenter)) await SetCenter();
+
+        if (Zoom != _internalZoom) await SetZoom();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -134,80 +123,115 @@ public partial class Map : IAsyncDisposable
             Instance ??= DotNetObjectReference.Create(this);
 
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Defaults, Center, Zoom, Markers, Shapes, Layers, Instance);
+                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Defaults, Center, Zoom,
+                    MarkersList.Select(p => p.InternalFeature).ToArray(),
+                    ShapesList.Select(p => p.InternalFeature).ToArray(),
+                    LayersList.Select(p => p.InternalLayer).ToArray(),
+                    Instance);
         }
     }
 
     [JSInvokable]
-    public Task OnInternalFeatureClick(Feature feature) => OnFeatureClick.InvokeAsync(feature);
-
-    [JSInvokable]
-    public async Task OnInternalMarkerClick(Marker marker)
+    public async Task OnInternalFeatureClick(Internal.Feature feature)
     {
-        _popupContext = marker;
-        await OnMarkerClick.InvokeAsync(marker);
-        StateHasChanged();
+        await OnFeatureClick.InvokeAsync(new Feature(feature));
     }
 
     [JSInvokable]
-    public async Task OnInternalShapeClick(Shape shape)
+    public async Task OnInternalMarkerClick(Internal.Marker marker)
     {
-        _popupContext = shape;
+        var m = MarkersList.FirstOrDefault(p => p.InternalFeature.ID == marker.ID);
+
+        if (m != null)
+        {
+            _popupContext = m;
+            await OnMarkerClick.InvokeAsync(m);
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnInternalShapeClick(Internal.Shape shape)
+    {
+        //_popupContext = shape;
         await OnShapeClick.InvokeAsync(shape);
         StateHasChanged();
     }
 
     [JSInvokable]
-    public Task OnInternalClick(Coordinate coordinate) => OnClick.InvokeAsync(coordinate);
-
-    [JSInvokable]
-    public Task OnInternalPointerMove(Coordinate coordinate) => OnPointerMove.InvokeAsync(coordinate);
-
-    [JSInvokable]
-    public Task OnInternalZoomChanged(double zoom)
+    public Task OnInternalClick(Coordinate coordinate)
     {
-        _zoom = zoom;
-        return ZoomChanged.InvokeAsync(zoom);
+        return OnClick.InvokeAsync(coordinate);
     }
 
     [JSInvokable]
-    public Task OnInternalCenterChanged(Coordinate coordinate)
+    public Task OnInternalPointerMove(Coordinate coordinate)
     {
-        _center = coordinate;
-        return CenterChanged.InvokeAsync(_center);
+        return OnPointerMove.InvokeAsync(coordinate);
     }
 
-    public async Task SetCenter(Coordinate center)
+    [JSInvokable]
+    public async Task OnInternalCenterChanged(Coordinate coordinate)
     {
-        _center = center;
-        if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, center);
+        Center = coordinate;
+        _internalCenter = coordinate;
+        await CenterChanged.InvokeAsync(Center);
     }
 
-    public async Task SetZoom(double zoom)
+    public async Task SetCenter()
     {
-        if (_zoom != zoom)
-        {
-            _zoom = zoom;
-            if (_module != null) await _module.InvokeVoidAsync("MapOLZoom", _mapId, zoom);
-        }
+        if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, Center);
+        _internalCenter = Center;
     }
 
-    public ValueTask SetZoomToExtent(Extent extent) => _module?.InvokeVoidAsync("MapOLZoomToExtent", _mapId, extent.ToString()) ?? ValueTask.CompletedTask;
+    [JSInvokable]
+    public async Task OnInternalZoomChanged(double zoom)
+    {
+        Zoom = zoom;
+        _internalZoom = zoom;
+        await ZoomChanged.InvokeAsync(zoom);
+    }
 
-    public ValueTask LoadGeoJson(object json) => _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json) ?? ValueTask.CompletedTask;
+    public async Task SetZoom()
+    {
+        if (_module != null) await _module.InvokeVoidAsync("MapOLZoom", _mapId, Zoom);
+        _internalZoom = Zoom;
+    }
 
-    public ValueTask CenterToCurrentGeoLocation() => _module?.InvokeVoidAsync("MapOLCenterToCurrentGeoLocation", _mapId) ?? ValueTask.CompletedTask;
+    public ValueTask SetZoomToExtent(Extent extent)
+    {
+        return _module?.InvokeVoidAsync("MapOLZoomToExtent", _mapId, extent.ToString()) ?? ValueTask.CompletedTask;
+    }
+
+    public ValueTask LoadGeoJson(object json)
+    {
+        return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json) ?? ValueTask.CompletedTask;
+    }
+
+    public ValueTask CenterToCurrentGeoLocation()
+    {
+        return _module?.InvokeVoidAsync("MapOLCenterToCurrentGeoLocation", _mapId) ?? ValueTask.CompletedTask;
+    }
 
     public ValueTask<Coordinate?> GetCurrentGeoLocation()
     {
         return _module?.InvokeAsync<Coordinate?>("MapOLGetCurrentGeoLocation", _mapId) ?? ValueTask.FromResult<Coordinate?>(null);
     }
 
-    public ValueTask SetMarkers() => _module?.InvokeVoidAsync("MapOLMarkers", _mapId, Markers) ?? ValueTask.CompletedTask;
+    public ValueTask SetMarkers()
+    {
+        return _module?.InvokeVoidAsync("MapOLMarkers", _mapId, MarkersList.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
+    }
 
-    public ValueTask SetShapes() => _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, Shapes) ?? ValueTask.CompletedTask;
+    public ValueTask SetShapes()
+    {
+        return _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, ShapesList.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
+    }
 
-    public ValueTask SetLayers() => _module?.InvokeVoidAsync("MapOLSetLayers", _mapId, Layers) ?? ValueTask.CompletedTask;
+    public ValueTask SetLayers()
+    {
+        return _module?.InvokeVoidAsync("MapOLSetLayers", _mapId, LayersList.Select(p => p.InternalLayer).ToArray()) ?? ValueTask.CompletedTask;
+    }
 
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
@@ -217,20 +241,12 @@ public partial class Map : IAsyncDisposable
         Task.Run(async () =>
         {
             if (e.OldItems != null)
-            {
-                foreach (var oldLayer in e.OldItems.OfType<TileLayer>())
-                {
-                    await _module.InvokeVoidAsync("MapOLRemoveLayer", _mapId, oldLayer);
-                }
-            }
+                foreach (var oldLayer in e.OldItems.OfType<Layer>())
+                    await _module.InvokeVoidAsync("MapOLRemoveLayer", _mapId, oldLayer.InternalLayer);
 
             if (e.NewItems != null)
-            {
-                foreach (var newLayer in e.NewItems.OfType<TileLayer>())
-                {
-                    await _module.InvokeVoidAsync("MapOLAddLayer", _mapId, newLayer);
-                }
-            }
+                foreach (var newLayer in e.NewItems.OfType<Layer>())
+                    await _module.InvokeVoidAsync("MapOLAddLayer", _mapId, newLayer.InternalLayer);
         });
     }
 
@@ -242,5 +258,10 @@ public partial class Map : IAsyncDisposable
     private void MarkersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         _ = SetMarkers();
+    }
+
+    public void ClearMarkers()
+    {
+        MarkersList.Clear();
     }
 }

@@ -1,10 +1,14 @@
 ﻿@page "/"
+@using OpenLayers.Blazor.Internal
+@using Marker = OpenLayers.Blazor.Marker
 @using System.Text.Json
 @using System.Xml.Linq
 @using System.Collections.Immutable
+@using Layer = OpenLayers.Blazor.Layer
+@using Feature = OpenLayers.Blazor.Feature
 
-<h1>Swiss Map</h1>
-<h2>Coordinates in VL95</h2>
+<h1>OpenLayers.Blazor.Map</h1>
+<h3>Coordinates in VL95</h3>
 
 <input type="range" min="1" max="15" @bind-value="_zoom"> @_zoom @_map?.Center
 
@@ -24,9 +28,9 @@
 </select>
 <button @onclick="AddSelectedLayer">Add Layer</button>
 
-<div style="border:1px solid silver;height:800px; margin-left: 50px; margin-right: 50px">
+<div style="margin: 30px">
 
-    <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" OnFeatureClick="OnFeatureClicked">
+    <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" OnFeatureClick="OnFeatureClicked" Style="border:1px solid silver;height:800px;">
         <Popup>
             <div id="popup" class="ol-box">
                 @if (context is Marker marker)
@@ -36,18 +40,38 @@
                 }
             </div>
         </Popup>
+        <Features>
+            <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
+            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933"></Marker>
+            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+        </Features>
     </SwissMap>
 
 </div>
 <p>
     @if (_lastPosition != null)
     {
-        <code>@_lastPosition.Y / @_lastPosition.X</code>
+        <code>@_lastPosition.X / @_lastPosition.Y</code>
     }
 </p>
 
 <code>@_featureInfo</code>
 
+<Map Style="height:480px; width:640px" Zoom="5" Center="new Coordinate(51,0)">
+    <Layers>
+        <Layer SourceType="SourceType.OSM"  />
+        <Layer SourceType="SourceType.TileWMS" 
+               Url="https://sedac.ciesin.columbia.edu/geoserver/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=gpw-v3%3Agpw-v3-population-density_2000&LANG=en" 
+               Opacity=".3" 
+               CrossOrigin="anonymous"></Layer>
+    </Layers>
+    <Features>
+        @*
+            <Marker />
+            <Shape />
+        *@
+    </Features>
+</Map>
 
 @code {
     private SwissMap _map = null!;
@@ -62,16 +86,15 @@
     {
         if (firstRender)
         {
-            _map.Shapes.Add(new ShapeCircle(new Coordinate(1197279.0774135895, 2770557.824138796), 5) { BackgroundColor = "#2222AA66"});
+            _map.ShapesList.Add(new Circle(new Coordinate(1197279.0774135895, 2770557.824138796), 5) { BackgroundColor = "#2222AA66"});
             await LoadSwissGeoLayersIds();
         }
     }
 
     private async Task OnMapClick(Coordinate coordinate)
     {
-        _map.Markers.Clear();
-        //_map.Markers.Add(new MarkerFlag(coordinate, "Here I am") { Popup = true });
-        _map.Markers.Add(new MarkerPin(coordinate) { Popup = true });
+        _map.MarkersList.Clear();
+        _map.MarkersList.Add(new Marker() { Type = MarkerType.MarkerPin, Popup = true, Coordinate = coordinate});
     }
 
     private void OnPointerMove(Coordinate coordinate)
@@ -100,7 +123,7 @@
     private async Task AddMarkLocation()
     {
         var coord = await _map.GetCurrentGeoLocation();
-        _map.Markers.Add(new MarkerPin(coord));
+        _map.MarkersList.Add(new Marker { Type = MarkerType.MarkerPin, Coordinate = coord });
     }
 
     private async Task LoadSwissGeoLayersIds()
@@ -115,8 +138,8 @@
 
     private Task AddSelectedLayer()
     {
-        if (_map.Layers.Count > 1)
-            _map.Layers.RemoveAt(1);
+        if (_map.LayersList.Count > 1)
+            _map.LayersList.RemoveAt(1);
         return _map.AddSwissGeoLayer(_selectedLayer, .7);
     }
 

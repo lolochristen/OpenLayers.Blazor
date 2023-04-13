@@ -16,6 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>OpenLayers;Blazor;Map;dotnet</PackageTags>
 		<PackageIcon>icon.png</PackageIcon>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

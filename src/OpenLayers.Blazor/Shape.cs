@@ -33,6 +33,13 @@ public class Shape : Feature, IDisposable
     }
 
     [Parameter]
+    public string? Label
+    {
+        get => InternalFeature.Label;
+        set => InternalFeature.Label = value;
+    }
+
+    [Parameter]
     public bool Popup
     {
         get => InternalFeature.Popup;

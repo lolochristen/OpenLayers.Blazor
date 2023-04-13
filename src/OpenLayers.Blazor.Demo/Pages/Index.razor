@@ -107,7 +107,7 @@
     {
         // https://labs.karavia.ch/swiss-boundaries-geojson/
         // or https://api3.geo.admin.ch/services/sdiservices.html
-        var json = await HttpClient.GetFromJsonAsync<object>("swissBOUNDARIES3D_1_3_TLM_LANDESGEBIET.geojson");
+        var json = await HttpClient.GetFromJsonAsync<JsonElement>("swissBOUNDARIES3D_1_3_TLM_LANDESGEBIET.geojson");
         await _map.LoadGeoJson(json);
     }
 

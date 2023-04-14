@@ -4,6 +4,10 @@ export function MapOLInit(mapId, popupId, defaults, center, zoom, markers, shape
     _MapOL[mapId] = new MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance);
 }
 
+export function MapOLDispose(mapId) {
+    _MapOL[mapId] = undefined;
+}
+
 export function MapOLCenter(mapId, point) {
     _MapOL[mapId].setCenter(point);
 }

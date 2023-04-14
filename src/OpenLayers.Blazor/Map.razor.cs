@@ -153,13 +153,16 @@ public partial class Map : IAsyncDisposable
     /// <returns>ValueTask</returns>
     public async ValueTask DisposeAsync()
     {
-        if (_module != null)
-            await _module.DisposeAsync();
-        _module = null;
-
         MarkersList.CollectionChanged -= MarkersOnCollectionChanged;
         ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
         LayersList.CollectionChanged -= LayersOnCollectionChanged;
+
+        if (_module != null)
+        {
+            await _module.InvokeVoidAsync("MapOLDispose", _mapId);
+            await _module.DisposeAsync();
+            _module = null;
+        }
     }
 
     protected override async Task OnParametersSetAsync()

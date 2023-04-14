@@ -1,59 +1,34 @@
 ﻿@page "/"
-@using Marker = OpenLayers.Blazor.Marker
-@using System.Text.Json
-@using System.Xml.Linq
-@using System.Collections.Immutable
-@using Layer = OpenLayers.Blazor.Layer
-@using Feature = OpenLayers.Blazor.Feature
+@using System.Diagnostics
 
-<header>
+<h1>OpenLayers.Blazor.Map</h1>
+<h3>Coordinates in VL95</h3>
 
-    <h1>OpenLayers.Blazor.Map</h1>
-    <h3>Coordinates in VL95</h3>
+<div class="m-2">
+    <button class="btn btn-primary" @onclick="CenterLocation">Center to current location</button>
+    <button class="btn btn-primary" @onclick="AddMarkLocation">Add Mark at current location</button>
+    <input type="range" min="1" max="15" @bind-value="_zoom"><code>@_zoom @_map?.Center</code>
+</div>
 
-    <div class="m-2">
-        <button class="btn btn-primary" @onclick="CenterLocation">Center to current location</button>
-        <button class="btn btn-primary" @onclick="AddMarkLocation">Add Mark at current location</button>
-        <button class="btn btn-primary" @onclick="LoadGeoJson">Load geojson</button>
-        <input type="range" min="1" max="15" @bind-value="_zoom"><code>@_zoom @_map?.Center</code>
-    </div>
-    <div class="m-2">
-        <select @bind="_selectedLayer" on>
-            @if (_layerIds != null)
-            {
-                @foreach (var layerId in _layerIds)
+<div class="container">
+
+    <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" Style="border:1px solid silver;height:800px;">
+        <Popup>
+            <div id="popup" class="ol-box">
+                @if (context is Marker marker)
                 {
-                    <option value="@layerId.Key">@layerId.Value</option>
+                    <h3>@marker.Title</h3>
+                    <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
                 }
-            }
-        </select>
-        <button class="btn btn-secondary" @onclick="LoadSwissGeoLayersIds">Load Layer List</button>
-        <button class="btn btn-primary" @onclick="AddSelectedLayer">Add Layer</button>
-    </div>
-
-</header>
-
-<main>
-    <div class="container">
-
-        <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" OnFeatureClick="OnFeatureClicked" Style="border:1px solid silver;height:800px;">
-            <Popup>
-                <div id="popup" class="ol-box">
-                    @if (context is Marker marker)
-                    {
-                        <h3>@marker.Title</h3>
-                        <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
-                    }
-                </div>
-            </Popup>
-            <Features>
-                <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
-                <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
-                <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
-            </Features>
-        </SwissMap>
-
-    </div>
+            </div>
+        </Popup>
+        <Features>
+            <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
+            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
+            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+        </Features>
+    </SwissMap>
+    
     <p>
         @if (_lastPosition != null)
         {
@@ -61,59 +36,21 @@
         }
     </p>
 
-    <code>@_featureInfo</code>
+</div>
 
-    <div class="container">
-        <OpenStreetMap Style="height:480px; width:640px" Zoom="5" Center="new Coordinate(51,0)">
-            <Layers>
-                <Layer SourceType="SourceType.TileWMS"
-                       Url="https://sedac.ciesin.columbia.edu/geoserver/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=gpw-v3%3Agpw-v3-population-density_2000&LANG=en"
-                       Opacity=".3"
-                       CrossOrigin="anonymous"></Layer>
-            </Layers>
-        </OpenStreetMap>
-    </div>
-
-</main>
 @code {
     private SwissMap _map = null!;
     private Coordinate? _lastPosition;
     private double _zoom = 2;
-    private string _featureInfo;
-    private IDictionary<string, string>? _layerIds;
-    private string? _selectedLayer;
-    [Inject] private HttpClient HttpClient { get; set; }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _map.ShapesList.Add(new Circle(new Coordinate(1197279.0774135895, 2770557.824138796), 5) { BackgroundColor = "#2222AA66"});
-        }
-    }
 
     private async Task OnMapClick(Coordinate coordinate)
     {
-        _map.MarkersList.Clear();
-        _map.MarkersList.Add(new Marker() { Type = MarkerType.MarkerPin, Popup = true, Coordinate = coordinate});
+        Debug.WriteLine($"you clicked at {coordinate}");
     }
 
     private void OnPointerMove(Coordinate coordinate)
     {
         _lastPosition = coordinate;
-    }
-
-    private async Task LoadGeoJson(MouseEventArgs obj)
-    {
-        // https://labs.karavia.ch/swiss-boundaries-geojson/
-        // or https://api3.geo.admin.ch/services/sdiservices.html
-        var json = await HttpClient.GetFromJsonAsync<JsonElement>("swissBOUNDARIES3D_1_3_TLM_LANDESGEBIET.geojson");
-        await _map.LoadGeoJson(json);
-    }
-
-    private void OnFeatureClicked(Feature feature)
-    {
-        _featureInfo = JsonSerializer.Serialize(feature);
     }
 
     private async Task CenterLocation()
@@ -126,22 +63,4 @@
         var coord = await _map.GetCurrentGeoLocation();
         _map.MarkersList.Add(new Marker { Type = MarkerType.MarkerPin, Coordinate = coord });
     }
-
-    private async Task LoadSwissGeoLayersIds()
-    {
-        var stream = await HttpClient.GetStreamAsync("https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities");
-        var xdoc = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
-        var ns = xdoc.Root.GetDefaultNamespace();
-        var layers = xdoc.Root.Element(ns + "Capability").Elements(ns + "Layer");
-        _layerIds = layers.Elements(ns + "Layer")
-            .ToImmutableSortedDictionary(p => p.Element(ns + "Name").Value, p => p.Element(ns + "Title").Value);
-    }
-
-    private Task AddSelectedLayer()
-    {
-        if (_map.LayersList.Count > 1)
-            _map.LayersList.RemoveAt(1);
-        return _map.AddSwissGeoLayer(_selectedLayer, .7);
-    }
-
 }

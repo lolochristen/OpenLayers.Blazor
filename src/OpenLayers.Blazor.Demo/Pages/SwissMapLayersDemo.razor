@@ -1,0 +1,52 @@
+﻿@page "/swissmaplayersdemo"
+@using System.Xml.Linq
+@using System.Collections.Immutable
+
+<h3>SwissMapLayersDemo</h3>
+
+<div class="m-2">
+    <select @bind="_selectedLayer" on>
+        @if (_layerIds != null)
+        {
+            @foreach (var layerId in _layerIds)
+            {
+                <option value="@layerId.Key">@layerId.Value</option>
+            }
+        }
+    </select>
+    <button class="btn btn-primary" @onclick="AddSelectedLayer">Add Layer</button>
+</div>
+
+<div class="container">
+    <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;"></SwissMap>
+</div>
+
+@code {
+    private SwissMap _map = null!;
+    private IDictionary<string, string>? _layerIds;
+    private string? _selectedLayer;
+    [Inject] private HttpClient HttpClient { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadSwissGeoLayersIds();
+    }
+
+    private async Task LoadSwissGeoLayersIds()
+    {
+        var stream = await HttpClient.GetStreamAsync("https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities");
+        var xdoc = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
+        var ns = xdoc.Root.GetDefaultNamespace();
+        var layers = xdoc.Root.Element(ns + "Capability").Elements(ns + "Layer");
+        _layerIds = layers.Elements(ns + "Layer")
+            .ToImmutableSortedDictionary(p => p.Element(ns + "Name").Value, p => p.Element(ns + "Title").Value);
+    }
+
+    private Task AddSelectedLayer()
+    {
+        if (_map.LayersList.Count > 1)
+            _map.LayersList.RemoveAt(1);
+        return _map.AddSwissGeoLayer(_selectedLayer, .7);
+    }
+
+}

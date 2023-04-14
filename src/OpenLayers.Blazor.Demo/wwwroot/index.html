@@ -3,22 +3,26 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>OpenLayers.Blazor.Demo</title>
     <base href="/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/app.css" rel="stylesheet" />
-
-    <!-- If you add any scoped CSS files, uncomment the following to load them
-    <link href="OpenLayers.Blazor.Demo.styles.css" rel="stylesheet" /> -->
-
+    <link href="OpenLayers.Blazor.Demo.styles.css" rel="stylesheet" />
     <link href="lib/openlayers/ol.css" rel="stylesheet" />
     <link href="_content/OpenLayers.Blazor/OpenLayers.Blazor.css" rel="stylesheet" />
     <script src="lib/openlayers/dist/ol.min.js"></script>
-
+    <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.

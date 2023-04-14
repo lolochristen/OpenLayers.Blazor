@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor", "src\Op
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Demo", "src\OpenLayers.Blazor.Demo\OpenLayers.Blazor.Demo.csproj", "{558FC061-5215-43DC-A7C1-CE3DA8D3112A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLayers.Blazor.Demo.Server", "src\OpenLayers.Blazor.Demo.Server\OpenLayers.Blazor.Demo.Server.csproj", "{56CA5376-8AD9-481C-81B1-D82D0716989A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Demo.Server", "src\OpenLayers.Blazor.Demo.Server\OpenLayers.Blazor.Demo.Server.csproj", "{56CA5376-8AD9-481C-81B1-D82D0716989A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

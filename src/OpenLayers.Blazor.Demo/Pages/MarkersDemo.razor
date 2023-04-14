@@ -1,0 +1,30 @@
+﻿@page "/markersdemo"
+<h3>Markers</h3>
+
+
+<div class="container">
+    <SwissMap @ref="_map" OnClick="OnMapClick" Style="border:1px solid silver;height:800px;">
+        <Popup>
+            <div id="popup" class="ol-box">
+                @if (context is Marker marker)
+                {
+                    <h3>@marker.Title</h3>
+                    <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
+                }
+            </div>
+        </Popup>
+        <Features>
+            <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
+            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
+        </Features>
+    </SwissMap>
+</div>
+@code {
+    private SwissMap _map = null!;
+
+    private async Task OnMapClick(Coordinate coordinate)
+    {
+        _map.MarkersList.Add(new Marker() { Type = MarkerType.MarkerPin, Popup = true, Color = "blue", Coordinate = coordinate, Title = "Marker"});
+    }
+
+}

@@ -158,6 +158,13 @@ public class Layer : ComponentBase
     }
 
     [Parameter]
+    public double Preload
+    {
+        get => _internalLayer.Preload;
+        set => _internalLayer.Preload = value;
+    }
+
+    [Parameter]
     public string? ServerType
     {
         get => _internalLayer.Source.ServerType;

@@ -482,7 +482,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
 }
 
 MapOL.prototype.onMapPointerMove = function (evt, element) {
-    if (evt.dragging) {
+    if (evt.dragging || Number.isNaN(evt.coordinate[0])) {
         return;
     }
     var coordinate = ol.proj.transform(evt.coordinate, this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)

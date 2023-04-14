@@ -1,5 +1,10 @@
-﻿namespace OpenLayers.Blazor;
+﻿using Microsoft.AspNetCore.Components;
 
+namespace OpenLayers.Blazor;
+
+/// <summary>
+/// Imagery Set for Bing
+/// </summary>
 public enum BingMapImagerySet
 {
     RoadOnDemand,
@@ -9,30 +14,47 @@ public enum BingMapImagerySet
     OrdnanceSurvey
 }
 
+/// <summary>
+/// Bing Map
+/// </summary>
 public class BingMap : Map
 {
     public BingMap()
     {
-        Center = new Coordinate(-6655.5402445057125, 6709968.258934638);
-        Zoom = 13;
+        ImagerySet = BingMapImagerySet.RoadOnDemand;
+        Center = new Coordinate(46.783290, 9.679330);
+        Zoom = 6;
     }
 
     /// <summary>
     ///     Your Bing Maps Key from https://www.bingmapsportal.com/
     /// </summary>
-    public string? Key { get; set; }
+    [Parameter] public string? Key { get; set; }
 
-    public BingMapImagerySet ImagerySet { get; set; }
+    [Parameter] public BingMapImagerySet ImagerySet { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnParametersSetAsync()
     {
-        LayersList.Add(new Layer
+        if (LayersList.Count > 0 && LayersList[0].ImagerySet != ImagerySet)
         {
-            SourceType = SourceType.BingMaps,
-            Key = Key,
-            ImagerySet = ImagerySet,
-            MaxZoom = 19
-        });
-        base.OnInitialized();
+            LayersList[0].ImagerySet = ImagerySet;
+            await SetLayers(LayersList);
+        }
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            LayersList.Add(new Layer
+            {
+                SourceType = SourceType.BingMaps,
+                Key = Key,
+                ImagerySet = ImagerySet,
+                MaxZoom = 19
+            });
+        }
+
+        return base.OnAfterRenderAsync(firstRender);
     }
 }

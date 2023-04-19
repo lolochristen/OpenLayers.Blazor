@@ -26,4 +26,7 @@ public class TileSource
     public double ZDirection { get; set; } = 0;
     public string? Key { get; set; }
     public string? ImagerySet { get; set; }
+    public string? Layer { get; set; }
+    public string? MatrixSet { get; set; }
+    public string? Format { get; set; }
 }

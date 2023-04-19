@@ -1,0 +1,21 @@
+﻿@page "/customdemo"
+
+<h3>CustomWMTSMap</h3>
+
+<div class="container">
+    <Map Style="height:800px" Zoom="5" Center="new Coordinate(51,0)">
+        <Layers>
+            <Layer SourceType="SourceType.Stamen" SourceLayer="watercolor"></Layer>
+        </Layers>
+    </Map>
+    
+    <Map Style="height:800px" Zoom="5" Center="new Coordinate(51,0)">
+        <Layers>
+            <Layer SourceType="SourceType.WMTS" Url="https://wxs.ign.fr/choisirgeoportail/geoportail/wmts" SourceLayer="GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2" MatrixSet="PM" Format="image/png"></Layer>
+        </Layers>
+    </Map>
+</div>
+
+@code {
+
+}

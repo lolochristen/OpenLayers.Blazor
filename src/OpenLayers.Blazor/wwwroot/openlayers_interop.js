@@ -189,14 +189,17 @@ MapOL.prepareLayers = function (layers) {
         if (l.maxResolution == null) l.maxResolution = undefined;
         if (l.maxZoom == null) l.maxZoom = undefined;
         if (l.minZoom == null) l.minZoom = undefined;
+        if (l.zIndex == null) l.zIndex= undefined;
         if (l.source.url == null) l.source.url = undefined;
         if (l.source.urls == null) l.source.urls = undefined;
         if (l.source.cacheSize == null) l.source.cacheSize = undefined;
         if (l.source.crossOrigin == null) l.source.crossOrigin = undefined;
         if (l.source.transition == null) l.source.transition = undefined;
+        if (l.source.layer == null) l.source.layer = undefined;
         if (l.source.key == null) l.source.key = undefined;
         if (l.source.serverType == null) l.source.serverType = undefined;
-        if (l.zIndex == null) l.zIndex= undefined;
+        if (l.source.matrixSet == null) l.source.matrixSet = undefined;
+        if (l.source.format == null) l.source.format = undefined;
         if (l.source.reprojectionErrorThreshold == null) l.source.reprojectionErrorThreshold = undefined;
 
         switch (l.source.sourceType) {

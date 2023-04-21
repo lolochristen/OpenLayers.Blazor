@@ -31,12 +31,7 @@ public class Shape : Feature
         set => Properties["title"] = value;
     }
 
-    [JsonIgnore]
-    public string? Content
-    {
-        get => GetProperty<string>("content");
-        set => Properties["content"] = value;
-    }
+    public string? Content { get; set; }
 
     public double TextScale { get; set; } = 1;
 

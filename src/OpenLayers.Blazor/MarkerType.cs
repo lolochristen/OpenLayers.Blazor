@@ -4,5 +4,6 @@ public enum MarkerType
 {
     MarkerPin,
     MarkerFlag,
-    MarkerAwesome
+    MarkerAwesome,
+    MarkerCustomImage
 }

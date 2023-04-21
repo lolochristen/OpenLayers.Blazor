@@ -82,6 +82,13 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.Scale = value;
     }
 
+    [Parameter]
+    public string? Content
+    {
+        get => InternalFeature.Content;
+        set => InternalFeature.Content = value;
+    }
+
     public void Dispose()
     {
         if (this is Marker)

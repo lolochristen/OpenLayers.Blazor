@@ -296,6 +296,10 @@ MapOL.prototype.setMarkers = function (markers) {
             case "MarkerAwesome":
                 feature.setStyle(this.awesomeStyle(marker));
                 break;
+
+            case "MarkerCustomImage":
+                feature.setStyle(this.customImageStyle(marker));
+                break;
         }
 
         source.addFeature(feature);
@@ -653,6 +657,23 @@ MapOL.prototype.awesomeStyle = function (marker) {
             })
         })
     ];
+}
+
+MapOL.prototype.customImageStyle = function (marker) {
+    return [
+        new ol.style.Style({
+            image: new ol.style.Icon({
+                anchor: marker.anchor,
+                size: marker.size,
+                offset: [0, 0],
+                opacity: 1,
+                scale: marker.scale,
+                anchorXUnits: 'pixels',
+                anchorYUnits: 'pixels',
+                src: marker.content
+                })
+            })
+        ];
 }
 
 MapOL.prototype.lineStyle = function (line) {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace OpenLayers.Blazor;
 
@@ -22,6 +23,15 @@ public class Marker : Shape<Internal.Marker>
         Label = icon.ToString();
     }
 
+    public Marker(Coordinate coordinate, string imageSource, float width, float height, float anchorX, float anchorY)
+    {
+        Type = MarkerType.MarkerCustomImage;
+        Coordinate = coordinate;
+        Content = imageSource;
+        InternalFeature.Size = new[] { width, height };
+        InternalFeature.Anchor = new[] { anchorX, anchorY };
+    }
+
     [Parameter]
     public MarkerType Type
     {
@@ -34,5 +44,19 @@ public class Marker : Shape<Internal.Marker>
     {
         get => InternalFeature.Coordinate;
         set => InternalFeature.Coordinate = value;
+    }
+
+    [Parameter]
+    public float[]? Size
+    {
+        get => InternalFeature.Size;
+        set => InternalFeature.Size = value;
+    }
+
+    [Parameter]
+    public float[]? Anchor
+    {
+        get => InternalFeature.Anchor;
+        set => InternalFeature.Anchor = value;
     }
 }

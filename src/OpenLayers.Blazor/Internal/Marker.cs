@@ -25,6 +25,10 @@ public class Marker : Shape
         }
     }
 
+    public float[]? Size { get; set; }
+
+    public float[]? Anchor { get; set; }
+
     public override int GetHashCode()
     {
         return base.GetHashCode() & _coordinate.GetHashCode();

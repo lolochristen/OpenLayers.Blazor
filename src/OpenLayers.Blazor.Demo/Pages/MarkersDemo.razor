@@ -24,7 +24,8 @@
 
     private async Task OnMapClick(Coordinate coordinate)
     {
-        _map.MarkersList.Add(new Marker() { Type = MarkerType.MarkerPin, Popup = true, Color = "blue", Coordinate = coordinate, Title = "Marker"});
+        //_map.MarkersList.Add(new Marker() { Type = MarkerType.MarkerPin, Popup = true, Color = "blue", Coordinate = coordinate, Title = "Marker"});
+        _map.MarkersList.Add(new Marker(coordinate, "pin.png", 414, 602, 414, 602) { Scale = 0.1, Popup = true, Title = "Custom Pin"});
     }
 
 }

@@ -30,7 +30,6 @@ public class Layer : ComponentBase
         get => _internalLayer.Extent;
         set => _internalLayer.Extent = value;
     }
-
     [Parameter]
     public int? ZIndex
     {
@@ -155,6 +154,27 @@ public class Layer : ComponentBase
     {
         get => _internalLayer.Source.ZDirection;
         set => _internalLayer.Source.ZDirection = value;
+    }
+
+    [Parameter]
+    public string? SourceLayer
+    {
+        get => _internalLayer.Source.Layer;
+        set => _internalLayer.Source.Layer = value;
+    }
+
+    [Parameter]
+    public string? MatrixSet
+    {
+        get => _internalLayer.Source.MatrixSet;
+        set => _internalLayer.Source.MatrixSet = value;
+    }
+
+    [Parameter]
+    public string? Format
+    {
+        get => _internalLayer.Source.Format;
+        set => _internalLayer.Source.Format = value;
     }
 
     [Parameter]

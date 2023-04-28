@@ -200,6 +200,7 @@ MapOL.prepareLayers = function (layers) {
         if (l.source.serverType == null) l.source.serverType = undefined;
         if (l.source.matrixSet == null) l.source.matrixSet = undefined;
         if (l.source.format == null) l.source.format = undefined;
+        if (l.source.projection == null) l.source.projection = undefined;
         if (l.source.reprojectionErrorThreshold == null) l.source.reprojectionErrorThreshold = undefined;
 
         switch (l.source.sourceType) {

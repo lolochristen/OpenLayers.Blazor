@@ -1,4 +1,6 @@
-﻿namespace OpenLayers.Blazor;
+﻿using System.Text.Json.Serialization;
+
+namespace OpenLayers.Blazor;
 
 public class Defaults
 {
@@ -13,4 +15,7 @@ public class Defaults
     public string BorderColor { get; set; } = "#FFFFFF";
 
     public string CoordinatesProjection { get; set; } = "EPSG:4326";
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public ScaleLineUnit ScaleLineUnit { get; set; } = ScaleLineUnit.Metric;
 }

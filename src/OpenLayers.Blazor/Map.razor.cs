@@ -145,6 +145,16 @@ public partial class Map : IAsyncDisposable
         set => Defaults.CoordinatesProjection = value;
     }
 
+    /// <summary>
+    /// Unit of the ScaleLine
+    /// </summary>
+    [Parameter]
+    public ScaleLineUnit ScaleLineUnit
+    {
+        get => Defaults.ScaleLineUnit;
+        set => Defaults.ScaleLineUnit = value;
+    }
+
     private DotNetObjectReference<Map>? Instance { get; set; }
 
     /// <summary>

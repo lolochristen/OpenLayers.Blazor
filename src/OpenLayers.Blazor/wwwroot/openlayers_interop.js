@@ -131,11 +131,11 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     this.Map = new ol.Map({
         layers: ollayers,
         target: mapId,
-        controls: ol.control.defaults.defaults().extend([
+        controls: defaults.scaleLineUnit != 'none' ? ol.control.defaults.defaults().extend([
             new ol.control.ScaleLine({
-                units: 'metric',
+                units: defaults.scaleLineUnit.toLowerCase(),
             }),
-        ]),
+        ]) : null,
         view: new ol.View({
             projection: viewProjection,
             center: viewCenter,

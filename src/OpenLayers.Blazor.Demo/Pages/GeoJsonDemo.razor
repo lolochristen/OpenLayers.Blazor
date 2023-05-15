@@ -9,6 +9,8 @@
     <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;"></SwissMap>
 </div>
 
+<CodeView Source="GeoJsonDemo.razor" />
+
 @code {
     private SwissMap _map = null!;
     [Inject] private HttpClient HttpClient { get; set; }

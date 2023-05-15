@@ -13,6 +13,8 @@
     <link href="_content/OpenLayers.Blazor/OpenLayers.Blazor.css" rel="stylesheet" />
     <script src="lib/openlayers/dist/ol.min.js"></script>
     <link rel="icon" type="image/png" href="favicon.png" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/dark.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -30,6 +32,14 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <script>
+        window.highlightSnippet = function () {
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightBlock(el);
+            });
+        }
+    </script>
 </body>
 
 </html>

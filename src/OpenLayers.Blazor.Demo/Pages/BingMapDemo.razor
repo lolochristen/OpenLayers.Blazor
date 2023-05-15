@@ -13,6 +13,8 @@
     <BingMap Style="height:720px;" ImagerySet="@(_layerselect != null ? Enum.Parse<BingMapImagerySet>(_layerselect) : BingMapImagerySet.RoadOnDemand)" Key="Your Bing Maps Key from https://www.bingmapsportal.com/ here"></BingMap>
 </div>
 
+<CodeView Source="BingMapDemo.razor" />
+
 @code {
     private string? _layerselect;
 }

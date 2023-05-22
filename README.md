@@ -2,6 +2,10 @@
 
 This is a map component based on [OpenLayers](https://openlayers.org/) to show different types and layers of maps from sources like OpenStreet, Bing, SwissTopo ary WMTS/WMS compatible source with some features like markes or shape drawing. The component has implemented the swiss specific coordination projection (VL03/VL95) and therefore can project map content from swisstopo (https://map.geo.admin.ch/). 
 
+## Demo/Examples
+
+https://openlayers-blazor-demo.laurent-christen.ch/
+
 ## Usage
 
 ### Setup

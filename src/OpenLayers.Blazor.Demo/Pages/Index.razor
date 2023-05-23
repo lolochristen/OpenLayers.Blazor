@@ -1,13 +1,22 @@
 ﻿@page "/"
 @using System.Diagnostics
+@using System.Text.Json
+@using System.Text.Json.Nodes
+@using System.Xml.Linq
 
-<h1>OpenLayers.Blazor.Map</h1>
-<h3>Coordinates in VL95</h3>
+<h1>OpenLayers.Blazor Demo/Examples</h1>
+<h5>Coordinates in VL95/EPSG:2056</h5>
 
 <div class="m-2">
     <button class="btn btn-primary" @onclick="CenterLocation">Center to current location</button>
     <button class="btn btn-primary" @onclick="AddMarkLocation">Add Mark at current location</button>
-    <input type="range" min="1" max="15" @bind-value="_zoom"><code>@_zoom @_map?.Center</code>
+    <input type="range" min="1" max="15" @bind-value="_zoom"> <code>@_zoom</code>
+    <p>
+        <code>Center:@_map?.Center</code><br/>
+        <code>Last Position: @_lastPosition?.X / @_lastPosition?.Y</code><br/>
+        <code>Altitude @(_altitude)m</code><br />
+        <code>Mouse Position: @_mousePosition?.X / @_mousePosition?.Y</code>
+    </p>
 </div>
 
 <div class="container">
@@ -28,31 +37,27 @@
             <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
         </Features>
     </SwissMap>
-    
-    <p>
-        @if (_lastPosition != null)
-        {
-            <code>@_lastPosition.X / @_lastPosition.Y</code>
-        }
-    </p>
-
 </div>
 
 <CodeView Source="Index.razor" />
 
 @code {
     private SwissMap _map = null!;
-    private Coordinate? _lastPosition;
+    private Coordinate? _mousePosition;
     private double _zoom = 2;
+    private decimal _altitude;
+    private Coordinate? _lastPosition;
+    [Inject] HttpClient HttpClient { get; set; }
 
     private async Task OnMapClick(Coordinate coordinate)
     {
-        Debug.WriteLine($"you clicked at {coordinate}");
+        _lastPosition = coordinate;
+        await GetAltitude(coordinate);
     }
 
     private void OnPointerMove(Coordinate coordinate)
     {
-        _lastPosition = coordinate;
+        _mousePosition = coordinate;
     }
 
     private async Task CenterLocation()
@@ -64,5 +69,12 @@
     {
         var coord = await _map.GetCurrentGeoLocation();
         _map.MarkersList.Add(new Marker { Type = MarkerType.MarkerPin, Coordinate = coord });
+    }
+
+    private async Task GetAltitude(Coordinate coordinate)
+    {
+        var result = await HttpClient.GetAsync($"https://api3.geo.admin.ch/rest/services/height?easting={coordinate.X}&elevation_model=COMB&northing={coordinate.Y}&sr=2056");
+        var heightDoc = await JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
+        _altitude = Decimal.Parse(heightDoc.RootElement.GetProperty("height").GetString());
     }
 }

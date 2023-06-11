@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Text.Json;
+using System.Web;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -368,10 +369,54 @@ public partial class Map : IAsyncDisposable
         return _module?.InvokeVoidAsync("MapOLSetLayers", _mapId, layers.Select(p => p.InternalLayer).ToArray()) ?? ValueTask.CompletedTask;
     }
 
+    /// <summary>
+    /// Updates a single layer
+    /// </summary>
+    /// <param name="layer"></param>
+    /// <returns></returns>
+    public ValueTask UpdateLayer(Layer layer)
+    {
+        return _module?.InvokeVoidAsync("MapOLUpdateLayer", _mapId, layer.InternalLayer) ?? ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Helper method to add a WMS Layer
+    /// </summary>
+    /// <param name="baseUrl"></param>
+    /// <param name="layers"></param>
+    /// <param name="opacity"></param>
+    /// <param name="styles"></param>
+    /// <param name="transparent"></param>
+    /// <param name="format"></param>
+    /// <param name="lang"></param>
+    /// <param name="wmsVersion"></param>
+    /// <returns></returns>
+    public ValueTask<Layer> AddTileWMSLayer(string url, string layers, double opacity = 1, string styles = "", bool transparent = true, string format = "image/png", string lang = "en", string wmsVersion = "1.3.0", double[] extent = null)
+    {
+        var layer = new Layer()
+        {
+            Opacity = 1,
+            SourceType = SourceType.TileWMS,
+            CrossOrigin = "anonymous",
+            ServerType = "mapserver",
+            //Url = $"{baseUrl}?SERVICE=WMS&VERSION={wmsVersion }&REQUEST=GetMap&FORMAT={HttpUtility.UrlEncode(format)}&TRANSPARENT={transparent}&LAYERS={HttpUtility.UrlEncode(layers)}&LANG={lang}&STYLE={HttpUtility.UrlEncode(styles)}"
+            Url = url,
+            Extent = extent,
+            Params = new Dictionary<string, object> { { "LAYERS", layers }, { "FORMAT", format } },
+        };
+
+        LayersList.Add(layer);
+        return ValueTask.FromResult(layer);
+    }
+
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (_module == null)
             return;
+
+        if (e.NewItems != null)
+            foreach (var newLayer in e.NewItems.OfType<Layer>())
+                newLayer.ParentMap = this;
 
         Task.Run(async () =>
         {

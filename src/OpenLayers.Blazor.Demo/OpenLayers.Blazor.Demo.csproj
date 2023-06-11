@@ -12,6 +12,7 @@
     <EmbeddedResource Include="Pages\CustomWMTSMap.razor" />
     <EmbeddedResource Include="Pages\GeoJsonDemo.razor" />
     <EmbeddedResource Include="Pages\Index.razor" />
+    <EmbeddedResource Include="Pages\LayersDemo.razor" />
     <EmbeddedResource Include="Pages\MarkersDemo.razor" />
     <EmbeddedResource Include="Pages\OpenStreetMapDemo.razor" />
     <EmbeddedResource Include="Pages\ShapesDemo.razor" />

@@ -1,0 +1,36 @@
+﻿@page "/layersdemo"
+<h3>Layers</h3>
+
+<div class="m-2">
+    <input type="checkbox" @bind="_visibility0" />
+    <input type="range" min="0" max="1" step="0.05" @bind="_opacity0"/>
+    <input type="range" min="0" max="1" step="0.05" @bind="_opacity1"/>
+    <input type="range" min="0" max="1" step="0.05" @bind="_opacity2"/>
+    <input type="range" min="0" max="1" step="0.05" @bind="_opacity3"/>
+</div>
+
+<div class="container">
+    <Map @ref="_map" Style="height:800px" CoordinatesProjection="EPSG:2056">
+        <Layers>
+            <Layer SourceType="SourceType.TileWMS" ServerType="mapserver" Url="https://wms.geo.admin.ch/" Layers="ch.swisstopo.pixelkarte-farbe" Format="image/png" Opacity="@_opacity0" Visibility="@_visibility0" CrossOrigin="anonymous" Extent="@(new double[] { 2420000, 1030000, 2900000, 1350000 })"></Layer>
+            <Layer SourceType="SourceType.TileWMS" Url="https://wms.geo.admin.ch/" Layers="ch.swisstopo.swissnames3d" Format="image/png" Opacity="@_opacity1" />
+            <Layer SourceType="SourceType.TileWMS" Url="https://wms.geo.admin.ch/" Layers="ch.swisstopo.swisssurface3d-reliefschattierung_monodirektional" Format="image/png" CrossOrigin="anonymous" Opacity="@_opacity2" />
+            <Layer SourceType="SourceType.TileWMS" Url="https://wms.geo.admin.ch/" Layers="ch.swisstopo.swisstlm3d-eisenbahnnetz" Format="image/png" CrossOrigin="anonymous" Opacity="@_opacity3" />
+        </Layers>
+    </Map>
+</div>
+
+@code {
+    private Map? _map { get; set; }
+    private double _opacity0 = 1, _opacity1 = .3, _opacity2 = .3, _opacity3 = 1;
+    private bool _visibility0 = true;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged(); // update _map
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+}

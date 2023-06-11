@@ -174,7 +174,11 @@ public class Layer : ComponentBase
     public string? Format
     {
         get => _internalLayer.Source.Format;
-        set => _internalLayer.Source.Format = value;
+        set
+        {
+            _internalLayer.Source.Format = value;
+            _internalLayer.Source.Params["format"] = value;
+        } 
     }
 
     [Parameter]
@@ -191,10 +195,29 @@ public class Layer : ComponentBase
         set => _internalLayer.Source.ServerType = value;
     }
 
+    [Parameter]
+    public string? Layers
+    {
+        get => _internalLayer.Source.Params["layers"]?.ToString();
+        set => _internalLayer.Source.Params["layers"] = value;
+    }
+
     protected override void OnInitialized()
     {
-        base.OnInitialized();
+        if (ParentMap != null)
+            ParentMap.LayersList.Add(this);
 
-        if (ParentMap != null) ParentMap.LayersList.Add(this);
+        base.OnInitialized();
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        return UpdateLayer();
+    }
+
+    public async Task UpdateLayer()
+    {
+        if (ParentMap != null)
+            await ParentMap.UpdateLayer(this);
     }
 }

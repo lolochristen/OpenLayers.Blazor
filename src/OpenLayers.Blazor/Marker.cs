@@ -16,7 +16,7 @@ public class Marker : Shape<Internal.Marker>
         Title = title;
     }
 
-    public Marker(Coordinate coordinate, int icon)
+    public Marker(Coordinate coordinate, char icon)
     {
         Type = MarkerType.MarkerAwesome;
         Coordinate = coordinate;

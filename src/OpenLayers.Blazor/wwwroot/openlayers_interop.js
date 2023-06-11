@@ -56,6 +56,10 @@ export function MapOLAddLayer(mapId, layer) {
     _MapOL[mapId].addLayer(layer);
 }
 
+export function MapOLUpdateLayer(mapId, layer) {
+    _MapOL[mapId].updateLayer(layer);
+}
+
 // --- MapOL ----------------------------------------------------------------------------//
 
 function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
@@ -145,13 +149,15 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     });
 
     this.Geometries = new ol.layer.Vector({
-        source: new ol.source.Vector()
+        source: new ol.source.Vector(),
+        zIndex: 999
     });
 
     this.Map.addLayer(this.Geometries);
 
     this.Markers = new ol.layer.Vector({
-        source: new ol.source.Vector()
+        source: new ol.source.Vector(),
+        zIndex: 999
     });
 
     this.Map.addLayer(this.Markers);
@@ -271,6 +277,32 @@ MapOL.prototype.removeLayer = function (layer) {
 MapOL.prototype.addLayer = function (layer) {
     var ollayers = MapOL.prepareLayers([layer])
     this.Map.addLayer(ollayers[0]);
+}
+
+MapOL.prototype.updateLayer = function (layer) {
+    var ollayers = MapOL.prepareLayers([layer])
+    var olayer = this.findLayer(ollayers[0]);
+    if (olayer != undefined) {
+        olayer.setVisible(layer.visibility);
+        olayer.setOpacity(layer.opacity);
+        olayer.setZIndex(layer.zindex);
+        olayer.setExtent(layer.extent);
+    }
+}
+
+MapOL.prototype.findLayer = function (layer) {
+    let foundLayer = undefined;
+    this.Map.getAllLayers().forEach((l) => {
+        try {
+            var source = l.getSource();
+            var layerSource = layer.getSource();
+            if (source.urls[0] == layerSource.urls[0] && source.getKey() == layerSource.getKey()) {
+                foundLayer = l;
+            }
+        }
+        catch { }
+    });
+    return foundLayer;
 }
 
 MapOL.prototype.setMarkers = function (markers) {
@@ -644,7 +676,7 @@ MapOL.prototype.awesomeStyle = function (marker) {
             text: new ol.style.Text({
                 text: String.fromCodePoint(0xF041), // Map Marker
                 scale: 2,
-                font: '900 18px "Font Awesome 5 Free"',
+                font: '900 18px "Font Awesome 6 Free"',
                 textBaseline: 'bottom',
                 fill: new ol.style.Fill({ color: marker.backgroundColor ?? this.Defaults.backgroundColor }),
                 stroke: new ol.style.Stroke({ color: marker.borderColor ?? this.Defaults.borderColor, width: 3 })
@@ -656,7 +688,7 @@ MapOL.prototype.awesomeStyle = function (marker) {
                 offsetY: -22,
                 opacity: 1,
                 scale: 1,
-                font: '900 18px "Font Awesome 5 Free"',
+                font: '900 18px "Font Awesome 6 Free"',
                 fill: new ol.style.Fill({ color: marker.color ?? this.Defaults.color })
             })
         })

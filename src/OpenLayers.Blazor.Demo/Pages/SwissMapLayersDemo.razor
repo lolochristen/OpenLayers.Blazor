@@ -5,7 +5,7 @@
 <h3>SwissMapLayersDemo</h3>
 
 <div class="m-2">
-    <select @bind="_selectedLayer" on>
+    <select @bind="_selectedLayer">
         @if (_layerIds != null)
         {
             @foreach (var layerId in _layerIds)

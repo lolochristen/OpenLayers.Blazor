@@ -2,6 +2,16 @@
 <h3>Markers</h3>
 
 
+<div class="m-2">
+    <select @bind="_selectedMarkerType">
+        <option value="@MarkerType.MarkerPin">Pin</option>
+        <option value="@MarkerType.MarkerAwesome">Awesome</option>
+        <option value="@MarkerType.MarkerFlag">Flag</option>
+        <option value="@MarkerType.MarkerCustomImage">Custom Image</option>
+    </select>
+    
+</div>
+
 <div class="container">
     <SwissMap @ref="_map" OnClick="OnMapClick" Style="border:1px solid silver;height:800px;">
         <Popup>
@@ -24,11 +34,22 @@
 
 @code {
     private SwissMap _map = null!;
-
+    private MarkerType _selectedMarkerType;
     private async Task OnMapClick(Coordinate coordinate)
     {
-        //_map.MarkersList.Add(new Marker() { Type = MarkerType.MarkerPin, Popup = true, Color = "blue", Coordinate = coordinate, Title = "Marker"});
-        _map.MarkersList.Add(new Marker(coordinate, "pin.png", 414, 602, 414, 602) { Scale = 0.1, Popup = true, Title = "Custom Pin"});
+        switch (_selectedMarkerType)
+        {
+            case MarkerType.MarkerPin:
+            case MarkerType.MarkerFlag:
+                _map.MarkersList.Add(new Marker(_selectedMarkerType, coordinate, DateTime.Now.ToShortTimeString()));
+                break;
+            case MarkerType.MarkerAwesome:
+                _map.MarkersList.Add(new Marker(coordinate, '\uf0f4'));
+                break;
+            case MarkerType.MarkerCustomImage:
+                _map.MarkersList.Add(new Marker(coordinate, "pin.png", 414, 602, 414, 602) { Scale = 0.1, Popup = true, Title = "Custom Pin"});
+                break;
+        }
     }
 
 }

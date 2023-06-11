@@ -149,13 +149,15 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     });
 
     this.Geometries = new ol.layer.Vector({
-        source: new ol.source.Vector()
+        source: new ol.source.Vector(),
+        zIndex: 999
     });
 
     this.Map.addLayer(this.Geometries);
 
     this.Markers = new ol.layer.Vector({
-        source: new ol.source.Vector()
+        source: new ol.source.Vector(),
+        zIndex: 999
     });
 
     this.Map.addLayer(this.Markers);
@@ -674,7 +676,7 @@ MapOL.prototype.awesomeStyle = function (marker) {
             text: new ol.style.Text({
                 text: String.fromCodePoint(0xF041), // Map Marker
                 scale: 2,
-                font: '900 18px "Font Awesome 5 Free"',
+                font: '900 18px "Font Awesome 6 Free"',
                 textBaseline: 'bottom',
                 fill: new ol.style.Fill({ color: marker.backgroundColor ?? this.Defaults.backgroundColor }),
                 stroke: new ol.style.Stroke({ color: marker.borderColor ?? this.Defaults.borderColor, width: 3 })
@@ -686,7 +688,7 @@ MapOL.prototype.awesomeStyle = function (marker) {
                 offsetY: -22,
                 opacity: 1,
                 scale: 1,
-                font: '900 18px "Font Awesome 5 Free"',
+                font: '900 18px "Font Awesome 6 Free"',
                 fill: new ol.style.Fill({ color: marker.color ?? this.Defaults.color })
             })
         })

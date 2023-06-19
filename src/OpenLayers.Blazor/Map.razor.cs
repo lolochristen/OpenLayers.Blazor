@@ -15,6 +15,7 @@ public partial class Map : IAsyncDisposable
 {
     private Coordinate? _internalCenter;
     private double? _internalZoom;
+    private Extent? _internalVisibleExtent;
     private INotifyCollectionChanged? _layerCollectionRef;
     private string _mapId;
     private INotifyCollectionChanged? _markersCollectionRef;
@@ -50,6 +51,8 @@ public partial class Map : IAsyncDisposable
     /// Event on zoom changes
     /// </summary>
     [Parameter] public EventCallback<double> ZoomChanged { get; set; }
+
+    [Parameter] public EventCallback<Extent> VisibleExtentChanged { get; set; }
 
     /// <summary>
     /// Collection of attached markers
@@ -156,6 +159,11 @@ public partial class Map : IAsyncDisposable
         set => Defaults.ScaleLineUnit = value;
     }
 
+    /// <summary>
+    /// Sets or gets the visible extent of the map
+    /// </summary>
+    [Parameter] public Extent? VisibleExtent { get; set; }
+
     private DotNetObjectReference<Map>? Instance { get; set; }
 
     /// <summary>
@@ -208,6 +216,8 @@ public partial class Map : IAsyncDisposable
         if (!Center.Equals(_internalCenter)) await SetCenter(Center);
 
         if (Zoom != _internalZoom) await SetZoom(Zoom);
+
+        if (VisibleExtent != null && !VisibleExtent.Equals(_internalVisibleExtent)) await SetVisibleExtent(VisibleExtent);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -216,7 +226,7 @@ public partial class Map : IAsyncDisposable
 
         if (firstRender)
         {
-            _module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js");
+            _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js");
             Instance ??= DotNetObjectReference.Create(this);
 
             if (_module != null)
@@ -275,6 +285,14 @@ public partial class Map : IAsyncDisposable
         await CenterChanged.InvokeAsync(Center);
     }
 
+    [JSInvokable]
+    public async Task OnInternalVisibleExtentChanged(Extent visibleExtent)
+    {
+        VisibleExtent = visibleExtent;
+        _internalVisibleExtent = visibleExtent;
+        await VisibleExtentChanged.InvokeAsync(VisibleExtent);
+    }
+
     /// <summary>
     /// Passes the center coordination to underlying map
     /// </summary>
@@ -282,6 +300,7 @@ public partial class Map : IAsyncDisposable
     /// <returns>Task</returns>
     public async Task SetCenter(Coordinate center)
     {
+        Center = center;
         if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, center);
         _internalCenter = Center;
     }
@@ -301,6 +320,7 @@ public partial class Map : IAsyncDisposable
     /// <returns></returns>
     public async Task SetZoom(double zoom)
     {
+        Zoom = zoom;
         if (_module != null) await _module.InvokeVoidAsync("MapOLZoom", _mapId, zoom);
         _internalZoom = Zoom;
     }
@@ -310,7 +330,7 @@ public partial class Map : IAsyncDisposable
     /// </summary>
     /// <param name="extent"></param>
     /// <returns></returns>
-    public ValueTask SetZoomToExtent(Extent extent)
+    public ValueTask SetZoomToExtent(ExtentType extent)
     {
         return _module?.InvokeVoidAsync("MapOLZoomToExtent", _mapId, extent.ToString()) ?? ValueTask.CompletedTask;
     }
@@ -380,33 +400,15 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
-    /// Helper method to add a WMS Layer
+    /// Set visible extent of map view
     /// </summary>
-    /// <param name="baseUrl"></param>
-    /// <param name="layers"></param>
-    /// <param name="opacity"></param>
-    /// <param name="styles"></param>
-    /// <param name="transparent"></param>
-    /// <param name="format"></param>
-    /// <param name="lang"></param>
-    /// <param name="wmsVersion"></param>
+    /// <param name="extent">Extent</param>
     /// <returns></returns>
-    public ValueTask<Layer> AddTileWMSLayer(string url, string layers, double opacity = 1, string styles = "", bool transparent = true, string format = "image/png", string lang = "en", string wmsVersion = "1.3.0", double[] extent = null)
+    public async Task SetVisibleExtent(Extent extent)
     {
-        var layer = new Layer()
-        {
-            Opacity = 1,
-            SourceType = SourceType.TileWMS,
-            CrossOrigin = "anonymous",
-            ServerType = "mapserver",
-            //Url = $"{baseUrl}?SERVICE=WMS&VERSION={wmsVersion }&REQUEST=GetMap&FORMAT={HttpUtility.UrlEncode(format)}&TRANSPARENT={transparent}&LAYERS={HttpUtility.UrlEncode(layers)}&LANG={lang}&STYLE={HttpUtility.UrlEncode(styles)}"
-            Url = url,
-            Extent = extent,
-            Params = new Dictionary<string, object> { { "LAYERS", layers }, { "FORMAT", format } },
-        };
-
-        LayersList.Add(layer);
-        return ValueTask.FromResult(layer);
+        VisibleExtent = extent;
+        if (_module != null) await _module.InvokeVoidAsync("MapOLSetVisibleExtent", _mapId, extent);
+        _internalVisibleExtent = extent;
     }
 
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

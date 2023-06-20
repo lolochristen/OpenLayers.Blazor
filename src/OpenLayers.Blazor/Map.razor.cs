@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Text.Json;
 using System.Web;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -409,6 +410,21 @@ public partial class Map : IAsyncDisposable
         VisibleExtent = extent;
         if (_module != null) await _module.InvokeVoidAsync("MapOLSetVisibleExtent", _mapId, extent);
         _internalVisibleExtent = extent;
+    }
+
+    public async Task EnableInteraction(string type)
+    {
+        if (_module != null) await _module.InvokeVoidAsync("MapOLAddInteraction", _mapId, type);
+    }
+
+    public async Task DisableInteraction()
+    {
+        if (_module != null) await _module.InvokeVoidAsync("MapOLRemoveInteraction", _mapId);
+    }
+
+    public async Task Undo()
+    {
+
     }
 
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

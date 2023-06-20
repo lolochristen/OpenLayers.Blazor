@@ -64,6 +64,10 @@ export function MapOLSetVisibleExtent(mapId, extent) {
     _MapOL[mapId].setVisibleExtent(extent);
 }
 
+export function MapOLAddInteraction(mapId, type) {
+    _MapOL[mapId].addInteraction(type);
+}
+
 // --- MapOL ----------------------------------------------------------------------------//
 
 function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
@@ -587,6 +591,27 @@ MapOL.prototype.setVisibleExtent = function (extent) {
     this.disableVisibleExtentChanged = true;
     this.Map.getView().fit(new Array(extent.x1, extent.y1, extent.x2, extent.y2), this.Map.getSize());
     this.disableVisibleExtentChanged = false;
+}
+
+MapOL.prototype.currentDraw = null;
+MapOL.prototype.currentSnap = null;
+MapOL.prototype.currentModify = null;
+MapOL.prototype.addInteraction = function (type) {
+    var source = this.Geometries.getSource();
+
+    if (this.currentModify == null) {
+        this.currentModify = new ol.interaction.Modify({source: source});
+        this.Map.addInteraction(this.currentModify);
+    }
+
+    this.currentDraw = new ol.interaction.Draw({
+      source: source,
+      type: type,
+    });
+    this.Map.addInteraction(this.currentDraw);
+
+    this.currentSnap = new ol.interaction.Snap({source: source});
+    this.Map.addInteraction(this.currentSnap);
 }
 
 //--- Styles -----------------------------------------------------------------//

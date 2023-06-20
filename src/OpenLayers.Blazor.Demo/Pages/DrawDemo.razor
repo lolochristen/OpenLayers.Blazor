@@ -1,0 +1,27 @@
+﻿@page "/drawdemo"
+<h3>DrawDemo</h3>
+
+<div class="m-2">
+    <button class="btn btn-primary active" @onclick="Draw">Draw</button>
+</div>
+
+
+<div class="container">
+    <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;">
+@*        <Popup>
+            <div id="popup" class="ol-box">
+            </div>
+        </Popup>
+*@    </SwissMap>
+</div>
+
+
+@code {
+    private SwissMap _map = null!;
+
+    private async Task Draw()
+    {
+        await _map.EnableInteraction("Polygon");
+    }
+
+}

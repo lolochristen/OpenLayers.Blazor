@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Demo", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Demo.Server", "src\OpenLayers.Blazor.Demo.Server\OpenLayers.Blazor.Demo.Server.csproj", "{56CA5376-8AD9-481C-81B1-D82D0716989A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLayers.Blazor.Demo.Maui", "src\OpenLayers.Blazor.Demo.Maui\OpenLayers.Blazor.Demo.Maui.csproj", "{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLayers.Blazor.Tests", "test\OpenLayers.Blazor.Tests\OpenLayers.Blazor.Tests.csproj", "{D235BF12-E194-49CA-AB16-27E23D87B9C5}"
 EndProject
 Global
@@ -29,6 +31,12 @@ Global
 		{56CA5376-8AD9-481C-81B1-D82D0716989A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56CA5376-8AD9-481C-81B1-D82D0716989A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56CA5376-8AD9-481C-81B1-D82D0716989A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{D235BF12-E194-49CA-AB16-27E23D87B9C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D235BF12-E194-49CA-AB16-27E23D87B9C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D235BF12-E194-49CA-AB16-27E23D87B9C5}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -60,6 +60,10 @@ export function MapOLUpdateLayer(mapId, layer) {
     _MapOL[mapId].updateLayer(layer);
 }
 
+export function MapOLSetVisibleExtent(mapId, extent) {
+    _MapOL[mapId].setVisibleExtent(extent);
+}
+
 // --- MapOL ----------------------------------------------------------------------------//
 
 function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
@@ -177,10 +181,12 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
 
     this.Map.on('click', function (evt) { that.onMapClick(evt, popup, popupElement) });
     this.Map.on('pointermove', function (evt) { that.onMapPointerMove(evt, popupElement) });
-    this.Map.getView().on("change:resolution", function (evt) { that.Instance.invokeMethodAsync('OnInternalZoomChanged', that.Map.getView().getZoom()); });
+    this.Map.getView().on("change:resolution", function (evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function (evt) { that.onMapCenterChanged(); });
     this.setMarkers(markers);
     this.setShapes(shapes);
+
+    this.onMapCenterChanged();
 }
 
 MapOL.prepareLayers = function (layers) {
@@ -530,10 +536,22 @@ MapOL.prototype.onMapPointerMove = function (evt, element) {
     this.Instance.invokeMethodAsync('OnInternalPointerMove', point);
 }
 
+MapOL.prototype.onMapResolutionChanged = function () {
+    this.Instance.invokeMethodAsync('OnInternalZoomChanged', this.Map.getView().getZoom());
+    this.onVisibleExtentChanged();
+}
 MapOL.prototype.onMapCenterChanged = function () {
     var coordinate = ol.proj.transform(this.Map.getView().getCenter(), this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
     var point = { Y: coordinate[1], X: coordinate[0] };
     this.Instance.invokeMethodAsync('OnInternalCenterChanged', point);
+    this.onVisibleExtentChanged();
+}
+
+MapOL.prototype.onVisibleExtentChanged = function () {
+    if (this.disableVisibleExtentChanged) return;
+    var extentArray = this.Map.getView().calculateExtent(this.Map.getSize());
+    var extent = { X1: extentArray[0], Y1: extentArray[1], X2: extentArray[2], Y2: extentArray[3]};
+    this.Instance.invokeMethodAsync('OnInternalVisibleExtentChanged', extent);
 }
 
 MapOL.prototype.centerToCurrentGeoLocation = function () {
@@ -561,6 +579,14 @@ MapOL.prototype.getCurrentGeoLocation = function () {
             reject("No geolocation received");
         };
     });
+}
+
+MapOL.prototype.disableVisibleExtentChanged = false;
+
+MapOL.prototype.setVisibleExtent = function (extent) {
+    this.disableVisibleExtentChanged = true;
+    this.Map.getView().fit(new Array(extent.x1, extent.y1, extent.x2, extent.y2), this.Map.getSize());
+    this.disableVisibleExtentChanged = false;
 }
 
 //--- Styles -----------------------------------------------------------------//

@@ -59,10 +59,19 @@ public class Coordinate : IEquatable<Coordinate>
         if (ReferenceEquals(this, other)) return true;
         return Coordinates.Equals(other.Coordinates);
     }
-
-    public override string ToString()
+    public override string ToString() => $"{X}/{Y}";
+    
+    public static implicit operator Coordinate(string val) => Coordinate.Parse(val);
+    
+    private static Coordinate Parse(string val)
     {
-        return $"{X}/{Y}";
+        val = val.Trim();
+        var parts = val.Split(',', '/', ':');
+
+        if (parts.Length != 2)
+            throw new InvalidOperationException("Cannot parse coordinate");
+
+        return new Coordinate(double.Parse(parts[0]), double.Parse(parts[1]));
     }
 
     /// <summary>

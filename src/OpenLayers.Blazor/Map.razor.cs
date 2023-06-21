@@ -294,6 +294,12 @@ public partial class Map : IAsyncDisposable
         await VisibleExtentChanged.InvokeAsync(VisibleExtent);
     }
 
+    [JSInvokable]
+    public async Task OnInternalShapeAdded(Internal.Shape shape)
+    {
+        //ShapesList.Add(new Shape(shape));
+    }
+
     /// <summary>
     /// Passes the center coordination to underlying map
     /// </summary>

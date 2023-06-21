@@ -8,11 +8,15 @@
 
 <div class="container">
     <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;">
-@*        <Popup>
+        @*        <Popup>
             <div id="popup" class="ol-box">
             </div>
         </Popup>
-*@    </SwissMap>
+*@    
+        <Features>
+            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="red"></Line>
+        </Features>
+    </SwissMap>
 </div>
 
 

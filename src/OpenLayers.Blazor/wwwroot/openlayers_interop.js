@@ -156,8 +156,15 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
         })
     });
 
+    var that = this;
+    var geoSource = new ol.source.Vector();
+    geoSource.on("removefeature", function (evt) { that.onFeatureRemoved(evt.feature); });
+    geoSource.on("addfeature", function (evt) { that.onFeatureAdded(evt.feature); });
+    geoSource.on("changefeature", function (evt) { that.onFeatureChanged(evt.feature); });
+
+
     this.Geometries = new ol.layer.Vector({
-        source: new ol.source.Vector(),
+        source: geoSource,
         zIndex: 999
     });
 
@@ -180,8 +187,6 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     });
 
     this.Map.addOverlay(popup);
-
-    var that = this;
 
     this.Map.on('click', function (evt) { that.onMapClick(evt, popup, popupElement) });
     this.Map.on('pointermove', function (evt) { that.onMapPointerMove(evt, popupElement) });
@@ -585,7 +590,7 @@ MapOL.prototype.getCurrentGeoLocation = function () {
     });
 }
 
-MapOL.prototype.disableVisibleExtentChanged = false;
+MapOL.prototype.disableVisibleExtentChranged = false;
 
 MapOL.prototype.setVisibleExtent = function (extent) {
     this.disableVisibleExtentChanged = true;
@@ -610,9 +615,50 @@ MapOL.prototype.addInteraction = function (type) {
     });
     this.Map.addInteraction(this.currentDraw);
 
+    //this.currentDraw.on("drawend", function (evt) {
+    //    var geo = evt.feature.getGeometry();
+    //    geo.getType();
+    //    geo.getCoordinates();
+
+    //});
+    
     this.currentSnap = new ol.interaction.Snap({source: source});
     this.Map.addInteraction(this.currentSnap);
 }
+
+
+MapOL.prototype.onFeatureAdded = function (feature) {
+    var geometry = feature.getGeometry();
+
+    var objectWithoutKey = (object, key) => {
+        const { [key]: deletedKey, ...otherKeys } = object;
+        return otherKeys;
+    }
+
+    var properties = objectWithoutKey(feature.getProperties(), "geometry");
+
+    var shape = {
+        type : "Feature",
+        geometries: {
+            type: geometry.getType(),
+            geometry: geometry.getCoordinates(),
+        },
+        popup: feature.popup,
+        title: feature.title,
+        content: feature.content,
+        properties: properties
+    };
+    this.Instance.invokeMethodAsync('OnInternalShapeAdded', shape);
+}
+
+MapOL.prototype.onFeatureRemoved = function (feature) {
+
+}
+
+MapOL.prototype.onFeatureChanged = function (feature) {
+
+}
+
 
 //--- Styles -----------------------------------------------------------------//
 

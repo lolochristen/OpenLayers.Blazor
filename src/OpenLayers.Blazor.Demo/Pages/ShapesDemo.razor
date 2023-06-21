@@ -8,7 +8,7 @@
 
     <SwissMap @ref="_map" OnClick="OnMapClicked" OnFeatureClick="OnFeatureClicked" Style="border:1px solid silver;height:800px;">
         <Features>
-            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+            <Line Points="new[] { new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200) }" BorderColor="cyan"></Line>
             <Circle Coordinate="new Coordinate(1197279.0774135895, 2770557.824138796)" Radius="5" BackgroundColor="#2222AA66"></Circle>
         </Features>
     </SwissMap>
@@ -17,7 +17,7 @@
     </p>
 </div>
 
-<CodeView Source="ShapesDemo.razor" />
+<CodeView Source="ShapesDemo.razor"/>
 
 @code {
     private SwissMap _map = null!;
@@ -32,4 +32,5 @@
     {
         _map.ShapesList.Add(new Circle(coordinate, 3) { BackgroundColor = "cyan" });
     }
+
 }

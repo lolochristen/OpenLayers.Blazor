@@ -9,7 +9,7 @@
         <option value="@MarkerType.MarkerFlag">Flag</option>
         <option value="@MarkerType.MarkerCustomImage">Custom Image</option>
     </select>
-    
+
 </div>
 
 <div class="container">
@@ -30,11 +30,12 @@
     </SwissMap>
 </div>
 
-<CodeView Source="MarkersDemo.razor" />
+<CodeView Source="MarkersDemo.razor"/>
 
 @code {
     private SwissMap _map = null!;
     private MarkerType _selectedMarkerType;
+
     private async Task OnMapClick(Coordinate coordinate)
     {
         switch (_selectedMarkerType)
@@ -47,7 +48,7 @@
                 _map.MarkersList.Add(new Marker(coordinate, '\uf0f4'));
                 break;
             case MarkerType.MarkerCustomImage:
-                _map.MarkersList.Add(new Marker(coordinate, "pin.png", 414, 602, 414, 602) { Scale = 0.1, Popup = true, Title = "Custom Pin"});
+                _map.MarkersList.Add(new Marker(coordinate, "pin.png", 414, 602, 414, 602) { Scale = 0.1, Popup = true, Title = "Custom Pin" });
                 break;
         }
     }

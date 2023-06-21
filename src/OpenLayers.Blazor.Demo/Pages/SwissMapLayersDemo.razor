@@ -21,13 +21,15 @@
     <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;"></SwissMap>
 </div>
 
-<CodeView Source="SwissMapLayersDemo.razor" />
+<CodeView Source="SwissMapLayersDemo.razor"/>
 
 @code {
     private SwissMap _map = null!;
     private IDictionary<string, string>? _layerIds;
     private string? _selectedLayer;
-    [Inject] private HttpClient HttpClient { get; set; }
+
+    [Inject]
+    private HttpClient HttpClient { get; set; }
 
     protected override Task OnInitializedAsync()
     {

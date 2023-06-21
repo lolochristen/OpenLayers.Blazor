@@ -1,7 +1,4 @@
-﻿@using System.Resources
-@using System.Reflection
-@using System.Text
-
+﻿@using System.Reflection
 @if (_code != null)
 {
     <div class="container m-3" style="overflow: auto; width: 80%">
@@ -9,12 +6,14 @@
         <pre class="code"><code class="html">
         @_code
         </code></pre>
-        </div>
+    </div>
 }
 
 @code {
     private string? _code;
-    [Inject] private IJSRuntime _js { get; set; }
+
+    [Inject]
+    private IJSRuntime _js { get; set; }
 
     [Parameter]
     public string? Source { get; set; }
@@ -38,4 +37,5 @@
     {
         await _js.InvokeVoidAsync("highlightSnippet");
     }
+
 }

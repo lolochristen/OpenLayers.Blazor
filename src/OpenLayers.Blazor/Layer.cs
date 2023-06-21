@@ -30,6 +30,7 @@ public class Layer : ComponentBase
         get => _internalLayer.Extent;
         set => _internalLayer.Extent = value;
     }
+
     [Parameter]
     public int? ZIndex
     {
@@ -178,7 +179,7 @@ public class Layer : ComponentBase
         {
             _internalLayer.Source.Format = value;
             _internalLayer.Source.Params["format"] = value;
-        } 
+        }
     }
 
     [Parameter]

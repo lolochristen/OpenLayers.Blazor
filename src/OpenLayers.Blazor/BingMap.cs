@@ -3,7 +3,7 @@
 namespace OpenLayers.Blazor;
 
 /// <summary>
-/// Imagery Set for Bing
+///     Imagery Set for Bing
 /// </summary>
 public enum BingMapImagerySet
 {
@@ -15,7 +15,7 @@ public enum BingMapImagerySet
 }
 
 /// <summary>
-/// Bing Map
+///     Bing Map
 /// </summary>
 public class BingMap : Map
 {
@@ -29,7 +29,8 @@ public class BingMap : Map
     /// <summary>
     ///     Your Bing Maps Key from https://www.bingmapsportal.com/
     /// </summary>
-    [Parameter] public string? Key { get; set; }
+    [Parameter]
+    public string? Key { get; set; }
 
     [Parameter] public BingMapImagerySet ImagerySet { get; set; }
 
@@ -45,7 +46,6 @@ public class BingMap : Map
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        {
             LayersList.Add(new Layer
             {
                 SourceType = SourceType.BingMaps,
@@ -53,7 +53,6 @@ public class BingMap : Map
                 ImagerySet = ImagerySet,
                 MaxZoom = 19
             });
-        }
 
         return base.OnAfterRenderAsync(firstRender);
     }

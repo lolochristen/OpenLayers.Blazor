@@ -98,6 +98,12 @@ public partial class Map : IAsyncDisposable
     public EventCallback<Coordinate> OnPointerMove { get; set; }
 
     /// <summary>
+    ///     Event when the rendering is complete
+    /// </summary>
+    [Parameter]
+    public EventCallback OnRenderComplete { get; set; }
+
+    /// <summary>
     ///     Content to show as a popup when a shape or marker gets clicked and <see cref="Shape.Popup" /> is set to true
     /// </summary>
     [Parameter]
@@ -308,6 +314,12 @@ public partial class Map : IAsyncDisposable
         await VisibleExtentChanged.InvokeAsync(visibleExtent);
     }
 
+    [JSInvokable]
+    public async Task OnInternalRenderComplete()
+    {
+        await OnRenderComplete.InvokeAsync();
+    }
+    
     /// <summary>
     ///     Passes the center coordination to underlying map
     /// </summary>

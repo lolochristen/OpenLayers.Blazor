@@ -181,6 +181,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
 
     this.Map.on('click', function (evt) { that.onMapClick(evt, popup, popupElement) });
     this.Map.on('pointermove', function (evt) { that.onMapPointerMove(evt, popupElement) });
+    this.Map.on('rendercomplete', function (evt) { that.Instance.invokeMethodAsync('OnInternalRenderComplete'); });
     this.Map.getView().on("change:resolution", function (evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function (evt) { that.onMapCenterChanged(); });
     this.setMarkers(markers);

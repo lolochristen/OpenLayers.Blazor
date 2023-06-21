@@ -181,6 +181,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
 
     this.Map.on('click', function (evt) { that.onMapClick(evt, popup, popupElement) });
     this.Map.on('pointermove', function (evt) { that.onMapPointerMove(evt, popupElement) });
+    this.Map.on('rendercomplete', function (evt) { that.onMapRenderComplete(); });
     this.Map.getView().on("change:resolution", function (evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function (evt) { that.onMapCenterChanged(); });
     this.setMarkers(markers);
@@ -553,6 +554,11 @@ MapOL.prototype.onVisibleExtentChanged = function () {
     var extent = { X1: extentArray[0], Y1: extentArray[1], X2: extentArray[2], Y2: extentArray[3]};
     this.Instance.invokeMethodAsync('OnInternalVisibleExtentChanged', extent);
 }
+
+MapOL.prototype.onMapRenderComplete = function () {
+    this.Instance.invokeMethodAsync('OnInternalRenderComplete');
+}
+
 
 MapOL.prototype.centerToCurrentGeoLocation = function () {
     var that = this;

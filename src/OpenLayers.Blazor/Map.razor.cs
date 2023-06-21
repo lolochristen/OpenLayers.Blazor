@@ -294,6 +294,16 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
+    /// Called when OpenLayers rendercomplete event is received
+    /// </summary>
+    /// <returns>Task</returns>
+    [JSInvokable]
+    public virtual async Task OnInternalRenderComplete()
+    {
+    }
+
+
+    /// <summary>
     /// Passes the center coordination to underlying map
     /// </summary>
     /// <param name="center">Center Coordinates</param>

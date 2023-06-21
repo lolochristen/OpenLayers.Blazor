@@ -1,7 +1,7 @@
 ﻿namespace OpenLayers.Blazor;
 
 /// <summary>
-/// Represents an extent or bounding box of a layer or visible map
+///     Represents an extent or bounding box of a layer or visible map
 /// </summary>
 public class Extent : IEquatable<Extent>
 {
@@ -35,5 +35,8 @@ public class Extent : IEquatable<Extent>
         return X1.GetHashCode() + Y1.GetHashCode() + X2.GetHashCode() + Y2.GetHashCode();
     }
 
-    public override string ToString() => $"{X1}/{Y1}:{X2}/{Y2}";
+    public override string ToString()
+    {
+        return $"{X1}/{Y1}:{X2}/{Y2}";
+    }
 }

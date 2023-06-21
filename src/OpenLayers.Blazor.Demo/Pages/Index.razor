@@ -1,8 +1,5 @@
 ﻿@page "/"
-@using System.Diagnostics
 @using System.Text.Json
-@using System.Text.Json.Nodes
-@using System.Xml.Linq
 
 <h1>OpenLayers.Blazor Demo/Examples</h1>
 <h5>Coordinates in VL95/EPSG:2056</h5>
@@ -13,16 +10,20 @@
     <button class="btn btn-primary" @onclick="SetVisibleExtent">Beautiful</button>
     <input type="range" min="1" max="15" @bind-value="_zoom"> <code>@_zoom</code>
     <p>
-        <code>Center:@_map?.Center</code><br/>
-        <code>Last Position: @_lastPosition?.X / @_lastPosition?.Y</code><br/>
-        <code>Altitude @(_altitude)m</code><br />
-        <code>Mouse Position: @_mousePosition?.X / @_mousePosition?.Y</code><br/>
-        <code>Visible Extent: @_map?.VisibleExtent</code>
+        <pre>
+        Center:@_map?.Center
+        Last Position: @_lastPosition?.X / @_lastPosition?.Y
+        Altitude @(_altitude)m
+        Mouse Position: @_mousePosition?.X / @_mousePosition?.Y
+        Visible Extent: @_map?.VisibleExtent
+        @_info
+        </pre>
     </p>
 </div>
 
 <div class="container">
-    <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" @bind-Zoom="_zoom" Style="border:1px solid silver;height:800px;">
+
+    <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" OnRenderComplete="@(() => { _info = "Render complete: " + DateTime.Now.ToString("h:mm:ss.ms"); })" @bind-Zoom="_zoom" Style="border:1px solid silver;height:800px;">
         <Popup>
             <div id="popup" class="ol-box">
                 @if (context is Marker marker)
@@ -35,12 +36,12 @@
         <Features>
             <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
             <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
-            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+            <Line Points="new[] { new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200) }" BorderColor="cyan"></Line>
         </Features>
     </SwissMap>
 </div>
 
-<CodeView Source="Index.razor" />
+<CodeView Source="Index.razor"/>
 
 @code {
     private SwissMap _map = null!;
@@ -48,7 +49,10 @@
     private double _zoom = 2;
     private decimal _altitude;
     private Coordinate? _lastPosition;
-    [Inject] HttpClient HttpClient { get; set; }
+    private string _info = "";
+
+    [Inject]
+    HttpClient HttpClient { get; set; }
 
     private async Task OnMapClick(Coordinate coordinate)
     {
@@ -76,11 +80,12 @@
     {
         var result = await HttpClient.GetAsync($"https://api3.geo.admin.ch/rest/services/height?easting={coordinate.X}&elevation_model=COMB&northing={coordinate.Y}&sr=2056");
         var heightDoc = await JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
-        _altitude = Decimal.Parse(heightDoc.RootElement.GetProperty("height").GetString());
+        _altitude = decimal.Parse(heightDoc.RootElement.GetProperty("height").GetString());
     }
 
     private async Task SetVisibleExtent()
     {
-        await _map.SetVisibleExtent(new Extent(2766546.266902437,1180272.9274316968,2774559.233529014,1186045.3471649496));
+        await _map.SetVisibleExtent(new Extent(2766546.266902437, 1180272.9274316968, 2774559.233529014, 1186045.3471649496));
     }
+
 }

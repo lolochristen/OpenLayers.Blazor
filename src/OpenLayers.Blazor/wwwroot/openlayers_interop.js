@@ -190,6 +190,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
 
     this.Map.on('click', function (evt) { that.onMapClick(evt, popup, popupElement) });
     this.Map.on('pointermove', function (evt) { that.onMapPointerMove(evt, popupElement) });
+    this.Map.on('rendercomplete', function (evt) { that.Instance.invokeMethodAsync('OnInternalRenderComplete'); });
     this.Map.getView().on("change:resolution", function (evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function (evt) { that.onMapCenterChanged(); });
     this.setMarkers(markers);
@@ -559,7 +560,9 @@ MapOL.prototype.onMapCenterChanged = function () {
 MapOL.prototype.onVisibleExtentChanged = function () {
     if (this.disableVisibleExtentChanged) return;
     var extentArray = this.Map.getView().calculateExtent(this.Map.getSize());
-    var extent = { X1: extentArray[0], Y1: extentArray[1], X2: extentArray[2], Y2: extentArray[3]};
+    var coordinate1 = ol.proj.transform([extentArray[0],extentArray[1]], this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
+    var coordinate2 = ol.proj.transform([extentArray[2],extentArray[3]], this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
+    var extent = { X1: coordinate1[0], Y1: coordinate1[1], X2: coordinate2[0], Y2: coordinate2[1]};
     this.Instance.invokeMethodAsync('OnInternalVisibleExtentChanged', extent);
 }
 

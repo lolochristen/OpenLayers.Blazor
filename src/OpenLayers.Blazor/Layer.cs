@@ -198,7 +198,7 @@ public class Layer : ComponentBase
     [Parameter]
     public string? Layers
     {
-        get => _internalLayer.Source.Params["layers"]?.ToString();
+        get => _internalLayer.Source.Params.ContainsKey("layers") ? _internalLayer.Source.Params["layers"].ToString() : null;
         set => _internalLayer.Source.Params["layers"] = value;
     }
 

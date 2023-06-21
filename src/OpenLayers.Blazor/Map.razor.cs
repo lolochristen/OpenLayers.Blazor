@@ -2,7 +2,6 @@
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Text.Json;
-using System.Web;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -260,7 +259,6 @@ public partial class Map : IAsyncDisposable
     [JSInvokable]
     public async Task OnInternalShapeClick(Internal.Shape shape)
     {
-        //_popupContext = shape;
         await OnShapeClick.InvokeAsync(shape);
         StateHasChanged();
     }
@@ -282,7 +280,7 @@ public partial class Map : IAsyncDisposable
     {
         Center = coordinate;
         _internalCenter = coordinate;
-        await CenterChanged.InvokeAsync(Center);
+        await CenterChanged.InvokeAsync(coordinate);
     }
 
     [JSInvokable]
@@ -290,7 +288,7 @@ public partial class Map : IAsyncDisposable
     {
         VisibleExtent = visibleExtent;
         _internalVisibleExtent = visibleExtent;
-        await VisibleExtentChanged.InvokeAsync(VisibleExtent);
+        await VisibleExtentChanged.InvokeAsync(visibleExtent);
     }
 
     /// <summary>

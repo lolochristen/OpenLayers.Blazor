@@ -53,11 +53,12 @@ public class Coordinate : IEquatable<Coordinate>
     /// </summary>
     public double[] Coordinates { get; set; } = new double[2] { 0, 0 };
 
+    
     public bool Equals(Coordinate? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Coordinates.Equals(other.Coordinates);
+        return GetHashCode() == other.GetHashCode();
     }
     public override string ToString() => $"{X}/{Y}";
     
@@ -136,6 +137,6 @@ public class Coordinate : IEquatable<Coordinate>
 
     public override int GetHashCode()
     {
-        return Coordinates.GetHashCode();
+        return X.GetHashCode() + Y.GetHashCode();
     }
 }

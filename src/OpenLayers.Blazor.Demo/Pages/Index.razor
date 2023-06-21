@@ -1,8 +1,5 @@
 ﻿@page "/"
-@using System.Diagnostics
 @using System.Text.Json
-@using System.Text.Json.Nodes
-@using System.Xml.Linq
 
 <h1>OpenLayers.Blazor Demo/Examples</h1>
 <h5>Coordinates in VL95/EPSG:2056</h5>
@@ -13,11 +10,13 @@
     <button class="btn btn-primary" @onclick="SetVisibleExtent">Beautiful</button>
     <input type="range" min="1" max="15" @bind-value="_zoom"> <code>@_zoom</code>
     <p>
-        <code>Center:@_map?.Center</code><br/>
-        <code>Last Position: @_lastPosition?.X / @_lastPosition?.Y</code><br/>
-        <code>Altitude @(_altitude)m</code><br />
-        <code>Mouse Position: @_mousePosition?.X / @_mousePosition?.Y</code><br/>
-        <code>Visible Extent: @_map?.VisibleExtent</code>
+        <pre>
+        Center:@_map?.Center
+        Last Position: @_lastPosition?.X / @_lastPosition?.Y
+        Altitude @(_altitude)m
+        Mouse Position: @_mousePosition?.X / @_mousePosition?.Y
+        Visible Extent: @_map?.VisibleExtent
+        </pre>
     </p>
 </div>
 

@@ -64,8 +64,16 @@ export function MapOLSetVisibleExtent(mapId, extent) {
     _MapOL[mapId].setVisibleExtent(extent);
 }
 
-export function MapOLAddInteraction(mapId, type) {
-    _MapOL[mapId].addInteraction(type);
+export function MapOLSetDrawingSettings(mapId, enableNewShapes, enableEditShapes, enableShapeSnap, newShapeTemplate) {
+    _MapOL[mapId].setDrawingSettings(enableNewShapes, enableEditShapes, enableShapeSnap, newShapeTemplate);
+}
+
+export function MapOLUndoDrawing(mapId) {
+    _MapOL[mapId].undoDrawing();
+}
+
+export function MapOLUpdateShape(mapId, shape) {
+    _MapOL[mapId].updateShape(shape);
 }
 
 // --- MapOL ----------------------------------------------------------------------------//
@@ -128,7 +136,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
 
     let viewProjection = undefined;
     let viewExtent = (ollayers.length > 0) ? ollayers[0].getExtent() : undefined;
-    let viewCenter = (center && center.coordinates) ? center.coordinates : undefined;
+    let viewCenter = (center && center) ? center : undefined;
     if (this.Defaults.coordinatesProjection == 'EPSG:2056') {
         viewProjection = projectionLV95;
     }
@@ -327,33 +335,7 @@ MapOL.prototype.setMarkers = function (markers) {
     source.clear();
 
     markers.forEach((marker) => {
-        var feature = new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.transform(marker.geometry.coordinates, this.Defaults.coordinatesProjection, this.Map.getView().getProjection().getCode())),
-            popup: marker.popup,
-            title: marker.title,
-            content: marker.content
-        });
-
-        feature.marker = marker;
-
-        switch (marker.kind) {
-            case "MarkerPin":
-                feature.setStyle(this.pinStyle(marker));
-                break;
-
-            case "MarkerFlag":
-                feature.setStyle(this.flagStyle(marker));
-                break;
-
-            case "MarkerAwesome":
-                feature.setStyle(this.awesomeStyle(marker));
-                break;
-
-            case "MarkerCustomImage":
-                feature.setStyle(this.customImageStyle(marker));
-                break;
-        }
-
+        var feature = this.mapShapeToFeature(marker);
         source.addFeature(feature);
     });
 }
@@ -366,48 +348,7 @@ MapOL.prototype.setShapes = function (shapes) {
     if (!shapes) return;
 
     shapes.forEach((shape) => {
-        var feature;
-        var viewProjection = this.Map.getView().getProjection().getCode();
-        switch (shape.kind) {
-            case "ShapeLine":
-                for (var i = 0; i < shape.geometry.coordinates.length; i++) {
-                    shape.geometry.coordinates[i] = ol.proj.transform(shape.geometry.coordinates[i], this.Defaults.coordinatesProjection, viewProjection);
-                }
-
-                feature = new ol.Feature({
-                    geometry: new ol.geom.LineString(shape.geometry.coordinates),
-                    popup: shape.popup,
-                    title: shape.title,
-                    content: shape.content
-                });
-                break;
-
-            case "ShapeCircle":
-                shape.geometry.coordinates = ol.proj.transform(shape.geometry.coordinates, this.Defaults.coordinatesProjection, viewProjection);
-
-                var circle = new ol.geom.Circle(shape.geometry.coordinates, shape.radius / ol.proj.getPointResolution(viewProjection, 1, shape.geometry.coordinates));
-
-                feature = new ol.Feature({
-                    geometry: new ol.geom.Polygon.fromCircle(circle, 32, 90),
-                    popup: shape.popup,
-                    title: shape.title,
-                    content: shape.content
-                });
-                break;
-        }
-
-        feature.shape = shape;
-
-        switch (shape.kind) {
-            case "ShapeLine":
-                feature.setStyle(this.lineStyle(shape));
-                break;
-
-            case "ShapeCircle":
-                feature.setStyle(this.circleStyle(shape));
-                break;
-        }
-
+        var feature = this.mapShapeToFeature(shape);
         source.addFeature(feature);
     });
 }
@@ -459,7 +400,7 @@ MapOL.prototype.setZoomToExtent = function (extent) {
 }
 
 MapOL.prototype.setCenter = function (point) {
-    this.Map.getView().setCenter(ol.proj.transform(point.coordinates, this.Defaults.coordinatesProjection, this.Map.getView().getProjection().getCode()));
+    this.Map.getView().setCenter(ol.proj.transform(point, this.Defaults.coordinatesProjection, this.Map.getView().getProjection().getCode()));
 }
 
 MapOL.prototype.setDefaults = function (defaults) {
@@ -495,29 +436,26 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
     var invokeMethod = true;
 
     this.Map.forEachFeatureAtPixel(evt.pixel, function (feature) {
-        if (feature != null) {
-            var reduced = that.getReducedFeature(feature);
-            that.Instance.invokeMethodAsync('OnInternalFeatureClick', reduced);
-        }
 
-        var shape = null;
+        var shape = that.mapFeatureToShape(feature);
 
-        if ((feature.marker != null) && invokeMethod) {
-            shape = feature.marker;
-            invokeMethod = false;
-            that.Instance.invokeMethodAsync('OnInternalMarkerClick', shape);
-        }
+        if (shape) {
+            that.Instance.invokeMethodAsync('OnInternalFeatureClick', shape); // ?
 
-        if ((feature.shape != null) && invokeMethod) {
-            shape = feature.shape;
-            invokeMethod = false;
-            that.Instance.invokeMethodAsync('OnInternalShapeClick', shape);
+            if (shape.properties.type == 'Marker') {
+                invokeMethod = false;
+                that.Instance.invokeMethodAsync('OnInternalMarkerClick', shape);
+            }
+            else {
+                invokeMethod = false;
+                that.Instance.invokeMethodAsync('OnInternalShapeClick', shape);
+            }
         }
 
         var showPopup = false;
 
         if (shape) {
-            showPopup = shape.popup;
+            showPopup = shape.properties.popup;
         }
         else if (that.Defaults.autoPopup) {
             showPopup = true;
@@ -527,6 +465,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
             var coordinates = feature.getGeometry().getCoordinates();
             popup.setPosition(coordinates);
         }
+
     });
 
     if (invokeMethod) {
@@ -551,7 +490,9 @@ MapOL.prototype.onMapResolutionChanged = function () {
     this.onVisibleExtentChanged();
 }
 MapOL.prototype.onMapCenterChanged = function () {
-    var coordinate = ol.proj.transform(this.Map.getView().getCenter(), this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
+    var center = this.Map.getView().getCenter();
+    if (!center) return;
+    var coordinate = ol.proj.transform(center, this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
     var point = { Y: coordinate[1], X: coordinate[0] };
     this.Instance.invokeMethodAsync('OnInternalCenterChanged', point);
     this.onVisibleExtentChanged();
@@ -604,54 +545,225 @@ MapOL.prototype.setVisibleExtent = function (extent) {
 MapOL.prototype.currentDraw = null;
 MapOL.prototype.currentSnap = null;
 MapOL.prototype.currentModify = null;
-MapOL.prototype.addInteraction = function (type) {
+MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes, enableShapeSnap, newShapeTemplate) {
+
+    this.removeDrawingInteractions();
+
     var source = this.Geometries.getSource();
 
-    if (this.currentModify == null) {
-        this.currentModify = new ol.interaction.Modify({source: source});
-        this.Map.addInteraction(this.currentModify);
+    if (enableEditShapes) { 
+        if (this.currentModify == null) {
+            this.currentModify = new ol.interaction.Modify({source: source});
+            this.Map.addInteraction(this.currentModify);
+        }
     }
 
-    this.currentDraw = new ol.interaction.Draw({
-      source: source,
-      type: type,
-    });
-    this.Map.addInteraction(this.currentDraw);
+    if (enableNewShapes) {
+        var style = this.getDefaultStyle(newShapeTemplate);
 
-    //this.currentDraw.on("drawend", function (evt) {
-    //    var geo = evt.feature.getGeometry();
-    //    geo.getType();
-    //    geo.getCoordinates();
+        this.currentDraw = new ol.interaction.Draw({
+          source: source,
+          type: newShapeTemplate.geometryType,
+          //style: style
+        });
+        this.currentDraw.on("drawend", function (evt) { evt.feature.setStyle(style);  });
 
-    //});
-    
-    this.currentSnap = new ol.interaction.Snap({source: source});
-    this.Map.addInteraction(this.currentSnap);
+        this.Map.addInteraction(this.currentDraw);
+    }
+   
+    if (enableShapeSnap) {
+        this.currentSnap = new ol.interaction.Snap({source: source});
+        this.Map.addInteraction(this.currentSnap);
+    }
 }
 
+MapOL.prototype.removeDrawingInteractions = function () {
+    if (this.currentDraw) {
+        this.Map.removeInteraction(this.currentDraw);
+        this.currentDraw = null;
+    }
+    if (this.currentSnap) {
+        this.Map.removeInteraction(this.currentSnap);
+        this.currentSnap = null;
+    }
+    if (this.currentModify) {
+        this.Map.removeInteraction(this.currentModify);
+        this.currentModify = null;
+    }
+}
+
+MapOL.prototype.undoDrawing = function () {
+    if (this.currentDraw) {
+        this.currentDraw.removeLastPoint();
+    }
+}
 
 MapOL.prototype.onFeatureAdded = function (feature) {
+    var shape = this.mapFeatureToShape(feature);      
+    this.Instance.invokeMethodAsync('OnInternalShapeAdded', shape);
+}
+
+MapOL.prototype.mapFeatureToShape = function (feature) {
+
+    if (feature == null) return null;
+
     var geometry = feature.getGeometry();
+    var viewProjection = this.Map.getView().getProjection().getCode();
+    var coordinates = null;
+
+    if (geometry != null && !Array.isArray(geometry)) {
+        switch (geometry.getType()) {
+        case 'Point':
+            coordinates = ol.proj.transform([ geometry.getCoordinates() ], viewProjection, this.Defaults.coordinatesProjection);
+            break;
+        case 'Circle':
+            coordinates = ol.proj.transform([ geometry.getCenter() ], viewProjection, this.Defaults.coordinatesProjection);
+            break;
+        case 'Polygon':
+            coordinates = ol.proj.transform(geometry.getCoordinates()[0], viewProjection, this.Defaults.coordinatesProjection);
+            break;
+        default:
+            coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
+            break;
+        }
+    }
+
+    var style = feature.getStyle();
+    var stroke = style && !Array.isArray(style) ? style.getStroke() : null;
+    var fill = style && !Array.isArray(style) ? style.getFill( ): null;
+    var text = style && !Array.isArray(style) ? style.getText( ): null;
+    var id = feature.getId();
+
+    if (id == null) {
+        id = self.crypto.randomUUID();
+        feature.setId(id);
+    }
 
     var objectWithoutKey = (object, key) => {
         const { [key]: deletedKey, ...otherKeys } = object;
         return otherKeys;
     }
-
     var properties = objectWithoutKey(feature.getProperties(), "geometry");
 
+    if (!properties.type) properties.type = 'Shape';
+    
     var shape = {
-        type : "Feature",
-        geometries: {
-            type: geometry.getType(),
-            geometry: geometry.getCoordinates(),
-        },
-        popup: feature.popup,
-        title: feature.title,
-        content: feature.content,
-        properties: properties
+        id: id,
+        geometryType: geometry ? geometry.getType() : "None",
+        coordinates: coordinates,
+        properties: properties,
+        borderColor: stroke ? stroke.getColor() : null,
+        borderSize: stroke ? stroke.getWidth() : null,
+        backgroundColor: fill ? fill.getColor() : null,
+        color: text && text.getStroke() ? text.getStroke().getColor() : null,
+        textScale: text ? text.getScale() : null
     };
-    this.Instance.invokeMethodAsync('OnInternalShapeAdded', shape);
+
+    if (geometry.getType() == 'Circle') {
+        shape.radius = geometry.getRadius();
+    }
+
+    if (style && !Array.isArray(style)) {
+        var imageStyle = style.getImage();
+        if (imageStyle) {
+            shape.scale = imageStyle.getScale();
+        }
+    }
+
+    return shape;
+}
+
+MapOL.prototype.mapShapeToFeature = function (shape) {
+
+    var geometry;
+    var viewProjection = this.Map.getView().getProjection().getCode();
+    var coordinates, coordinate;
+    if (shape.coordinates)
+        coordinates = ol.proj.transform(shape.coordinates, this.Defaults.coordinatesProjection, viewProjection);
+
+    switch (shape.geometryType) {
+        case "Point":
+            geometry = new ol.geom.Point(coordinates[0]);
+            break;
+        case "LineString":
+            geometry = new ol.geom.LineString(coordinates);
+            break;
+        case "Polygon":
+            geometry = new ol.geom.Polygon([ coordinates ]);
+            break;
+        case "Circle":
+            geometry = new ol.geom.Circle(coordinates[0], shape.radius / ol.proj.getPointResolution(viewProjection, 1, coordinates[0]));
+            //geometry = new ol.geom.Polygon.fromCircle(circle, 32, 90);
+            break;
+        case "MultiPoint":
+            geometry = new ol.geom.MultiPoint(coordinates);
+            break;
+        case "MultiLineString":
+            geometry = new ol.geom.MultiLineString(coordinates);
+            break;
+        case "MultiPolygon":
+            geometry = new ol.geom.MultiPolygon(coordinates);
+            break;
+    }
+
+    var feature = new ol.Feature({
+        type: shape.properties.type,
+        popup: shape.properties.popup,
+        title: shape.properties.title,
+        label: shape.properties.label,
+        content: shape.properties.content,
+        style: shape.properties.style,
+    });
+
+    if (geometry) {
+        feature.setGeometry(geometry);
+    }
+
+    feature.setId(shape.id);
+
+    var style;
+    switch (shape.properties.style) {
+        case "MarkerPin":
+            style = this.pinStyle(shape);
+            break;
+
+        case "MarkerFlag":
+            style = this.flagStyle(shape);
+            break;
+
+        case "MarkerAwesome":
+            style = this.awesomeStyle(shape);
+            break;
+
+        case "MarkerCustomImage":
+            style = this.customImageStyle(shape);
+            break;
+
+        default:
+            style = this.getDefaultStyle(shape);
+            break;
+    }
+
+    feature.setStyle(style);
+    return feature;
+}
+
+MapOL.prototype.getDefaultStyle = function (shape) {
+    return new ol.style.Style({
+                fill: shape.backgroundColor ? new ol.style.Fill({ color: shape.backgroundColor }) : null,
+                stroke: new ol.style.Stroke({ color: shape.borderColor, width: shape.borderSize }),
+                text: shape.label ? new ol.style.Text({
+                    overflow: true,
+                    text: shape.label,
+                    placement: "line",
+                    scale: shape.textScale,
+                    fill: new ol.style.Fill({ color: shape.color }),
+                    stroke: new ol.style.Stroke({ color: shape.color, width: shape.color }),
+                    offsetX: 0,
+                    offsetY: 0,
+                    rotation: 0
+                }) : null,
+            });
 }
 
 MapOL.prototype.onFeatureRemoved = function (feature) {
@@ -660,8 +772,22 @@ MapOL.prototype.onFeatureRemoved = function (feature) {
 
 MapOL.prototype.onFeatureChanged = function (feature) {
 
+    if (feature.getProperties().type != 'Marker') {
+        var shape = this.mapFeatureToShape(feature);      
+        this.Instance.invokeMethodAsync('OnInternalShapeChanged', shape);
+    }
 }
 
+MapOL.prototype.updateShape = function (shape) {
+    var source = this.Geometries.getSource();
+    var feature = source.getFeatureById(shape.id);
+
+    if (feature) {
+        var newFeature = this.mapShapeToFeature(shape);
+        feature.setGeometry(newFeature.getGeometry());
+        feature.setStyle(newFeature.getStyle());
+    }
+}
 
 //--- Styles -----------------------------------------------------------------//
 
@@ -810,38 +936,6 @@ MapOL.prototype.customImageStyle = function (marker) {
                 })
             })
         ];
-}
-
-MapOL.prototype.lineStyle = function (line) {
-    return new ol.style.Style({
-        stroke: new ol.style.Stroke({ color: line.borderColor, width: line.borderSize }),
-        text: new ol.style.Text({
-            text: line.properties.label,
-            placement: "line",
-            opacity: 1,
-            scale: line.textScale,
-            fill: new ol.style.Fill({ color: line.color }),
-            stroke: new ol.style.Stroke({ color: line.borderColor, width: line.borderSize })
-        }),
-    });
-}
-
-MapOL.prototype.circleStyle = function (circle) {
-    return new ol.style.Style({
-        fill: new ol.style.Fill({ color: circle.backgroundColor }),
-        stroke: new ol.style.Stroke({ color: circle.borderColor, width: circle.borderSize }),
-        text: new ol.style.Text({
-            overflow: true,
-            text: circle.properties.label,
-            placement: "line",
-            scale: circle.textScale,
-            fill: new ol.style.Fill({ color: circle.color }),
-            stroke: new ol.style.Stroke({ color: circle.borderColor, width: circle.borderSize }),
-            offsetX: 0,
-            offsetY: 0,
-            rotation: 0
-        }),
-    });
 }
 
 // --- GeoStyles ------------------------------------------------------------------------//

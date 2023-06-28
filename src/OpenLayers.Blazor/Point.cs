@@ -3,20 +3,19 @@ using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
-public class Circle : Shape
+public class Point : Shape
 {
-    public Circle() : base (ShapeType.Circle)
+    public Point() : base (ShapeType.Point)
     {
     }
 
-    public Circle(Coordinate center, double radius) : this()
+    public Point(Coordinate coordinate) : this()
     {
-        Center = center;
-        Radius = radius;
+        Coordinate = coordinate;
     }
 
     [Parameter]
-    public Coordinate? Center
+    public Coordinate? Coordinate
     {
         get => InternalFeature.Point;
         set => InternalFeature.Point = value?.Value;

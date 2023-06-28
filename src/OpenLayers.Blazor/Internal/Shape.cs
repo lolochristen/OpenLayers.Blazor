@@ -3,19 +3,20 @@ using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor.Internal;
 
-public class Shape : Feature
+public class Shape : Feature, IEquatable<Shape>
 {
     public Shape()
     {
-        Kind = GetType().Name;
-        ID = Guid.NewGuid();
+        Type = nameof(Shape);
     }
 
-    public string Kind { get; set; }
+    [JsonIgnore]
+    public bool Popup
+    {
+        get => GetProperty<bool>("popup");
+        set => Properties["popup"] = value;
+    }
 
-    public Guid ID { get; set; }
-
-    public bool Popup { get; set; }
 
     [JsonIgnore]
     public string? Label
@@ -31,31 +32,65 @@ public class Shape : Feature
         set => Properties["title"] = value;
     }
 
-    public string? Content { get; set; }
-
-    public double TextScale { get; set; } = 1;
-
-    public string Color { get; set; } = "#FFFFFF";
-
-    public string BorderColor { get; set; } = "#FFFFFF";
-
-    public int BorderSize { get; set; } = 1;
-
-    public string BackgroundColor { get; set; } = "#000000";
-
-    public double Radius { get; set; }
-
-    public double Scale { get; set; } = 1;
-
-    private T? GetProperty<T>(string key)
+    [JsonIgnore]
+    public string? Style
     {
-        if (Properties.ContainsKey(key))
-        {
-            if (Properties[key] is JsonElement jsonElement)
-                return jsonElement.Deserialize<T>();
-            return (T)Properties[key];
-        }
+        get => GetProperty<string>("style");
+        set => Properties["style"] = value;
+    }
 
-        return default;
+    [JsonIgnore]
+    public string? Content
+    {
+        get => GetProperty<string>("content");
+        set => Properties["content"] = value;
+    }
+
+    //[JsonIgnore]
+    //public double? Size
+    //{
+    //    get => GetProperty<double>("size");
+    //    set => Properties["size"] = value;
+    //}
+
+    //[JsonIgnore]
+    //public double[]? Anchor
+    //{
+    //    get => GetProperty<double[]>("anchor");
+    //    set => Properties["anchor"] = value;
+    //}
+
+    public double? TextScale { get; set; } = 1;
+
+    public string? Color { get; set; } = "#FFFFFF";
+
+    public string? BorderColor { get; set; } = "#FFFFFF";
+
+    public int? BorderSize { get; set; } = 1;
+
+    public string? BackgroundColor { get; set; } = "#000000";
+
+    public double? Radius { get; set; }
+
+    public double? Scale { get; set; } = 1;
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(base.GetHashCode(), TextScale, Color, BorderColor, BorderSize, BackgroundColor, Radius, Scale);
+    }
+
+    public bool Equals(Shape? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return base.Equals(other) && Nullable.Equals(TextScale, other.TextScale) && Color == other.Color && BorderColor == other.BorderColor && BorderSize == other.BorderSize && BackgroundColor == other.BackgroundColor && Nullable.Equals(Radius, other.Radius) && Nullable.Equals(Scale, other.Scale);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((Shape)obj);
     }
 }

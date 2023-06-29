@@ -83,7 +83,7 @@ public class Shape : Feature, IEquatable<Shape>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return base.Equals(other) && Nullable.Equals(TextScale, other.TextScale) && Color == other.Color && BorderColor == other.BorderColor && BorderSize == other.BorderSize && BackgroundColor == other.BackgroundColor && Nullable.Equals(Radius, other.Radius) && Nullable.Equals(Scale, other.Scale);
+        return base.GetHashCode() == other.GetHashCode();
     }
 
     public override bool Equals(object? obj)

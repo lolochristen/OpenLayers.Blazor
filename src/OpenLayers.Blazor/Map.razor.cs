@@ -23,6 +23,7 @@ public partial class Map : IAsyncDisposable
         _popupId = Guid.NewGuid().ToString();
 
         NewShapeTemplate = new Point();
+        EnableShapeSnap = true;
     }
 
     [Inject] private IJSRuntime? JSRuntime { get; set; }
@@ -189,7 +190,7 @@ public partial class Map : IAsyncDisposable
     public bool EnableNewShapes { get; set; }
 
     [Parameter]
-    public bool EnableShapeSnap { get; set; } = true;
+    public bool EnableShapeSnap { get; set; }
 
     [Parameter]
     public bool EnableEditShapes { get; set; }
@@ -241,11 +242,13 @@ public partial class Map : IAsyncDisposable
         else
             shapeSnap = EnableShapeSnap;
 
-        if (parameters.TryGetValue(nameof(NewShapeTemplate), out Shape? shapeTemplate) && shapeTemplate != null &&
+        if (parameters.TryGetValue(nameof(NewShapeTemplate), out Shape shapeTemplate) && shapeTemplate != null &&
             !shapeTemplate.InternalFeature.Equals(NewShapeTemplate?.InternalFeature))
         {
             drawingChanges++;
             shapeTemplate.ParentMap = this; // to link the template with parent
+            if (NewShapeTemplate != null)
+                Console.WriteLine($"shapeTemplate not equal: {shapeTemplate.InternalFeature.GetHashCode()} {NewShapeTemplate.InternalFeature.GetHashCode()}\n {System.Text.Json.JsonSerializer.Serialize(shapeTemplate.InternalFeature)} \n {System.Text.Json.JsonSerializer.Serialize(NewShapeTemplate.InternalFeature)}");
         }
         else
             shapeTemplate = NewShapeTemplate;
@@ -381,7 +384,6 @@ public partial class Map : IAsyncDisposable
             Console.WriteLine("OnInternalShapeChanged: OnShapeChanged");
             existingShape.InternalFeature = shape;
             await OnShapeChanged.InvokeAsync(existingShape);
-
             await existingShape.OnChanged.InvokeAsync(existingShape);
         }
         else
@@ -402,6 +404,7 @@ public partial class Map : IAsyncDisposable
     /// <returns>Task</returns>
     public async Task SetCenter(Coordinate center)
     {
+        Console.WriteLine("SetCenter");
         if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, center.Value);
     }
 
@@ -419,6 +422,7 @@ public partial class Map : IAsyncDisposable
     /// <returns></returns>
     public async Task SetZoom(double zoom)
     {
+        Console.WriteLine("SetZoom");
         if (_module != null) await _module.InvokeVoidAsync("MapOLZoom", _mapId, zoom);
     }
 
@@ -474,6 +478,7 @@ public partial class Map : IAsyncDisposable
     /// <returns></returns>
     public ValueTask SetShapes(IEnumerable<Shape> shapes)
     {
+        Console.WriteLine("SetShapes");
         return _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, shapes.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
     }
 
@@ -483,6 +488,7 @@ public partial class Map : IAsyncDisposable
     /// <param name="layers">collection of layers</param>
     public ValueTask SetLayers(IEnumerable<Layer> layers)
     {
+        Console.WriteLine("SetLayers");
         return _module?.InvokeVoidAsync("MapOLSetLayers", _mapId, layers.Select(p => p.InternalLayer).ToArray()) ?? ValueTask.CompletedTask;
     }
 
@@ -513,6 +519,8 @@ public partial class Map : IAsyncDisposable
 
     public async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, Shape shapeTemplate)
     {
+        Console.WriteLine("SetDrawingSettings");
+
         try
         {
             if (_module != null)
@@ -562,6 +570,7 @@ public partial class Map : IAsyncDisposable
 
     public ValueTask UpdateShape(Shape shape)
     {
+        Console.WriteLine($"UpdateShape: {System.Text.Json.JsonSerializer.Serialize(shape.InternalFeature)}");
         return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.InternalFeature) ?? ValueTask.CompletedTask;
     }
 }

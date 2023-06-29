@@ -2,7 +2,7 @@
 @using Marker = OpenLayers.Blazor.Marker
 <h3>DrawDemo</h3>
 
-<div class="m-2">
+<div class="m-2 btn-toolbar mb-3" role="toolbar">
     <div class="btn-group" data-toggle="buttons">
         <input type="checkbox" class="btn-check" id="btndraw" autocomplete="off" @bind="_enabledraw">
         <label class="btn btn-outline-primary" for="btndraw">Draw</label>
@@ -17,9 +17,14 @@
         <option value="@(ShapeType.Polygon)">Polygon</option>
         <option value="@(ShapeType.Circle)">Circle</option>
     </select>
+    <input type="color" class="form-control form-control-color" id="bgColorInput" title="Background" @bind="_bgcolor">
+    <input type="color" class="form-control form-control-color" id="borderColorInput" title="Background" @bind="_bordercolor">
+    <input type="range" min="1" max="30" @bind="_borderSize" title="Border Size">
+
+    <input type="button" class="btn btn-primary" value="Undo" @onclick="() => _map.Undo()" />
+    <input type="button" class="btn btn-secondary" value="Clear" @onclick="() => _map.ShapesList.Clear()" />
     <input type="range" min="1080000" max="1280000" value="@_y" @onchange="OnYChange"> <code>@_y</code>
-    <input type="button" value="Clear" @onclick="Clear"/>
-</div>
+ </div>
 
 
 <div class="container">
@@ -42,7 +47,7 @@
     </SwissMap>
 
     <!-- Template Shape -->
-    <Shape @ref="_shapeTemplate" ShapeType="@_shapeType" Color="red" BorderColor="red" BackgroundColor="cyan" BorderSize="2"></Shape>
+    <Shape @ref="_shapeTemplate" ShapeType="@_shapeType" Color="red" BorderColor="@_bordercolor" BackgroundColor="@_bgcolor" BorderSize="@_borderSize"></Shape>
 </div>
 
 @if (_map != null)
@@ -79,6 +84,9 @@
     private Coordinate _center = new Coordinate(1197650, 2604200);
     private bool _enabledraw, _enableedit, _snap = true;
     private Shape _shapeTemplate;
+    private string _bgcolor = "#563d7c";
+    private string _bordercolor = "#dd1111";
+    private int _borderSize = 2;
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
@@ -94,10 +102,4 @@
         _circle.Center = _center;
         _ = _circle.UpdateShape();
     }
-
-    private void Clear()
-    {
-        _map.ShapesList.Clear();
-    }
-
 }

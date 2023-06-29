@@ -180,10 +180,18 @@ public class Shape : Feature, IDisposable
             ParentMap?.ShapesList.Add(this);
     }
 
-    //protected override Task OnParametersSetAsync()
-    //{
-    //    return UpdateShape();
-    //}
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ParentMap != null)
+        {
+            if (ParentMap.NewShapeTemplate == this)
+            {
+                await ParentMap.SetDrawingSettings();
+            }
+            
+        }
+        //return UpdateShape();
+    }
 
     public async Task UpdateShape()
     {

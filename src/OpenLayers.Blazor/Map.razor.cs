@@ -241,8 +241,12 @@ public partial class Map : IAsyncDisposable
         else
             shapeSnap = EnableShapeSnap;
 
-        if (parameters.TryGetValue(nameof(NewShapeTemplate), out Shape? shapeTemplate) && shapeTemplate != null && !shapeTemplate.InternalFeature.Equals(NewShapeTemplate?.InternalFeature))
+        if (parameters.TryGetValue(nameof(NewShapeTemplate), out Shape? shapeTemplate) && shapeTemplate != null &&
+            !shapeTemplate.InternalFeature.Equals(NewShapeTemplate?.InternalFeature))
+        {
             drawingChanges++;
+            shapeTemplate.ParentMap = this; // to link the template with parent
+        }
         else
             shapeTemplate = NewShapeTemplate;
 
@@ -502,7 +506,12 @@ public partial class Map : IAsyncDisposable
         if (_module != null) await _module.InvokeVoidAsync("MapOLSetVisibleExtent", _mapId, extent);
     }
 
-    private async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, Shape shapeTemplate)
+    public Task SetDrawingSettings()
+    {
+        return SetDrawingSettings(EnableNewShapes, EnableEditShapes, EnableShapeSnap, NewShapeTemplate);
+    }
+
+    public async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, Shape shapeTemplate)
     {
         try
         {

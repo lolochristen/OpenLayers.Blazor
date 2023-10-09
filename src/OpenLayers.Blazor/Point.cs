@@ -7,6 +7,8 @@ public class Point : Shape
 {
     public Point() : base (ShapeType.Point)
     {
+        Radius = 5;
+        BorderSize = 1;
     }
 
     public Point(Coordinate coordinate) : this()

@@ -108,8 +108,8 @@ public class Shape : Feature, IDisposable
     [Parameter]
     public double? Radius
     {
-        get => InternalFeature.Radius / 1000;
-        set => InternalFeature.Radius = value * 1000;
+        get => InternalFeature.Radius;
+        set => InternalFeature.Radius = value;
     }
 
     [Parameter]
@@ -199,7 +199,6 @@ public class Shape : Feature, IDisposable
             await ParentMap.SetDrawingSettings();
 
         await base.OnParametersSetAsync();
-        //return UpdateShape();
     }
 
     public async Task UpdateShape()

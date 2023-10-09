@@ -219,7 +219,7 @@ MapOL.prepareLayers = function (layers) {
         if (l.maxResolution == null) l.maxResolution = undefined;
         if (l.maxZoom == null) l.maxZoom = undefined;
         if (l.minZoom == null) l.minZoom = undefined;
-        if (l.zIndex == null) l.zIndex= undefined;
+        if (l.zIndex == null) l.zIndex = undefined;
         if (l.source.url == null) l.source.url = undefined;
         if (l.source.urls == null) l.source.urls = undefined;
         if (l.source.cacheSize == null) l.source.cacheSize = undefined;
@@ -283,7 +283,7 @@ MapOL.prepareLayers = function (layers) {
 }
 
 MapOL.prototype.setLayers = function (layers) {
-     this.Map.setLayers(MapOL.prepareLayers(layers));
+    this.Map.setLayers(MapOL.prepareLayers(layers));
 }
 
 MapOL.prototype.removeLayer = function (layer) {
@@ -501,16 +501,16 @@ MapOL.prototype.onMapCenterChanged = function () {
 MapOL.prototype.onVisibleExtentChanged = function () {
     if (this.disableVisibleExtentChanged) return;
     var extentArray = this.Map.getView().calculateExtent(this.Map.getSize());
-    var coordinate1 = ol.proj.transform([extentArray[0],extentArray[1]], this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
-    var coordinate2 = ol.proj.transform([extentArray[2],extentArray[3]], this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
-    var extent = { X1: coordinate1[0], Y1: coordinate1[1], X2: coordinate2[0], Y2: coordinate2[1]};
+    var coordinate1 = ol.proj.transform([extentArray[0], extentArray[1]], this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
+    var coordinate2 = ol.proj.transform([extentArray[2], extentArray[3]], this.Map.getView().getProjection().getCode(), this.Defaults.coordinatesProjection)
+    var extent = { X1: coordinate1[0], Y1: coordinate1[1], X2: coordinate2[0], Y2: coordinate2[1] };
     this.Instance.invokeMethodAsync('OnInternalVisibleExtentChanged', extent);
 }
 
 MapOL.prototype.centerToCurrentGeoLocation = function () {
     var that = this;
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
+        navigator.geolocation.getCurrentPosition(function (position) {
             var projection = that.Map.getView().getProjection().getCode();
             that.Map.getView().setCenter(ol.proj.transform([position.coords.longitude, position.coords.latitude], 'EPSG:4326', projection));
         });
@@ -551,9 +551,9 @@ MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes
 
     var source = this.Geometries.getSource();
 
-    if (enableEditShapes) { 
+    if (enableEditShapes) {
         if (this.currentModify == null) {
-            this.currentModify = new ol.interaction.Modify({source: source});
+            this.currentModify = new ol.interaction.Modify({ source: source });
             this.Map.addInteraction(this.currentModify);
         }
     }
@@ -562,17 +562,17 @@ MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes
         var style = this.getDefaultStyle(newShapeTemplate);
 
         this.currentDraw = new ol.interaction.Draw({
-          source: source,
-          type: newShapeTemplate.geometryType,
-          //style: style
+            source: source,
+            type: newShapeTemplate.geometryType,
+            //style: style
         });
-        this.currentDraw.on("drawend", function (evt) { evt.feature.setStyle(style);  });
+        this.currentDraw.on("drawend", function (evt) { evt.feature.setStyle(style); });
 
         this.Map.addInteraction(this.currentDraw);
     }
-   
+
     if (enableShapeSnap) {
-        this.currentSnap = new ol.interaction.Snap({source: source});
+        this.currentSnap = new ol.interaction.Snap({ source: source });
         this.Map.addInteraction(this.currentSnap);
     }
 }
@@ -599,7 +599,7 @@ MapOL.prototype.undoDrawing = function () {
 }
 
 MapOL.prototype.onFeatureAdded = function (feature) {
-    var shape = this.mapFeatureToShape(feature);      
+    var shape = this.mapFeatureToShape(feature);
     this.Instance.invokeMethodAsync('OnInternalShapeAdded', shape);
 }
 
@@ -613,25 +613,25 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
 
     if (geometry != null && !Array.isArray(geometry)) {
         switch (geometry.getType()) {
-        case 'Point':
-            coordinates = ol.proj.transform([ geometry.getCoordinates() ], viewProjection, this.Defaults.coordinatesProjection);
-            break;
-        case 'Circle':
-            coordinates = ol.proj.transform([ geometry.getCenter() ], viewProjection, this.Defaults.coordinatesProjection);
-            break;
-        case 'Polygon':
-            coordinates = ol.proj.transform(geometry.getCoordinates()[0], viewProjection, this.Defaults.coordinatesProjection);
-            break;
-        default:
-            coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
-            break;
+            case 'Point':
+                coordinates = ol.proj.transform([geometry.getCoordinates()], viewProjection, this.Defaults.coordinatesProjection);
+                break;
+            case 'Circle':
+                coordinates = ol.proj.transform([geometry.getCenter()], viewProjection, this.Defaults.coordinatesProjection);
+                break;
+            case 'Polygon':
+                coordinates = ol.proj.transform(geometry.getCoordinates()[0], viewProjection, this.Defaults.coordinatesProjection);
+                break;
+            default:
+                coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
+                break;
         }
     }
 
     var style = feature.getStyle();
     var stroke = style && !Array.isArray(style) ? style.getStroke() : null;
-    var fill = style && !Array.isArray(style) ? style.getFill( ): null;
-    var text = style && !Array.isArray(style) ? style.getText( ): null;
+    var fill = style && !Array.isArray(style) ? style.getFill() : null;
+    var text = style && !Array.isArray(style) ? style.getText() : null;
     var id = feature.getId();
 
     if (id == null) {
@@ -646,7 +646,7 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
     var properties = objectWithoutKey(feature.getProperties(), "geometry");
 
     if (!properties.type) properties.type = 'Shape';
-    
+
     var shape = {
         id: id,
         geometryType: geometry ? geometry.getType() : "None",
@@ -677,7 +677,7 @@ MapOL.prototype.mapShapeToFeature = function (shape) {
 
     var geometry;
     var viewProjection = this.Map.getView().getProjection().getCode();
-    var coordinates, coordinate;
+    var coordinates;
     if (shape.coordinates)
         coordinates = ol.proj.transform(shape.coordinates, this.Defaults.coordinatesProjection, viewProjection);
 
@@ -689,11 +689,10 @@ MapOL.prototype.mapShapeToFeature = function (shape) {
             geometry = new ol.geom.LineString(coordinates);
             break;
         case "Polygon":
-            geometry = new ol.geom.Polygon([ coordinates ]);
+            geometry = new ol.geom.Polygon([coordinates]);
             break;
         case "Circle":
             geometry = new ol.geom.Circle(coordinates[0], shape.radius / ol.proj.getPointResolution(viewProjection, 1, coordinates[0]));
-            //geometry = new ol.geom.Polygon.fromCircle(circle, 32, 90);
             break;
         case "MultiPoint":
             geometry = new ol.geom.MultiPoint(coordinates);
@@ -749,21 +748,48 @@ MapOL.prototype.mapShapeToFeature = function (shape) {
 }
 
 MapOL.prototype.getDefaultStyle = function (shape) {
-    return new ol.style.Style({
-                fill: shape.backgroundColor ? new ol.style.Fill({ color: shape.backgroundColor }) : null,
-                stroke: new ol.style.Stroke({ color: shape.borderColor, width: shape.borderSize }),
-                text: shape.label ? new ol.style.Text({
-                    overflow: true,
-                    text: shape.label,
-                    placement: "line",
-                    scale: shape.textScale,
-                    fill: new ol.style.Fill({ color: shape.color }),
-                    stroke: new ol.style.Stroke({ color: shape.color, width: shape.color }),
-                    offsetX: 0,
-                    offsetY: 0,
-                    rotation: 0
-                }) : null,
-            });
+
+    if (shape.geometryType == 'Point') {
+        var viewProjection = this.Map.getView().getProjection().getCode();
+        var coordinates = ol.proj.transform(shape.coordinates, this.Defaults.coordinatesProjection, viewProjection);
+        var radius = 5;
+        if (shape.radius != null) {
+            radius = shape.radius
+        }
+        if (coordinates.length > 0) {
+            radius = radius / ol.proj.getPointResolution(viewProjection, 1, coordinates[0]);
+        }
+        return new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: radius,
+                fill: new ol.style.Fill({
+                    color: shape.backgroundColor,
+                }),
+                stroke: new ol.style.Stroke({
+                    color: shape.borderColor,
+                    width: shape.borderSize,
+                }),
+            }),
+            zIndex: Infinity,
+        });
+    }
+    else {
+        return new ol.style.Style({
+            fill: shape.backgroundColor ? new ol.style.Fill({ color: shape.backgroundColor }) : null,
+            stroke: new ol.style.Stroke({ color: shape.borderColor, width: shape.borderSize }),
+            text: shape.label ? new ol.style.Text({
+                overflow: true,
+                text: shape.label,
+                placement: "line",
+                scale: shape.textScale,
+                fill: new ol.style.Fill({ color: shape.color }),
+                stroke: new ol.style.Stroke({ color: shape.color, width: shape.color }),
+                offsetX: 0,
+                offsetY: 0,
+                rotation: 0
+            }) : null,
+        });
+    }
 }
 
 MapOL.prototype.onFeatureRemoved = function (feature) {
@@ -773,7 +799,7 @@ MapOL.prototype.onFeatureRemoved = function (feature) {
 MapOL.prototype.onFeatureChanged = function (feature) {
 
     if (feature.getProperties().type != 'Marker') {
-        var shape = this.mapFeatureToShape(feature);      
+        var shape = this.mapFeatureToShape(feature);
         this.Instance.invokeMethodAsync('OnInternalShapeChanged', shape);
     }
 }
@@ -794,7 +820,7 @@ MapOL.prototype.updateShape = function (shape) {
 MapOL.prototype.pinStyle = function (marker) {
     var src = './_content/OpenLayers.Blazor/img/marker-pin-red.png';
     if (marker.color == null || marker.color != '#FFFFFF')
-        src = './_content/OpenLayers.Blazor/img/marker-pin-'+marker.color+'.png';
+        src = './_content/OpenLayers.Blazor/img/marker-pin-' + marker.color + '.png';
     return [
         new ol.style.Style({
             image: new ol.style.Icon({
@@ -818,9 +844,9 @@ MapOL.prototype.pinStyle = function (marker) {
                 anchorXUnits: 'pixels',
                 anchorYUnits: 'pixels',
                 src: src
-                })
             })
-        ];
+        })
+    ];
 }
 
 MapOL.prototype.flagStyle = function (marker) {
@@ -933,9 +959,9 @@ MapOL.prototype.customImageStyle = function (marker) {
                 anchorXUnits: 'pixels',
                 anchorYUnits: 'pixels',
                 src: marker.content
-                })
             })
-        ];
+        })
+    ];
 }
 
 // --- GeoStyles ------------------------------------------------------------------------//

@@ -24,7 +24,7 @@
     <input type="button" class="btn btn-primary" value="Undo" @onclick="() => _map.Undo()" />
     <input type="button" class="btn btn-secondary" value="Clear" @onclick="() => _map.ShapesList.Clear()" />
     <input type="range" min="1080000" max="1280000" value="@_y" @onchange="OnYChange"> <code>@_y</code>
- </div>
+</div>
 
 
 <div class="container">
@@ -37,12 +37,11 @@
                 }
             </div>
         </Popup>
-    
+
         <Features>
             <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="red" BorderSize="2"></Line>
-            <Circle @ref="_circle" Center="_center" Radius="20" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>
-            <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
-            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
+            <Circle @ref="_circle" Center="_center" Radius="2000" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>
+            <Point Coordinate="new Coordinate(1247123.8311215444, 2683276.620804008)" BackgroundColor="green" Radius="20"></Point>
         </Features>
     </SwissMap>
 
@@ -56,7 +55,8 @@
         <h5>Shapes</h5>
         @foreach (var shape in _map.ShapesList)
         {
-            <p>@shape.Id @shape.Type @shape.GeometryType
+            <p>
+                @shape.Id @shape.Type @shape.GeometryType
                 <ul>
                     @if (shape.Coordinates != null)
                     {
@@ -66,7 +66,7 @@
                         }
                     }
                 </ul>
-             </p>
+            </p>
         }
         <h5>Markers</h5>
         @foreach (var marker in _map.MarkersList)

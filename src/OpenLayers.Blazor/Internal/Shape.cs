@@ -46,20 +46,6 @@ public class Shape : Feature, IEquatable<Shape>
         set => Properties["content"] = value;
     }
 
-    //[JsonIgnore]
-    //public double? Size
-    //{
-    //    get => GetProperty<double>("size");
-    //    set => Properties["size"] = value;
-    //}
-
-    //[JsonIgnore]
-    //public double[]? Anchor
-    //{
-    //    get => GetProperty<double[]>("anchor");
-    //    set => Properties["anchor"] = value;
-    //}
-
     public double? TextScale { get; set; } = 1;
 
     public string? Color { get; set; } = "#FFFFFF";

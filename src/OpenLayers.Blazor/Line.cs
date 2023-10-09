@@ -8,7 +8,6 @@ public class Line : Shape
 {
     public Line() : base(ShapeType.LineString)
     {
-        InternalFeature.GeometryType = GeometryTypes.LineString;
     }
 
     public Line(Coordinate point1, Coordinate point2) : this()

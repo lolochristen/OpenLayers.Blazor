@@ -4,25 +4,25 @@ namespace OpenLayers.Blazor;
 
 public class Marker : Shape<Internal.Marker>
 {
-    public Marker() : base(new Internal.Marker())
+    public Marker() : base (new Internal.Marker())
     {
     }
 
-    public Marker(MarkerType type, Coordinate coordinate, string? title = null)
+    public Marker(MarkerType type, Coordinate coordinate, string? title = null) : this()
     {
         Type = type;
         Coordinate = coordinate;
         Title = title;
     }
 
-    public Marker(Coordinate coordinate, char icon)
+    public Marker(Coordinate coordinate, char icon) : this()
     {
         Type = MarkerType.MarkerAwesome;
         Coordinate = coordinate;
         Label = icon.ToString();
     }
 
-    public Marker(Coordinate coordinate, string imageSource, float width, float height, float anchorX, float anchorY)
+    public Marker(Coordinate coordinate, string imageSource, float width, float height, float anchorX, float anchorY) : this()
     {
         Type = MarkerType.MarkerCustomImage;
         Coordinate = coordinate;
@@ -34,15 +34,8 @@ public class Marker : Shape<Internal.Marker>
     [Parameter]
     public MarkerType Type
     {
-        get => Enum.Parse<MarkerType>(InternalFeature.Kind);
-        set => InternalFeature.Kind = value.ToString();
-    }
-
-    [Parameter]
-    public Coordinate Coordinate
-    {
-        get => InternalFeature.Coordinate;
-        set => InternalFeature.Coordinate = value;
+        get => InternalFeature.Style != null ? Enum.Parse<MarkerType>(InternalFeature.Style) : MarkerType.MarkerPin;
+        set => InternalFeature.Style = value.ToString();
     }
 
     [Parameter]
@@ -57,5 +50,13 @@ public class Marker : Shape<Internal.Marker>
     {
         get => InternalFeature.Anchor;
         set => InternalFeature.Anchor = value;
+    }
+
+
+    [Parameter]
+    public Coordinate? Coordinate
+    {
+        get => InternalFeature.Point;
+        set => InternalFeature.Point = value?.Value;
     }
 }

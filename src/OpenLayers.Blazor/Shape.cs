@@ -1,14 +1,19 @@
 ﻿using Microsoft.AspNetCore.Components;
+using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
-public class Shape<T> : Shape where T : Internal.Shape, new()
+public enum ShapeType
 {
-    public Shape() : base(new T())
-    {
-    }
+    Point,
+    LineString,
+    Polygon,
+    Circle
+}
 
-    public Shape(T shape) : base(shape)
+public abstract class Shape<T> : Shape where T : Internal.Shape, new()
+{
+    internal Shape(T shape) : base(shape)
     {
     }
 
@@ -17,13 +22,67 @@ public class Shape<T> : Shape where T : Internal.Shape, new()
 
 public class Shape : Feature, IDisposable
 {
+    public Shape() : this(ShapeType.Point)
+    {
+    }
+
+    public Shape(ShapeType shapeType)
+    {
+        InternalFeature = new Internal.Shape();
+        ShapeType = shapeType;
+    }
+
     internal Shape(Internal.Shape shape) : base(shape)
     {
     }
 
-    internal new Internal.Shape InternalFeature => (Internal.Shape)base.InternalFeature;
+    internal new Internal.Shape InternalFeature
+    { 
+        get => (Internal.Shape)base.InternalFeature;
+        set => base.InternalFeature = value;
+    }
 
     [CascadingParameter] public Map? ParentMap { get; set; }
+
+    [Parameter] public ShapeType ShapeType
+    {
+        get
+        {
+            switch (InternalFeature.GeometryType)
+            {
+                case GeometryTypes.MultiLineString:
+                case GeometryTypes.LineString:
+                    return ShapeType.LineString;
+                case GeometryTypes.MultiPolygon:
+                case GeometryTypes.Polygon:
+                    return ShapeType.Polygon;
+                case GeometryTypes.Circle:
+                    return ShapeType.Circle;
+                default:
+                    return ShapeType.Point;
+            }
+        }
+        set
+        {
+            switch (value)
+            {
+                case ShapeType.Point:
+                    InternalFeature.GeometryType = GeometryTypes.Point;
+                    break;
+                case ShapeType.LineString:
+                    InternalFeature.GeometryType = GeometryTypes.LineString;
+                    break;
+                case ShapeType.Polygon:
+                    InternalFeature.GeometryType = GeometryTypes.Polygon;
+                    break;
+                case ShapeType.Circle:
+                    InternalFeature.GeometryType = GeometryTypes.Circle;
+                    break;
+            }
+        }
+    }
+
+    [Parameter] public EventCallback<Shape> OnChanged { get; set; }
 
     [Parameter]
     public string? Title
@@ -47,39 +106,54 @@ public class Shape : Feature, IDisposable
     }
 
     [Parameter]
-    public double Radius
+    public double? Radius
     {
-        get => InternalFeature.Radius / 1000;
-        set => InternalFeature.Radius = value * 1000;
+        get => InternalFeature.Radius;
+        set => InternalFeature.Radius = value;
     }
 
     [Parameter]
-    public string Color
+    public string? Color
     {
         get => InternalFeature.Color;
         set => InternalFeature.Color = value;
     }
 
     [Parameter]
-    public string BorderColor
+    public string? BorderColor
     {
         get => InternalFeature.BorderColor;
         set => InternalFeature.BorderColor = value;
     }
 
+    
+    [Parameter]
+    public int? BorderSize
+    {
+        get => InternalFeature.BorderSize;
+        set => InternalFeature.BorderSize = value;
+    }
+
 
     [Parameter]
-    public string BackgroundColor
+    public string? BackgroundColor
     {
         get => InternalFeature.BackgroundColor;
         set => InternalFeature.BackgroundColor = value;
     }
 
     [Parameter]
-    public double Scale
+    public double? Scale
     {
         get => InternalFeature.Scale;
         set => InternalFeature.Scale = value;
+    }
+
+    [Parameter]
+    public double? TextScale
+    {
+        get => InternalFeature.TextScale;
+        set => InternalFeature.TextScale = value;
     }
 
     [Parameter]
@@ -104,5 +178,33 @@ public class Shape : Feature, IDisposable
             ParentMap?.MarkersList.Add((Marker)this);
         else
             ParentMap?.ShapesList.Add(this);
+    }
+
+    private bool _drawSettingsChanged;
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        _drawSettingsChanged = false;
+        if (parameters.TryGetValue(nameof(BackgroundColor), out string? bgColor) && bgColor != BackgroundColor) _drawSettingsChanged = true;
+        if (parameters.TryGetValue(nameof(Color), out string? color) && color != Color) _drawSettingsChanged = true;
+        if (parameters.TryGetValue(nameof(BorderColor), out string? bcolor) && bcolor != BorderColor) _drawSettingsChanged = true;
+        if (parameters.TryGetValue(nameof(BorderSize), out int? size) && size != BorderSize) _drawSettingsChanged = true;
+        if (parameters.TryGetValue(nameof(ShapeType), out ShapeType shapeType) && shapeType != ShapeType) _drawSettingsChanged = true;
+
+        return base.SetParametersAsync(parameters);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ParentMap != null && ReferenceEquals(ParentMap.NewShapeTemplate, this) && _drawSettingsChanged)
+            await ParentMap.SetDrawingSettings();
+
+        await base.OnParametersSetAsync();
+    }
+
+    public async Task UpdateShape()
+    {
+        if (ParentMap != null)
+            await ParentMap.UpdateShape(this);
     }
 }

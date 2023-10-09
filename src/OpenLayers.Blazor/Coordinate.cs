@@ -32,26 +32,35 @@ public class Coordinate : IEquatable<Coordinate>
         X = coordinate.X;
     }
 
+    
+    public Coordinate(double[] coordinates)
+    {
+        if (coordinates.Length < 2) 
+            throw new ArgumentException(nameof(coordinates));
+        Y = coordinates[0];
+        X = coordinates[1];
+    }
+
     public double Latitude => Y;
 
     public double Y
     {
-        get => Coordinates[1];
-        set => Coordinates[1] = value;
+        get => Value[1];
+        set => Value[1] = value;
     }
 
     public double Longitude => X;
 
     public double X
     {
-        get => Coordinates[0];
-        set => Coordinates[0] = value;
+        get => Value[0];
+        set => Value[0] = value;
     }
 
     /// <summary>
     ///     Coordinate in OpenLayers Style: [Longitude, Latitude]
     /// </summary>
-    public double[] Coordinates { get; set; } = new double[2] { 0, 0 };
+    public double[] Value { get; set; } = new double[2] { 0, 0 };
 
 
     public bool Equals(Coordinate? other)
@@ -69,6 +78,13 @@ public class Coordinate : IEquatable<Coordinate>
     public static implicit operator Coordinate(string val)
     {
         return Parse(val);
+    }
+
+    public static implicit operator Coordinate(double[] val)
+    {
+        if (val == null)
+            return null;
+        return new Coordinate(val[0], val[1]);
     }
 
     private static Coordinate Parse(string val)

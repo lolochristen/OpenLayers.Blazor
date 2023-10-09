@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Collections.ObjectModel;
+using Microsoft.AspNetCore.Components;
+using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
@@ -23,12 +25,25 @@ public class Feature : ComponentBase
         InternalFeature = feature;
     }
 
+    /// <summary>
+    /// Identifier
+    /// </summary>
+    [Parameter]
+    public Guid Id
+    {
+        get => InternalFeature.Id;
+        set => InternalFeature.Id = value;
+    }
+
     protected Internal.Feature InternalFeature { get; set; }
 
-    [Parameter]
-    public dynamic? Geometry
-    {
-        get => InternalFeature.Geometry;
-        set => InternalFeature.Geometry = value;
-    }
+    public GeometryTypes? GeometryType => InternalFeature.GeometryType;
+
+    public string? Type => InternalFeature.Type;
+
+    public Dictionary<string, dynamic> Properties => InternalFeature.Properties;
+
+    public Coordinate? Point => Coordinates.FirstOrDefault();
+
+    public IEnumerable<Coordinate> Coordinates => InternalFeature.Coordinates.Select(p => new Coordinate(p)).ToArray();
 }

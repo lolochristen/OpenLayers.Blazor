@@ -32,7 +32,7 @@ public class Extent : IEquatable<Extent>
 
     public override int GetHashCode()
     {
-        return X1.GetHashCode() + Y1.GetHashCode() + X2.GetHashCode() + Y2.GetHashCode();
+        return HashCode.Combine(X1, Y1, X2, Y2);
     }
 
     public override string ToString()

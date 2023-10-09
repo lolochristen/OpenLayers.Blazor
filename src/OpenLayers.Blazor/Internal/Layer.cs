@@ -15,5 +15,5 @@ public class Layer
     public TileSource Source { get; set; } = new();
     public bool UseInterimTilesOnError { get; set; } = true;
 
-    public Dictionary<string, object>? Properties { get; set; }
+    public Dictionary<string, object>? Properties { get; set; } = new();
 }

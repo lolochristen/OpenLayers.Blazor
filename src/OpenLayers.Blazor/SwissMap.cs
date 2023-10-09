@@ -10,7 +10,7 @@ public class SwissMap : Map
             SourceType = SourceType.TileWMS,
             Url = "https://wms.geo.admin.ch/",
             CrossOrigin = "anonymous",
-            Params = new Dictionary<string, object> { { "LAYERS", "ch.swisstopo.pixelkarte-farbe" }, { "FORMAT", "image/jpeg" } },
+            SourceParameters = new Dictionary<string, object> { { "LAYERS", "ch.swisstopo.pixelkarte-farbe" }, { "FORMAT", "image/jpeg" } },
             ServerType = "mapserver",
             Attributions = "© <a href=\"https://www.swisstopo.admin.ch/en/home.html\" target=\"_blank\">swisstopo</a>"
         });

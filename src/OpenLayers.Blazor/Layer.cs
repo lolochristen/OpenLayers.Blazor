@@ -109,7 +109,7 @@ public class Layer : ComponentBase
     }
 
     [Parameter]
-    public Dictionary<string, object> Params
+    public Dictionary<string, object> SourceParameters
     {
         get => _internalLayer.Source.Params;
         set => _internalLayer.Source.Params = value;
@@ -201,6 +201,13 @@ public class Layer : ComponentBase
     {
         get => _internalLayer.Source.Params.ContainsKey("layers") ? _internalLayer.Source.Params["layers"].ToString() : null;
         set => _internalLayer.Source.Params["layers"] = value;
+    }
+
+    [Parameter]
+    public string? Title
+    {
+        get => _internalLayer.Properties.ContainsKey("title") ? _internalLayer.Properties["title"].ToString() : null;
+        set => _internalLayer.Properties["title"] = value;
     }
 
     protected override void OnInitialized()

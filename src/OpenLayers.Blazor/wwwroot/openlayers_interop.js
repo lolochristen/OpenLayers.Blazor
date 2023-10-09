@@ -958,7 +958,7 @@ MapOL.prototype.customImageStyle = function (marker) {
                 scale: marker.scale,
                 anchorXUnits: 'pixels',
                 anchorYUnits: 'pixels',
-                src: marker.content
+                src: marker.properties['content']
             })
         })
     ];

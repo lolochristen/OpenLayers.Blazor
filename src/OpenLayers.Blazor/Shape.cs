@@ -181,6 +181,7 @@ public class Shape : Feature, IDisposable
     }
 
     private bool _drawSettingsChanged;
+
     public override Task SetParametersAsync(ParameterView parameters)
     {
         _drawSettingsChanged = false;

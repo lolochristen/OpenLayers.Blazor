@@ -17,6 +17,9 @@ public partial class Map : IAsyncDisposable
     private Feature? _popupContext;
     private string _popupId;
 
+    /// <summary>
+    /// Default Constructor
+    /// </summary>
     public Map()
     {
         _mapId = Guid.NewGuid().ToString();
@@ -183,15 +186,27 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public Extent? VisibleExtent { get; set; }
 
+    /// <summary>
+    /// A shape providing default parameters when drawing new shapes
+    /// </summary>
     [Parameter]
     public Shape NewShapeTemplate { get; set; }
 
+    /// <summary>
+    /// Get or set if new shapes shall be drawn
+    /// </summary>
     [Parameter]
     public bool EnableNewShapes { get; set; }
 
+    /// <summary>
+    /// Get or sets if the position of points shall be snapped.
+    /// </summary>
     [Parameter]
     public bool EnableShapeSnap { get; set; }
 
+    /// <summary>
+    /// Get or sets if drawing new shapes is enabled.
+    /// </summary>
     [Parameter]
     public bool EnableEditShapes { get; set; }
 
@@ -247,8 +262,6 @@ public partial class Map : IAsyncDisposable
         {
             drawingChanges++;
             shapeTemplate.ParentMap = this; // to link the template with parent
-            if (NewShapeTemplate != null)
-                Console.WriteLine($"shapeTemplate not equal: {shapeTemplate.InternalFeature.GetHashCode()} {NewShapeTemplate.InternalFeature.GetHashCode()}\n {System.Text.Json.JsonSerializer.Serialize(shapeTemplate.InternalFeature)} \n {System.Text.Json.JsonSerializer.Serialize(NewShapeTemplate.InternalFeature)}");
         }
         else
             shapeTemplate = NewShapeTemplate;
@@ -286,15 +299,18 @@ public partial class Map : IAsyncDisposable
     [JSInvokable]
     public async Task OnInternalFeatureClick(Internal.Feature feature)
     {
+#if DEBUG
         Console.WriteLine($"OnInternalFeatureClick: {System.Text.Json.JsonSerializer.Serialize(feature)}");
+#endif
         await OnFeatureClick.InvokeAsync(new Feature(feature));
     }
 
     [JSInvokable]
     public async Task OnInternalMarkerClick(Internal.Marker marker)
     {
+#if DEBUG
         Console.WriteLine($"OnInternalMarkerClick: {System.Text.Json.JsonSerializer.Serialize(marker)}");
-
+#endif
         var m = MarkersList.FirstOrDefault(p => p.InternalFeature.Id == marker.Id);
 
         if (m != null)
@@ -308,8 +324,9 @@ public partial class Map : IAsyncDisposable
     [JSInvokable]
     public async Task OnInternalShapeClick(Internal.Shape shape)
     {
+#if DEBUG
         Console.WriteLine($"OnInternalShapeClick: {System.Text.Json.JsonSerializer.Serialize(shape)}");
-
+#endif
         await OnShapeClick.InvokeAsync(shape);
         StateHasChanged();
     }
@@ -352,8 +369,9 @@ public partial class Map : IAsyncDisposable
     [JSInvokable]
     public async Task OnInternalShapeAdded(Internal.Shape shape)
     {
+#if DEBUG
         Console.WriteLine($"OnInternalShapeAdded: {System.Text.Json.JsonSerializer.Serialize(shape)}");
-
+#endif
         if (ShapesList.All(p => p.Id != shape.Id))
         {
             var newShape = new Shape(shape);
@@ -370,7 +388,9 @@ public partial class Map : IAsyncDisposable
     [JSInvokable]
     public async Task OnInternalShapeChanged(Internal.Shape shape)
     {
+#if DEBUG
         Console.WriteLine($"OnInternalShapeChanged: {System.Text.Json.JsonSerializer.Serialize(shape)}");
+#endif
         var existingShape = ShapesList.FirstOrDefault(p => p.Id == shape.Id);
 
         if (existingShape == null)
@@ -386,8 +406,6 @@ public partial class Map : IAsyncDisposable
             await OnShapeChanged.InvokeAsync(existingShape);
             await existingShape.OnChanged.InvokeAsync(existingShape);
         }
-        else
-            Console.WriteLine("OnInternalShapeChanged: equal");
 
     }
 
@@ -570,7 +588,9 @@ public partial class Map : IAsyncDisposable
 
     public ValueTask UpdateShape(Shape shape)
     {
+#if DEBUG
         Console.WriteLine($"UpdateShape: {System.Text.Json.JsonSerializer.Serialize(shape.InternalFeature)}");
+#endif
         return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.InternalFeature) ?? ValueTask.CompletedTask;
     }
 }

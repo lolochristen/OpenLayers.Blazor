@@ -401,7 +401,6 @@ public partial class Map : IAsyncDisposable
 
         if (!existingShape.InternalFeature.Equals(shape))
         {
-            Console.WriteLine("OnInternalShapeChanged: OnShapeChanged");
             existingShape.InternalFeature = shape;
             await OnShapeChanged.InvokeAsync(existingShape);
             await existingShape.OnChanged.InvokeAsync(existingShape);
@@ -422,7 +421,6 @@ public partial class Map : IAsyncDisposable
     /// <returns>Task</returns>
     public async Task SetCenter(Coordinate center)
     {
-        Console.WriteLine("SetCenter");
         if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, center.Value);
     }
 
@@ -440,7 +438,6 @@ public partial class Map : IAsyncDisposable
     /// <returns></returns>
     public async Task SetZoom(double zoom)
     {
-        Console.WriteLine("SetZoom");
         if (_module != null) await _module.InvokeVoidAsync("MapOLZoom", _mapId, zoom);
     }
 
@@ -496,7 +493,6 @@ public partial class Map : IAsyncDisposable
     /// <returns></returns>
     public ValueTask SetShapes(IEnumerable<Shape> shapes)
     {
-        Console.WriteLine("SetShapes");
         return _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, shapes.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
     }
 
@@ -506,7 +502,6 @@ public partial class Map : IAsyncDisposable
     /// <param name="layers">collection of layers</param>
     public ValueTask SetLayers(IEnumerable<Layer> layers)
     {
-        Console.WriteLine("SetLayers");
         return _module?.InvokeVoidAsync("MapOLSetLayers", _mapId, layers.Select(p => p.InternalLayer).ToArray()) ?? ValueTask.CompletedTask;
     }
 
@@ -537,8 +532,6 @@ public partial class Map : IAsyncDisposable
 
     public async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, Shape shapeTemplate)
     {
-        Console.WriteLine("SetDrawingSettings");
-
         try
         {
             if (_module != null)

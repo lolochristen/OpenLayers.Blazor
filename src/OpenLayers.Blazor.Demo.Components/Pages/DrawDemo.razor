@@ -1,0 +1,105 @@
+﻿@page "/drawdemo"
+@using Marker = OpenLayers.Blazor.Marker
+<h3>DrawDemo</h3>
+
+<div class="m-2 btn-toolbar mb-3" role="toolbar">
+    <div class="btn-group" data-toggle="buttons">
+        <input type="checkbox" class="btn-check" id="btndraw" autocomplete="off" @bind="_enabledraw">
+        <label class="btn btn-outline-primary" for="btndraw">Draw</label>
+        <input type="checkbox" class="btn-check" id="btnedit" autocomplete="off" @bind="_enableedit">
+        <label class="btn btn-outline-primary" for="btnedit">Edit</label>
+        <input type="checkbox" class="btn-check" id="btnsnap" autocomplete="off" @bind="_snap">
+        <label class="btn btn-outline-primary" for="btnsnap">Snap</label>
+    </div>
+    <select id="type" @bind="_shapeType">
+        <option value="@(ShapeType.Point)">Point</option>
+        <option value="@(ShapeType.LineString)">LineString</option>
+        <option value="@(ShapeType.Polygon)">Polygon</option>
+        <option value="@(ShapeType.Circle)">Circle</option>
+    </select>
+    <input type="color" class="form-control form-control-color" id="bgColorInput" title="Background" @bind="_bgcolor">
+    <input type="color" class="form-control form-control-color" id="borderColorInput" title="Background" @bind="_bordercolor">
+    <input type="range" min="1" max="30" @bind="_borderSize" title="Border Size">
+
+    <input type="button" class="btn btn-primary" value="Undo" @onclick="() => _map.Undo()" />
+    <input type="button" class="btn btn-secondary" value="Clear" @onclick="() => _map.ShapesList.Clear()" />
+    <input type="range" min="1080000" max="1280000" value="@_y" @onchange="OnYChange"> <code>@_y</code>
+</div>
+
+
+<div class="container">
+    <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;" OnShapeAdded="StateHasChanged" OnShapeChanged="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" NewShapeTemplate="_shapeTemplate">
+        <Popup>
+            <div id="popup" class="ol-box">
+                @if (@context != null)
+                {
+                    <h3>@context.Type</h3>
+                }
+            </div>
+        </Popup>
+
+        <Features>
+            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="red" BorderSize="2"></Line>
+            <Circle @ref="_circle" Center="_center" Radius="2000" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>
+            <Point Coordinate="new Coordinate(1247123.8311215444, 2683276.620804008)" BackgroundColor="green" Radius="20"></Point>
+        </Features>
+    </SwissMap>
+
+    <!-- Template Shape -->
+    <Shape @ref="_shapeTemplate" ShapeType="@_shapeType" Color="red" BorderColor="@_bordercolor" BackgroundColor="@_bgcolor" BorderSize="@_borderSize"></Shape>
+</div>
+
+@if (_map != null)
+{
+    <div>
+        <h5>Shapes</h5>
+        @foreach (var shape in _map.ShapesList)
+        {
+            <p>
+                @shape.Id @shape.Type @shape.GeometryType
+                <ul>
+                    @if (shape.Coordinates != null)
+                    {
+                        @foreach (Coordinate c in shape.Coordinates)
+                        {
+                            <li>@c</li>
+                        }
+                    }
+                </ul>
+            </p>
+        }
+        <h5>Markers</h5>
+        @foreach (var marker in _map.MarkersList)
+        {
+            <p>@marker.Id @marker.Type</p>
+        }
+    </div>
+}
+
+@code {
+    private SwissMap _map = null!;
+    private ShapeType _shapeType;
+    private double _y = 1197650;
+    private Circle _circle;
+    private Coordinate _center = new Coordinate(1197650, 2604200);
+    private bool _enabledraw, _enableedit, _snap = true;
+    private Shape _shapeTemplate;
+    private string _bgcolor = "#563d7c";
+    private string _bordercolor = "#dd1111";
+    private int _borderSize = 2;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            StateHasChanged();
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void OnYChange(ChangeEventArgs obj)
+    {
+        _y = Double.Parse(obj.Value.ToString());
+        _center.Y = _y;
+        _circle.Center = _center;
+        _ = _circle.UpdateShape();
+    }
+}

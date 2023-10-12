@@ -9,13 +9,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link href="css/site.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/7.3.0/ol.min.css" rel="stylesheet" />
-    <link href="_content/OpenLayers.Blazor/OpenLayers.Blazor.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/7.3.0/dist/ol.min.js"></script>
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
+    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/app.css" rel="stylesheet" />
     <link href="OpenLayers.Blazor.Demo.Server.styles.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="favicon.png"/>
+    <link href="lib/openlayers/ol.css" rel="stylesheet" />
+    <link href="_content/OpenLayers.Blazor/OpenLayers.Blazor.css" rel="stylesheet" />
+    <script src="lib/openlayers/dist/ol.min.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/dark.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="lib/font-awesome/css/all.min.css" />
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
@@ -31,7 +34,15 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script src="_framework/blazor.server.js"></script>
+
+    <script>
+        window.highlightSnippet = function () {
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightBlock(el);
+            });
+        }
+    </script>
 </body>
 </html>

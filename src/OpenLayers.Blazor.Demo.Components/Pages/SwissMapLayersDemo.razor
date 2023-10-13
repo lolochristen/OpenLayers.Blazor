@@ -3,33 +3,37 @@
 @using System.Threading
 @using System.Text.Json
 
-<h3>SwissMapLayersDemo</h3>
 
-<div class="m-2">
-    <select @bind="_selectedLayer">
-        @if (_layerList != null)
-        {
-            @foreach (var layer in _layerList)
+<div class="card mt-2 mb-2">
+
+    <div class="card-header">
+        <h3 class="card-title">SwissMapLayersDemo</h3>
+    </div>
+
+    <div class="card-body">
+        <select @bind="_selectedLayer">
+            @if (_layerList != null)
             {
-                <option value="@layer.Key">@layer.Title (@layer.Key)</option>
+                @foreach (var layer in _layerList)
+                {
+                    <option value="@layer.Key">@layer.Title (@layer.Key)</option>
+                }
             }
-        }
-    </select>
-    <button class="btn btn-primary" @onclick="AddSelectedLayer">Add Layer</button>
+        </select>
+        <button class="btn btn-primary" @onclick="AddSelectedLayer">Add Layer</button>
+    </div>
 </div>
 
-<div class="container">
-    <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;" OnClick="OnMapClick" OnFeatureClick="OnFeatureClick"></SwissMap>
-</div>
+<SwissMap @ref="_map" Style="height:800px;" Class="card" OnClick="OnMapClick" OnFeatureClick="OnFeatureClick"></SwissMap>
 
 @if (_currentFeature != null)
 {
-    <div class="box">
-        <table>
+    <div class="card mt-2">
+        <table class="table-info table-striped">
             @foreach (var prop in _currentFeature.Properties)
             {
                 <tr>
-                    <td>@prop.Key</td>
+                    <td class="table-secondary fw-bold">@prop.Key</td>
                     <td>@prop.Value</td>
                 </tr>
             }

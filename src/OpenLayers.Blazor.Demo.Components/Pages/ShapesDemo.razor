@@ -1,22 +1,26 @@
 ﻿@page "/shapesdemo"
 @using System.Text.Json
 
-<h3>ShapesDemo</h3>
+<div class="card mt-2 mb-2">
 
-
-<div class="container">
-
-    <SwissMap @ref="_map" OnClick="OnMapClicked" OnFeatureClick="OnFeatureClicked" Style="border:1px solid silver;height:800px;">
-        <Features>
-            <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan" BorderSize="4"></Line>
-            <Circle Center="new Coordinate(1197279.0774135895, 2770557.824138796)" Radius="5000" BackgroundColor="#2222AA66"></Circle>
-            <Point Coordinate="new Coordinate(1197650, 2604200)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
-        </Features>
-    </SwissMap>
-    <p>
-        <code>@_featureInfo</code>
-    </p>
+<div class="card-header">
+        <h3 class="card-title">ShapesDemo</h3>
 </div>
+
+    <div class="card-body">
+        <p>
+            <code>@_featureInfo</code>
+        </p>
+    </div>
+</div>
+
+<SwissMap @ref="_map" OnClick="OnMapClicked" OnFeatureClick="OnFeatureClicked" Style="height:800px;" Class="card">
+    <Features>
+        <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan" BorderSize="4"></Line>
+        <Circle Center="new Coordinate(1197279.0774135895, 2770557.824138796)" Radius="5000" BackgroundColor="#2222AA66"></Circle>
+        <Point Coordinate="new Coordinate(1197650, 2604200)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
+    </Features>
+</SwissMap>
 
 <CodeView Source="ShapesDemo.razor"/>
 

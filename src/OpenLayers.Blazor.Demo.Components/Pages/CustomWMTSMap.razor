@@ -1,13 +1,16 @@
 ﻿@page "/customdemo"
 
-<h3>CustomWMTSMap</h3>
+<div class="card mt-2 mb-2">
 
-<div class="container">
-    <Map Style="height:800px" Zoom="5" Center="new Coordinate(40.72, -73)" CoordinatesProjection="EPSG:4326">
-        <Layers>
-            <Layer SourceType="SourceType.XYZ" Url="@("https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}")" CrossOrigin="anonymous" Format="image/png"></Layer>
-        </Layers>
-    </Map>
+    <div class="card-header">
+        <h3 class="card-title">Custom WMTS Map</h3>
+    </div>
 </div>
 
-<CodeView Source="CustomWMTSMap.razor"/>
+<Map Style="height:800px" Class="card" Zoom="5" Center="new Coordinate(40.72, -73)" CoordinatesProjection="EPSG:4326">
+    <Layers>
+        <Layer SourceType="SourceType.XYZ" Url="@("https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}")" CrossOrigin="anonymous" Format="image/png"></Layer>
+    </Layers>
+</Map>
+
+<CodeView Source="CustomWMTSMap.razor" />

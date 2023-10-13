@@ -1,33 +1,53 @@
 ﻿@page "/swissmaplayersdemo"
 @using System.Xml.Linq
 @using System.Threading
+@using System.Text.Json
 
-<h3>SwissMapLayersDemo</h3>
 
-<div class="m-2">
-    <select @bind="_selectedLayer">
-        @if (_layerList != null)
-        {
-            @foreach (var layer in _layerList)
+<div class="card mt-2 mb-2">
+
+    <div class="card-header">
+        <h3 class="card-title">SwissMapLayersDemo</h3>
+    </div>
+
+    <div class="card-body">
+        <select @bind="_selectedLayer">
+            @if (_layerList != null)
             {
-                <option value="@layer.Key">@layer.Title (@layer.Key)</option>
+                @foreach (var layer in _layerList)
+                {
+                    <option value="@layer.Key">@layer.Title (@layer.Key)</option>
+                }
             }
-        }
-    </select>
-    <button class="btn btn-primary" @onclick="AddSelectedLayer">Add Layer</button>
+        </select>
+        <button class="btn btn-primary" @onclick="AddSelectedLayer">Add Layer</button>
+    </div>
 </div>
 
-<div class="container">
-    <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;"></SwissMap>
-</div>
+<SwissMap @ref="_map" Style="height:800px;" Class="card" OnClick="OnMapClick" OnFeatureClick="OnFeatureClick"></SwissMap>
+
+@if (_currentFeature != null)
+{
+    <div class="card mt-2">
+        <table class="table-info table-striped">
+            @foreach (var prop in _currentFeature.Properties)
+            {
+                <tr>
+                    <td class="table-secondary fw-bold">@prop.Key</td>
+                    <td>@prop.Value</td>
+                </tr>
+            }
+        </table>
+    </div>
+}
 
 <CodeView Source="SwissMapLayersDemo.razor"/>
 
 @code {
     private SwissMap _map = null!;
-    private IDictionary<string, string>? _layerIds;
     private string? _selectedLayer;
     private List<Layer>? _layerList;
+    private Feature? _currentFeature;
 
     [Inject]
     private HttpClient HttpClient { get; set; }
@@ -35,6 +55,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadSwissGeoLayersIds();
+        _selectedLayer = _layerList.First().Key;
     }
 
     private async Task LoadSwissGeoLayersIds()
@@ -68,4 +89,17 @@
 
         _map.LayersList.Add(_layerList.First(p => p.Key == _selectedLayer));
     }
+    
+    private async Task OnMapClick(Coordinate coordinate)
+    {
+        string url = $"https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry={coordinate.X},{coordinate.Y}&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=975,1117,96&lang=en&layers=all:{_selectedLayer}&limit=10&mapExtent={_map.VisibleExtent.X1},{_map.VisibleExtent.Y1},{_map.VisibleExtent.X2},{_map.VisibleExtent.Y2}&returnGeometry=true&sr=2056&timeInstant=2021&tolerance=10";
+        var json = await HttpClient.GetFromJsonAsync<JsonElement>(url);
+        var results = json.GetProperty("results");await _map.LoadGeoJson(results[0], _map.Defaults.CoordinatesProjection); // json is in EPSG:2056
+    }
+
+    private void OnFeatureClick(Feature feature)
+    {
+        _currentFeature = feature;
+    }
+
 }

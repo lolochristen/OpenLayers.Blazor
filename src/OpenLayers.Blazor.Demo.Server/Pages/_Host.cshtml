@@ -39,9 +39,7 @@
 
     <script>
         window.highlightSnippet = function () {
-            document.querySelectorAll('pre code').forEach((el) => {
-                hljs.highlightBlock(el);
-            });
+            hljs.highlightAll();
         }
     </script>
 </body>

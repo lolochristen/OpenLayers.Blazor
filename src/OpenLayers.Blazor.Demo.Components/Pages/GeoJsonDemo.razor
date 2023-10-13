@@ -1,13 +1,17 @@
 ﻿@page "/geojsondemo"
 @using System.Text.Json
 
-<h3>GeoJson</h3>
+<div class="card mt-2 mb-2">
 
-<button class="btn btn-primary" @onclick="LoadGeoJson">Load geojson</button>
-
-<div class="container">
-    <SwissMap @ref="_map" Style="border:1px solid silver;height:800px;"></SwissMap>
+    <div class="card-header">
+        <h3 class="card-title">GeoJson</h3>
+    </div>
+    <div class="card-body">
+        <button class="btn btn-primary" @onclick="LoadGeoJson">Load geojson</button>
+    </div>
 </div>
+
+<SwissMap @ref="_map" Style="height:800px;" Class="card"></SwissMap>
 
 <CodeView Source="GeoJsonDemo.razor"/>
 

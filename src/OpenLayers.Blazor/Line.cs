@@ -18,7 +18,7 @@ public class Line : Shape
     [Parameter]
     public IEnumerable<Coordinate> Points
     {
-        get => InternalFeature.Coordinates.Select(p => new Coordinate(p)).ToList();
-        set => InternalFeature.Coordinates = value.Select(p => p.Value).ToList();
+        get => CoordinatesHelper.GetCoordinates(InternalFeature.Coordinates);
+        set => InternalFeature.Coordinates = CoordinatesHelper.SetCoordinates(value);
     }
 }

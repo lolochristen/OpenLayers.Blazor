@@ -1,38 +1,42 @@
 ﻿@page "/markersdemo"
-<h3>Markers</h3>
 
+<div class="card mt-2 mb-2">
 
-<div class="m-2">
-    <select @bind="_selectedMarkerType">
-        <option value="@MarkerType.MarkerPin">Pin</option>
-        <option value="@MarkerType.MarkerAwesome">Awesome</option>
-        <option value="@MarkerType.MarkerFlag">Flag</option>
-        <option value="@MarkerType.MarkerCustomImage">Custom Image</option>
-    </select>
+    <div class="card-header">
+        <h3 class="card-title">Markers</h3>
+    </div>
 
+    <div class="card-body">
+        <select @bind="_selectedMarkerType">
+            <option value="@MarkerType.MarkerPin">Pin</option>
+            <option value="@MarkerType.MarkerAwesome">Awesome</option>
+            <option value="@MarkerType.MarkerFlag">Flag</option>
+            <option value="@MarkerType.MarkerCustomImage">Custom Image</option>
+        </select>
+
+    </div>
 </div>
 
-<div class="container">
-    <SwissMap @ref="_map" OnClick="OnMapClick" Style="border:1px solid silver;height:800px;">
-        <Popup>
-            <div id="popup" class="ol-box">
-                @if (context is Marker marker)
-                {
-                    <h3>@marker.Title</h3>
-                    <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
-                }
-            </div>
-        </Popup>
-        <Features>
-            <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
-            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
-        </Features>
-    </SwissMap>
-</div>
+<SwissMap @ref="_map" OnClick="OnMapClick" Style="height:800px;" Class="card">
+    <Popup>
+        <div id="popup" class="ol-box">
+            @if (context is Marker marker)
+            {
+                <h3>@marker.Title</h3>
+                <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
+            }
+        </div>
+    </Popup>
+    <Features>
+        <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
+        <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
+     </Features>
+ </SwissMap>
 
-<CodeView Source="MarkersDemo.razor"/>
 
-@code {
+ <CodeView Source="MarkersDemo.razor" />
+
+ @code {
     private SwissMap _map = null!;
     private MarkerType _selectedMarkerType;
 

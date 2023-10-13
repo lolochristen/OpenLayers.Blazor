@@ -29,9 +29,9 @@ public class Feature : ComponentBase
     /// Identifier
     /// </summary>
     [Parameter]
-    public Guid Id
+    public string Id
     {
-        get => InternalFeature.Id;
+        get => InternalFeature.Id.ToString();
         set => InternalFeature.Id = value;
     }
 
@@ -43,7 +43,10 @@ public class Feature : ComponentBase
 
     public Dictionary<string, dynamic> Properties => InternalFeature.Properties;
 
-    public Coordinate? Point => Coordinates.FirstOrDefault();
+    public Coordinate? Point => Coordinates?.FirstOrDefault();
 
-    public IEnumerable<Coordinate> Coordinates => InternalFeature.Coordinates.Select(p => new Coordinate(p)).ToArray();
+    public IEnumerable<Coordinate>? Coordinates => CoordinatesHelper.GetCoordinates(InternalFeature.Coordinates);
+
+    public IEnumerable<IEnumerable<Coordinate>> MultiCoordinates => CoordinatesHelper.GetMultiCoordinates(InternalFeature.Coordinates);
+
 }

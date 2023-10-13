@@ -1,19 +1,24 @@
 ﻿@page "/bingmapdemo"
-<h3>BingMapDemo</h3>
+<div class="card mt-2 mb-2">
 
-<select @bind="_layerselect">
-    <option value="Aerial">Aerial</option>
-    <option value="AerialWithLabelsOnDemand">Aerial with labels</option>
-    <option value="RoadOnDemand" selected>Road</option>
-    <option value="CanvasDark">Road dark</option>
-    <option value="OrdnanceSurvey">Ordnance Survey</option>
-</select>
+    <div class="card-header">
+        <h3 class="card-title">Bing Maps</h3>
+    </div>
 
-<div class="container">
-    <BingMap Style="height:720px;" ImagerySet="@(_layerselect != null ? Enum.Parse<BingMapImagerySet>(_layerselect) : BingMapImagerySet.RoadOnDemand)" Key="Your Bing Maps Key from https://www.bingmapsportal.com/ here"></BingMap>
+    <div class="card-body">
+        <select @bind="_layerselect">
+            <option value="Aerial">Aerial</option>
+            <option value="AerialWithLabelsOnDemand">Aerial with labels</option>
+            <option value="RoadOnDemand" selected>Road</option>
+            <option value="CanvasDark">Road dark</option>
+            <option value="OrdnanceSurvey">Ordnance Survey</option>
+        </select>
+    </div>
 </div>
 
-<CodeView Source="BingMapDemo.razor"/>
+<BingMap Style="height:800px;" Class="card" ImagerySet="@(_layerselect != null ? Enum.Parse<BingMapImagerySet>(_layerselect) : BingMapImagerySet.RoadOnDemand)" Key="Your Bing Maps Key from https://www.bingmapsportal.com/ here"></BingMap>
+
+<CodeView Source="BingMapDemo.razor" />
 
 @code {
     private string? _layerselect;

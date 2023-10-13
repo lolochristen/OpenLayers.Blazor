@@ -19,6 +19,7 @@
 		<EmbeddedResource Include="Pages\OpenStreetMapDemo.razor" />
 		<EmbeddedResource Include="Pages\ShapesDemo.razor" />
 		<EmbeddedResource Include="Pages\SwissMapLayersDemo.razor" />
+		<EmbeddedResource Include="Pages\DrawDemo.razor" />
 	</ItemGroup>
 
 	<ItemGroup>

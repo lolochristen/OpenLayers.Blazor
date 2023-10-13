@@ -372,7 +372,7 @@ public partial class Map : IAsyncDisposable
 #if DEBUG
         Console.WriteLine($"OnInternalShapeAdded: {System.Text.Json.JsonSerializer.Serialize(shape)}");
 #endif
-        if (ShapesList.All(p => p.Id != shape.Id))
+        if (ShapesList.All(p => p.Id != shape.Id.ToString()))
         {
             var newShape = new Shape(shape);
             ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
@@ -391,7 +391,7 @@ public partial class Map : IAsyncDisposable
 #if DEBUG
         Console.WriteLine($"OnInternalShapeChanged: {System.Text.Json.JsonSerializer.Serialize(shape)}");
 #endif
-        var existingShape = ShapesList.FirstOrDefault(p => p.Id == shape.Id);
+        var existingShape = ShapesList.FirstOrDefault(p => p.Id == shape.Id.ToString());
 
         if (existingShape == null)
         {
@@ -455,9 +455,10 @@ public partial class Map : IAsyncDisposable
     ///     Loads GeoJson data (https://geojson.org/) to the map
     /// </summary>
     /// <param name="json">GeoJson Data</param>
-    public ValueTask LoadGeoJson(JsonElement json)
+    /// <param name="dataProjection"></param>
+    public ValueTask LoadGeoJson(JsonElement json, string? dataProjection = null)
     {
-        return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json) ?? ValueTask.CompletedTask;
+        return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json, dataProjection) ?? ValueTask.CompletedTask;
     }
 
     /// <summary>

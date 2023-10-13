@@ -20,8 +20,8 @@ export function MapOLSetDefaults(mapId, defaults) {
     _MapOL[mapId].setDefaults(defaults);
 }
 
-export function MapOLLoadGeoJson(mapId, url) {
-    _MapOL[mapId].loadGeoJson(url);
+export function MapOLLoadGeoJson(mapId, json, dataProjection) {
+    _MapOL[mapId].loadGeoJson(json, dataProjection);
 }
 
 export function MapOLZoomToExtent(mapId, extent) {
@@ -353,7 +353,7 @@ MapOL.prototype.setShapes = function (shapes) {
     });
 }
 
-MapOL.prototype.loadGeoJson = function (json) {
+MapOL.prototype.loadGeoJson = function (json, dataProjection) {
     if (this.GeoLayer) {
         var source = this.GeoLayer.getSource();
 
@@ -363,7 +363,7 @@ MapOL.prototype.loadGeoJson = function (json) {
     if (!json) return;
 
     var geoSource = new ol.source.Vector({
-        features: (new ol.format.GeoJSON()).readFeatures(json, { featureProjection: this.Defaults.coordinatesProjection })
+        features: (new ol.format.GeoJSON()).readFeatures(json, { featureProjection: this.Defaults.coordinatesProjection, dataProjection: dataProjection })
     });
 
     if (this.GeoLayer) {
@@ -614,13 +614,13 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
     if (geometry != null && !Array.isArray(geometry)) {
         switch (geometry.getType()) {
             case 'Point':
-                coordinates = ol.proj.transform([geometry.getCoordinates()], viewProjection, this.Defaults.coordinatesProjection);
+                coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
                 break;
             case 'Circle':
-                coordinates = ol.proj.transform([geometry.getCenter()], viewProjection, this.Defaults.coordinatesProjection);
+                coordinates = ol.proj.transform(geometry.getCenter(), viewProjection, this.Defaults.coordinatesProjection);
                 break;
             case 'Polygon':
-                coordinates = ol.proj.transform(geometry.getCoordinates()[0], viewProjection, this.Defaults.coordinatesProjection);
+                coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
                 break;
             default:
                 coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
@@ -683,16 +683,16 @@ MapOL.prototype.mapShapeToFeature = function (shape) {
 
     switch (shape.geometryType) {
         case "Point":
-            geometry = new ol.geom.Point(coordinates[0]);
+            geometry = new ol.geom.Point(coordinates);
             break;
         case "LineString":
             geometry = new ol.geom.LineString(coordinates);
             break;
         case "Polygon":
-            geometry = new ol.geom.Polygon([coordinates]);
+            geometry = new ol.geom.Polygon(coordinates);
             break;
         case "Circle":
-            geometry = new ol.geom.Circle(coordinates[0], shape.radius / ol.proj.getPointResolution(viewProjection, 1, coordinates[0]));
+            geometry = new ol.geom.Circle(coordinates, shape.radius / ol.proj.getPointResolution(viewProjection, 1, coordinates));
             break;
         case "MultiPoint":
             geometry = new ol.geom.MultiPoint(coordinates);
@@ -751,13 +751,13 @@ MapOL.prototype.getDefaultStyle = function (shape) {
 
     if (shape.geometryType == 'Point') {
         var viewProjection = this.Map.getView().getProjection().getCode();
-        var coordinates = ol.proj.transform(shape.coordinates, this.Defaults.coordinatesProjection, viewProjection);
+        var coordinates = ol.proj.transform(shape.coordinates ?? this.Map.getView().getCenter(), this.Defaults.coordinatesProjection, viewProjection);
         var radius = 5;
         if (shape.radius != null) {
             radius = shape.radius
         }
         if (coordinates.length > 0) {
-            radius = radius / ol.proj.getPointResolution(viewProjection, 1, coordinates[0]);
+            radius = radius / ol.proj.getPointResolution(viewProjection, 1, coordinates);
         }
         return new ol.style.Style({
             image: new ol.style.Circle({
@@ -988,7 +988,7 @@ MapOL.prototype.getGeoStyle = function (feature) {
                 width: 1
             }),
             fill: new ol.style.Fill({
-                color: 'rgba(255, 255, 0, 0.1)'
+                color: 'rgba(255, 255, 0, 0.3)'
             })
         }),
         'Polygon': new ol.style.Style({
@@ -998,7 +998,7 @@ MapOL.prototype.getGeoStyle = function (feature) {
                 width: 3
             }),
             fill: new ol.style.Fill({
-                color: 'rgba(0, 0, 255, 0.1)'
+                color: 'rgba(0, 0, 255, 0.3)'
             })
         }),
         'GeometryCollection': new ol.style.Style({
@@ -1023,7 +1023,7 @@ MapOL.prototype.getGeoStyle = function (feature) {
                 width: 2
             }),
             fill: new ol.style.Fill({
-                color: 'rgba(255,0,0,0.2)'
+                color: 'rgba(255,0,0,0.3)'
             })
         })
     };

@@ -37,8 +37,7 @@ public class Coordinate : IEquatable<Coordinate>
     {
         if (coordinates.Length < 2) 
             throw new ArgumentException(nameof(coordinates));
-        Y = coordinates[0];
-        X = coordinates[1];
+        Value = coordinates;
     }
 
     public double Latitude => Y;

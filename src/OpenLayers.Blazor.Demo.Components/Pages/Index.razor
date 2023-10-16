@@ -8,13 +8,26 @@
         <h5 class="card-subtitle">Coordinates in VL95/EPSG:2056</h5>
     </div>
     <div class="card-body">
-
-        <button class="btn btn-primary" @onclick="CenterLocation">Center to current location</button>
-        <button class="btn btn-primary" @onclick="AddMarkLocation">Add Mark at current location</button>
-        <button class="btn btn-primary" @onclick="SetVisibleExtent">Beautiful</button>
-        <input type="range" min="1" max="15" @bind-value="_zoom"> <code>@_zoom</code>
+        <div class="btn-toolbar gap-1" role="toolbar">
+            @if (_map != null)
+            {
+                <select id="layerId" @bind="_map.LayerId">
+                    <option value="ch.swisstopo.pixelkarte-farbe">ch.swisstopo.pixelkarte-farbe</option>
+                    <option value="ch.swisstopo.pixelkarte-grau">ch.swisstopo.pixelkarte-grau</option>
+                    <option value="ch.swisstopo.pixelkarte-farbe-winter">ch.swisstopo.pixelkarte-farbe-winter</option>
+                    <option value="ch.swisstopo.swissimage">ch.swisstopo.swissimage</option>
+                </select>
+            }
+            <button class="btn btn-primary" @onclick="CenterLocation">Center to current location</button>
+            <button class="btn btn-primary" @onclick="AddMarkLocation">Add Mark at current location</button>
+            <button class="btn btn-primary" @onclick="SetVisibleExtent">Beautiful</button>
+            <div class="input-group">
+                <label for="zoom" class="form-label">Zoom @_zoom</label>
+                <input type="range" class="form-range" id="zoom" min="1" max="15" @bind-value="_zoom">
+            </div>
+        </div>
         <p>
-        <pre>
+            <pre>
 Center:@_map?.Center
 Last Position: @_lastPosition?.X / @_lastPosition?.Y
 Altitude @(_altitude)m

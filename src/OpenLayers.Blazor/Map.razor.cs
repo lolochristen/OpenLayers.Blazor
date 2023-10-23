@@ -567,6 +567,41 @@ public partial class Map : IAsyncDisposable
         if (_module != null) await _module.InvokeVoidAsync("MapOLUndoDrawing", _mapId);
     }
 
+    /// <summary>
+    /// Explicit call to update an existing shape
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
+    public ValueTask UpdateShape(Shape shape)
+    {
+#if DEBUG
+        Console.WriteLine($"UpdateShape: {System.Text.Json.JsonSerializer.Serialize(shape.InternalFeature)}");
+#endif
+        return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.InternalFeature) ?? ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Default Style Callback
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
+    public static StyleOptions DefaultShapeStyleCallback(Shape shape)
+    {
+        return new StyleOptions()
+        {
+            Stroke = new StyleOptions.StrokeOptions()
+            {
+                Color = "blue",
+                Width = 3,
+                LineDash = new double[] { 4 }
+            },
+            Fill = new StyleOptions.FillOptions()
+            {
+                Color = "rgba(0, 0, 255, 0.3)"
+            }
+        };
+    }
+
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (_module == null)
@@ -596,35 +631,5 @@ public partial class Map : IAsyncDisposable
     private void MarkersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         _ = SetMarkers(MarkersList);
-    }
-
-    public ValueTask UpdateShape(Shape shape)
-    {
-#if DEBUG
-        Console.WriteLine($"UpdateShape: {System.Text.Json.JsonSerializer.Serialize(shape.InternalFeature)}");
-#endif
-        return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.InternalFeature) ?? ValueTask.CompletedTask;
-    }
-
-    /// <summary>
-    /// Default Style Callback
-    /// </summary>
-    /// <param name="shape"></param>
-    /// <returns></returns>
-    public static StyleOptions DefaultShapeStyleCallback(Shape shape)
-    {
-        return new StyleOptions()
-        {
-            Stroke = new StyleOptions.StrokeOptions()
-            {
-                Color = "blue",
-                Width = 3,
-                LineDash = new double[] { 4 }
-            },
-            Fill = new StyleOptions.FillOptions()
-            {
-                Color = "rgba(0, 0, 255, 0.3)"
-            }
-        };
     }
 }

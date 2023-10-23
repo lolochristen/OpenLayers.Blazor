@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
-using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
 public class Circle : Shape
 {
-    public Circle() : base (ShapeType.Circle)
+    public Circle() : base(ShapeType.Circle)
     {
     }
 

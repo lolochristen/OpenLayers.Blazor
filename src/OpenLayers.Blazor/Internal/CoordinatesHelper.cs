@@ -21,7 +21,7 @@ internal static class CoordinatesHelper
     public static IEnumerable<Coordinate>? GetCoordinates(dynamic coordinates)
     {
         if (coordinates is double[] c1)
-            return new [] { new Coordinate(c1) };
+            return new[] { new Coordinate(c1) };
         if (coordinates is IEnumerable<double[]> c2)
             return c2.Select(p => new Coordinate(p));
         if (coordinates is IEnumerable<IEnumerable<double[]>> c3)
@@ -37,9 +37,9 @@ internal static class CoordinatesHelper
     public static IEnumerable<IEnumerable<Coordinate>>? GetMultiCoordinates(dynamic coordinates)
     {
         if (coordinates is double[] c1)
-            return new[] { new [] { new Coordinate(c1) } };
+            return new[] { new[] { new Coordinate(c1) } };
         if (coordinates is IEnumerable<double[]> c2)
-            return new [] { c2.Select(p => new Coordinate(p)) };
+            return new[] { c2.Select(p => new Coordinate(p)) };
         if (coordinates is IEnumerable<IEnumerable<double[]>> c3)
             return c3.Select(p => p.Select(p2 => new Coordinate(p2)));
         return null;

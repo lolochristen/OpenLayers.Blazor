@@ -29,14 +29,15 @@ public class Shape : Feature, IDisposable
     }
 
     internal new Internal.Shape InternalFeature
-    { 
+    {
         get => (Internal.Shape)base.InternalFeature;
         set => base.InternalFeature = value;
     }
 
     [CascadingParameter] public Map? ParentMap { get; set; }
 
-    [Parameter] public ShapeType ShapeType
+    [Parameter]
+    public ShapeType ShapeType
     {
         get
         {
@@ -118,7 +119,7 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.BorderColor = value;
     }
 
-    
+
     [Parameter]
     public int? BorderSize
     {

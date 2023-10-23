@@ -22,7 +22,7 @@
             <button class="btn btn-primary" @onclick="AddMarkLocation">Add Mark at current location</button>
             <button class="btn btn-primary" @onclick="SetVisibleExtent">Beautiful</button>
             <div class="input-group">
-                <label for="zoom" class="form-label">Zoom @_zoom</label>
+                <label for="zoom" class="form-label small">Zoom @_zoom</label>
                 <input type="range" class="form-range" id="zoom" min="1" max="15" @bind-value="_zoom">
             </div>
         </div>

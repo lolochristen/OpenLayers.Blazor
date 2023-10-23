@@ -32,10 +32,10 @@ public class Coordinate : IEquatable<Coordinate>
         X = coordinate.X;
     }
 
-    
+
     public Coordinate(double[] coordinates)
     {
-        if (coordinates.Length < 2) 
+        if (coordinates.Length < 2)
             throw new ArgumentException(nameof(coordinates));
         Value = coordinates;
     }

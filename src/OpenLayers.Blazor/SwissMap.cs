@@ -14,8 +14,7 @@ public class SwissMap : Map
     }
 
 
-    [Parameter]
-    public string LayerId { get; set; }
+    [Parameter] public string LayerId { get; set; }
 
     protected override Task OnParametersSetAsync()
     {
@@ -41,9 +40,7 @@ public class SwissMap : Map
         if (LayersList.Count == 0)
             LayersList.Add(layer);
         else
-        {
             LayersList[0] = layer;
-        }
     }
 
     /// <summary>

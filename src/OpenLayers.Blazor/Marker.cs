@@ -4,7 +4,7 @@ namespace OpenLayers.Blazor;
 
 public class Marker : Shape<Internal.Marker>
 {
-    public Marker() : base (new Internal.Marker())
+    public Marker() : base(new Internal.Marker())
     {
     }
 

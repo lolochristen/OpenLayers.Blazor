@@ -18,7 +18,7 @@ public partial class Map : IAsyncDisposable
     private string _popupId;
 
     /// <summary>
-    /// Default Constructor
+    ///     Default Constructor
     /// </summary>
     public Map()
     {
@@ -186,30 +186,36 @@ public partial class Map : IAsyncDisposable
     public Extent? VisibleExtent { get; set; }
 
     /// <summary>
-    /// A shape providing default parameters when drawing new shapes
+    ///     A shape providing default parameters when drawing new shapes
     /// </summary>
     [Parameter]
     public ShapeType NewShapeType { get; set; }
 
     /// <summary>
-    /// Get or set if new shapes shall be drawn
+    ///     Get or set if new shapes shall be drawn
     /// </summary>
     [Parameter]
     public bool EnableNewShapes { get; set; }
 
     /// <summary>
-    /// Get or sets if the position of points shall be snapped.
+    ///     Get or sets if the position of points shall be snapped.
     /// </summary>
     [Parameter]
     public bool EnableShapeSnap { get; set; }
 
     /// <summary>
-    /// Get or sets if drawing new shapes is enabled.
+    ///     Get or sets if drawing new shapes is enabled.
     /// </summary>
     [Parameter]
     public bool EnableEditShapes { get; set; }
 
     private DotNetObjectReference<Map>? Instance { get; set; }
+
+    [Parameter] public EventCallback<Shape> OnShapeAdded { get; set; }
+
+    [Parameter] public EventCallback<Shape> OnShapeChanged { get; set; }
+
+    [Parameter] public Func<Shape, StyleOptions> ShapeStyleCallback { get; set; } = DefaultShapeStyleCallback;
 
     /// <summary>
     ///     Disposing resources.
@@ -257,9 +263,7 @@ public partial class Map : IAsyncDisposable
             shapeSnap = EnableShapeSnap;
 
         if (parameters.TryGetValue(nameof(NewShapeType), out ShapeType shapeType) && shapeType != NewShapeType)
-        {
             drawingChanges++;
-        }
         else
             shapeType = NewShapeType;
 
@@ -268,7 +272,7 @@ public partial class Map : IAsyncDisposable
 
         return base.SetParametersAsync(parameters);
     }
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -279,13 +283,11 @@ public partial class Map : IAsyncDisposable
             Instance ??= DotNetObjectReference.Create(this);
 
             if (_module != null)
-            {
                 await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Defaults, Center.Value, Zoom,
                     MarkersList.Select(p => p.InternalFeature).ToArray(),
                     ShapesList.Select(p => p.InternalFeature).ToArray(),
                     LayersList.Select(p => p.InternalLayer).ToArray(),
                     Instance);
-            }
 
             MarkersList.CollectionChanged += MarkersOnCollectionChanged;
             ShapesList.CollectionChanged += ShapesOnCollectionChanged;
@@ -297,7 +299,7 @@ public partial class Map : IAsyncDisposable
     public async Task OnInternalFeatureClick(Internal.Feature feature)
     {
 #if DEBUG
-        Console.WriteLine($"OnInternalFeatureClick: {System.Text.Json.JsonSerializer.Serialize(feature)}");
+        Console.WriteLine($"OnInternalFeatureClick: {JsonSerializer.Serialize(feature)}");
 #endif
         await OnFeatureClick.InvokeAsync(new Feature(feature));
     }
@@ -306,7 +308,7 @@ public partial class Map : IAsyncDisposable
     public async Task OnInternalMarkerClick(Internal.Marker marker)
     {
 #if DEBUG
-        Console.WriteLine($"OnInternalMarkerClick: {System.Text.Json.JsonSerializer.Serialize(marker)}");
+        Console.WriteLine($"OnInternalMarkerClick: {JsonSerializer.Serialize(marker)}");
 #endif
         var m = MarkersList.FirstOrDefault(p => p.InternalFeature.Id == marker.Id);
 
@@ -322,7 +324,7 @@ public partial class Map : IAsyncDisposable
     public async Task OnInternalShapeClick(Internal.Shape shape)
     {
 #if DEBUG
-        Console.WriteLine($"OnInternalShapeClick: {System.Text.Json.JsonSerializer.Serialize(shape)}");
+        Console.WriteLine($"OnInternalShapeClick: {JsonSerializer.Serialize(shape)}");
 #endif
         await OnShapeClick.InvokeAsync(shape);
         StateHasChanged();
@@ -360,14 +362,11 @@ public partial class Map : IAsyncDisposable
         }
     }
 
-    [Parameter]
-    public EventCallback<Shape> OnShapeAdded { get; set; }
-
     [JSInvokable]
     public async Task OnInternalShapeAdded(Internal.Shape shape)
     {
 #if DEBUG
-        Console.WriteLine($"OnInternalShapeAdded: {System.Text.Json.JsonSerializer.Serialize(shape)}");
+        Console.WriteLine($"OnInternalShapeAdded: {JsonSerializer.Serialize(shape)}");
 #endif
         if (ShapesList.All(p => p.Id != shape.Id.ToString()))
         {
@@ -379,14 +378,11 @@ public partial class Map : IAsyncDisposable
         }
     }
 
-    [Parameter]
-    public EventCallback<Shape> OnShapeChanged { get; set; }
-    
     [JSInvokable]
     public async Task OnInternalShapeChanged(Internal.Shape shape)
     {
 #if DEBUG
-        Console.WriteLine($"OnInternalShapeChanged: {System.Text.Json.JsonSerializer.Serialize(shape)}");
+        Console.WriteLine($"OnInternalShapeChanged: {JsonSerializer.Serialize(shape)}");
 #endif
         var existingShape = ShapesList.FirstOrDefault(p => p.Id == shape.Id.ToString());
 
@@ -402,7 +398,6 @@ public partial class Map : IAsyncDisposable
             await OnShapeChanged.InvokeAsync(existingShape);
             await existingShape.OnChanged.InvokeAsync(existingShape);
         }
-
     }
 
     [JSInvokable]
@@ -410,7 +405,7 @@ public partial class Map : IAsyncDisposable
     {
         await OnRenderComplete.InvokeAsync();
     }
-    
+
     /// <summary>
     ///     Passes the center coordination to underlying map
     /// </summary>
@@ -528,17 +523,14 @@ public partial class Map : IAsyncDisposable
     public StyleOptions OnGetShapeStyle(Internal.Shape shape)
     {
 #if DEBUG
-        Console.WriteLine($"OnGetShapeStyle: {System.Text.Json.JsonSerializer.Serialize(shape)}");
+        Console.WriteLine($"OnGetShapeStyle: {JsonSerializer.Serialize(shape)}");
 #endif
 
         return ShapeStyleCallback(new Shape(shape));
     }
 
-    [Parameter]
-    public Func<Shape, StyleOptions> ShapeStyleCallback { get; set; } = DefaultShapeStyleCallback;
-
     /// <summary>
-    /// Sets explicitly drawing settings
+    ///     Sets explicitly drawing settings
     /// </summary>
     /// <param name="newShapes"></param>
     /// <param name="editShapes"></param>
@@ -559,7 +551,7 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
-    /// Undo last drawing interaction
+    ///     Undo last drawing interaction
     /// </summary>
     /// <returns></returns>
     public async Task Undo()
@@ -568,34 +560,34 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
-    /// Explicit call to update an existing shape
+    ///     Explicit call to update an existing shape
     /// </summary>
     /// <param name="shape"></param>
     /// <returns></returns>
     public ValueTask UpdateShape(Shape shape)
     {
 #if DEBUG
-        Console.WriteLine($"UpdateShape: {System.Text.Json.JsonSerializer.Serialize(shape.InternalFeature)}");
+        Console.WriteLine($"UpdateShape: {JsonSerializer.Serialize(shape.InternalFeature)}");
 #endif
         return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.InternalFeature) ?? ValueTask.CompletedTask;
     }
 
     /// <summary>
-    /// Default Style Callback
+    ///     Default Style Callback
     /// </summary>
     /// <param name="shape"></param>
     /// <returns></returns>
     public static StyleOptions DefaultShapeStyleCallback(Shape shape)
     {
-        return new StyleOptions()
+        return new StyleOptions
         {
-            Stroke = new StyleOptions.StrokeOptions()
+            Stroke = new StyleOptions.StrokeOptions
             {
                 Color = "blue",
                 Width = 3,
                 LineDash = new double[] { 4 }
             },
-            Fill = new StyleOptions.FillOptions()
+            Fill = new StyleOptions.FillOptions
             {
                 Color = "rgba(0, 0, 255, 0.3)"
             }

@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor.Internal;
 
@@ -60,11 +59,6 @@ public class Shape : Feature, IEquatable<Shape>
 
     public double? Scale { get; set; } = 1;
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(base.GetHashCode(), TextScale, Color, BorderColor, BorderSize, BackgroundColor, Radius, Scale);
-    }
-
     public bool Equals(Shape? other)
     {
         if (ReferenceEquals(null, other)) return false;
@@ -72,11 +66,16 @@ public class Shape : Feature, IEquatable<Shape>
         return base.GetHashCode() == other.GetHashCode();
     }
 
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(base.GetHashCode(), TextScale, Color, BorderColor, BorderSize, BackgroundColor, Radius, Scale);
+    }
+
     public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((Shape)obj);
     }
 }

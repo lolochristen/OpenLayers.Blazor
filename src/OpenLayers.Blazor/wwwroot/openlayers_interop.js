@@ -608,7 +608,7 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
                 var g = geometry.getCoordinates();
                 var l = g.length;
                 if (Array.isArray(g[0])) g.forEach((g2) => l = l + g2.length); 
-                if (l < 200) coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
+                if (l < this.Defaults.serializationCoordinatesLimit) coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
                 break;
         }
     }

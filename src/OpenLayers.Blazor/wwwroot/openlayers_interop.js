@@ -64,8 +64,8 @@ export function MapOLSetVisibleExtent(mapId, extent) {
     _MapOL[mapId].setVisibleExtent(extent);
 }
 
-export function MapOLSetDrawingSettings(mapId, enableNewShapes, enableEditShapes, enableShapeSnap, newShapeTemplate) {
-    _MapOL[mapId].setDrawingSettings(enableNewShapes, enableEditShapes, enableShapeSnap, newShapeTemplate);
+export function MapOLSetDrawingSettings(mapId, enableNewShapes, enableEditShapes, enableShapeSnap, geometryType) {
+    _MapOL[mapId].setDrawingSettings(enableNewShapes, enableEditShapes, enableShapeSnap, geometryType);
 }
 
 export function MapOLUndoDrawing(mapId) {
@@ -358,7 +358,7 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
     else {
         this.GeoLayer = new ol.layer.Vector({
             source: geoSource,
-            style: (feature) => this.getGeoStyle(feature)
+            style: (feature) => this.getShapeStyle(feature)
         });
 
         this.Map.addLayer(this.GeoLayer);
@@ -533,8 +533,8 @@ MapOL.prototype.setVisibleExtent = function (extent) {
 MapOL.prototype.currentDraw = null;
 MapOL.prototype.currentSnap = null;
 MapOL.prototype.currentModify = null;
-MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes, enableShapeSnap, newShapeTemplate) {
-
+MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes, enableShapeSnap, geometryType) {
+    var that = this;
     this.removeDrawingInteractions();
 
     var source = this.Geometries.getSource();
@@ -547,14 +547,14 @@ MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes
     }
 
     if (enableNewShapes) {
-        var style = this.getDefaultStyle(newShapeTemplate);
-
         this.currentDraw = new ol.interaction.Draw({
             source: source,
-            type: newShapeTemplate.geometryType,
-            //style: style
+            type: geometryType
         });
-        this.currentDraw.on("drawend", function (evt) { evt.feature.setStyle(style); });
+        this.currentDraw.on("drawend", function(evt) {
+            var style = that.getShapeStyle(evt.feature);
+            evt.feature.setStyle(style);
+        });
 
         this.Map.addInteraction(this.currentDraw);
     }
@@ -949,19 +949,42 @@ MapOL.prototype.customImageStyle = function (marker) {
     ];
 }
 
-// --- GeoStyles ------------------------------------------------------------------------//
-MapOL.prototype.getGeoStyle = function (feature) {
+// Shape Style
+MapOL.prototype.getShapeStyle = function (feature) {
     var that = this;
 
     var shape = this.mapFeatureToShape(feature);
     var style = this.Instance.invokeMethod('OnGetShapeStyle', shape);
+    style = MapOL.transformNullToUndefined(style);
+
+    if (feature.getGeometry().getType() == 'Point') {
+        if (style.circle == undefined) {
+            style.circle = {
+                radius: 5,
+                fill: style.fill,
+                stroke: style.stroke
+            }
+        }
+    }
+
+    if (style.circle) {
+        if (style.circle.fill) style.circle.fill = new ol.style.Fill(style.circle.fill);
+        if (style.circle.stroke) style.circle.stroke = new ol.style.Stroke(style.circle.stroke);
+    }
+
+    if (style.text) {
+        if (style.text.fill) style.text.fill = new ol.style.Fill(style.text.fill);
+        if (style.text.stroke) style.text.stroke = new ol.style.Stroke(style.text.stroke);
+        if (style.text.backgroundFill) style.text.backgroundFill = new ol.style.Fill(style.text.backgroundFill);
+        if (style.text.backgroundStroke) style.text.backgroundStroke = new ol.style.Stroke(style.text.backgroundStroke);
+    }
 
     var styleObject = new ol.style.Style({
-        stroke: style.stroke != null ? new ol.style.Stroke(MapOL.transformNullToUndefined(style.stroke)) : undefined,
-        fill: style.fill != null ? new ol.style.Fill(MapOL.transformNullToUndefined(style.fill)): undefined,
-        text: style.text != null ? new ol.style.Text(MapOL.transformNullToUndefined(style.text)): undefined,
-        image: style.circle != null ? new ol.style.Circle(MapOL.transformNullToUndefined(style.circle)) : 
-            style.icon != null ? new ol.style.Icon(MapOL.transformNullToUndefined(style.icon)) : undefined
+        stroke: style.stroke ? new ol.style.Stroke(style.stroke) : undefined,
+        fill: style.fill ? new ol.style.Fill(style.fill): undefined,
+        text: style.text ? new ol.style.Text(style.text): undefined,
+        image: style.circle ? new ol.style.Circle(style.circle) : 
+            style.icon ? new ol.style.Icon(style.icon) : undefined
     });
 
     return styleObject;

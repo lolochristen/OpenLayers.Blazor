@@ -25,7 +25,6 @@ public partial class Map : IAsyncDisposable
         _mapId = Guid.NewGuid().ToString();
         _popupId = Guid.NewGuid().ToString();
 
-        NewShapeTemplate = new Point();
         EnableShapeSnap = true;
     }
 
@@ -190,7 +189,7 @@ public partial class Map : IAsyncDisposable
     /// A shape providing default parameters when drawing new shapes
     /// </summary>
     [Parameter]
-    public Shape NewShapeTemplate { get; set; }
+    public ShapeType NewShapeType { get; set; }
 
     /// <summary>
     /// Get or set if new shapes shall be drawn
@@ -257,17 +256,15 @@ public partial class Map : IAsyncDisposable
         else
             shapeSnap = EnableShapeSnap;
 
-        if (parameters.TryGetValue(nameof(NewShapeTemplate), out Shape shapeTemplate) && shapeTemplate != null &&
-            !shapeTemplate.InternalFeature.Equals(NewShapeTemplate?.InternalFeature))
+        if (parameters.TryGetValue(nameof(NewShapeType), out ShapeType shapeType) && shapeType != NewShapeType)
         {
             drawingChanges++;
-            shapeTemplate.ParentMap = this; // to link the template with parent
         }
         else
-            shapeTemplate = NewShapeTemplate;
+            shapeType = NewShapeType;
 
         if (drawingChanges > 0)
-            _ = SetDrawingSettings(newShapes, editShapes, shapeSnap, shapeTemplate);
+            _ = SetDrawingSettings(newShapes, editShapes, shapeSnap, shapeType);
 
         return base.SetParametersAsync(parameters);
     }
@@ -540,17 +537,20 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public Func<Shape, StyleOptions> ShapeStyleCallback { get; set; } = DefaultShapeStyleCallback;
 
-    public Task SetDrawingSettings()
-    {
-        return SetDrawingSettings(EnableNewShapes, EnableEditShapes, EnableShapeSnap, NewShapeTemplate);
-    }
-
-    public async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, Shape shapeTemplate)
+    /// <summary>
+    /// Sets explicitly drawing settings
+    /// </summary>
+    /// <param name="newShapes"></param>
+    /// <param name="editShapes"></param>
+    /// <param name="shapeSnap"></param>
+    /// <param name="shapeType"></param>
+    /// <returns></returns>
+    public async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, ShapeType shapeType)
     {
         try
         {
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, newShapes, editShapes, shapeSnap, shapeTemplate?.InternalFeature);
+                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, newShapes, editShapes, shapeSnap, shapeType);
         }
         catch (Exception exp)
         {

@@ -1,22 +1,49 @@
-﻿namespace OpenLayers.Blazor;
+﻿using Microsoft.AspNetCore.Components;
+
+namespace OpenLayers.Blazor;
 
 public class SwissMap : Map
 {
     public SwissMap()
     {
-        LayersList.Add(new Layer
+        LayerId = "ch.swisstopo.pixelkarte-farbe";
+        SetBaseLayer(LayerId);
+        Center = new Coordinate { X = 2660013.54, Y = 1185171.98 }; // Swiss Center
+        Zoom = 2.4;
+        Defaults.CoordinatesProjection = "EPSG:2056"; // VT95
+    }
+
+
+    [Parameter]
+    public string LayerId { get; set; }
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (LayersList.Count > 0 && LayersList[0].SourceParameters["LAYERS"] != LayerId)
+            SetBaseLayer(LayerId);
+        return base.OnParametersSetAsync();
+    }
+
+    protected void SetBaseLayer(string layerId)
+    {
+        Console.WriteLine($"SetBaseLayer {layerId}");
+        var layer = new Layer
         {
             Extent = new double[] { 2420000, 1030000, 2900000, 1350000 },
             SourceType = SourceType.TileWMS,
             Url = "https://wms.geo.admin.ch/",
             CrossOrigin = "anonymous",
-            SourceParameters = new Dictionary<string, object> { { "LAYERS", "ch.swisstopo.pixelkarte-farbe" }, { "FORMAT", "image/jpeg" } },
+            SourceParameters = new Dictionary<string, object> { { "LAYERS", layerId }, { "FORMAT", "image/jpeg" } },
             ServerType = "mapserver",
             Attributions = "© <a href=\"https://www.swisstopo.admin.ch/en/home.html\" target=\"_blank\">swisstopo</a>"
-        });
-        Center = new Coordinate { X = 2660013.54, Y = 1185171.98 }; // Swiss Center
-        Zoom = 2.4;
-        Defaults.CoordinatesProjection = "EPSG:2056"; // VT95
+        };
+
+        if (LayersList.Count == 0)
+            LayersList.Add(layer);
+        else
+        {
+            LayersList[0] = layer;
+        }
     }
 
     /// <summary>

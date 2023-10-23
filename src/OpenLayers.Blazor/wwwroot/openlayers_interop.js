@@ -20,8 +20,8 @@ export function MapOLSetDefaults(mapId, defaults) {
     _MapOL[mapId].setDefaults(defaults);
 }
 
-export function MapOLLoadGeoJson(mapId, json, dataProjection) {
-    _MapOL[mapId].loadGeoJson(json, dataProjection);
+export function MapOLLoadGeoJson(mapId, json, dataProjection, raiseEvents) {
+    _MapOL[mapId].loadGeoJson(json, dataProjection, raiseEvents);
 }
 
 export function MapOLZoomToExtent(mapId, extent) {
@@ -213,25 +213,7 @@ MapOL.prepareLayers = function (layers) {
     layers.forEach((l, i, arr) => {
 
         let source;
-        if (l.extent == null) l.extent = undefined;
-        if (l.className == null) l.className = undefined;
-        if (l.minResolution == null) l.minResolution = undefined;
-        if (l.maxResolution == null) l.maxResolution = undefined;
-        if (l.maxZoom == null) l.maxZoom = undefined;
-        if (l.minZoom == null) l.minZoom = undefined;
-        if (l.zIndex == null) l.zIndex = undefined;
-        if (l.source.url == null) l.source.url = undefined;
-        if (l.source.urls == null) l.source.urls = undefined;
-        if (l.source.cacheSize == null) l.source.cacheSize = undefined;
-        if (l.source.crossOrigin == null) l.source.crossOrigin = undefined;
-        if (l.source.transition == null) l.source.transition = undefined;
-        if (l.source.layer == null) l.source.layer = undefined;
-        if (l.source.key == null) l.source.key = undefined;
-        if (l.source.serverType == null) l.source.serverType = undefined;
-        if (l.source.matrixSet == null) l.source.matrixSet = undefined;
-        if (l.source.format == null) l.source.format = undefined;
-        if (l.source.projection == null) l.source.projection = undefined;
-        if (l.source.reprojectionErrorThreshold == null) l.source.reprojectionErrorThreshold = undefined;
+        l = MapOL.transformNullToUndefined(l);
 
         switch (l.source.sourceType) {
             case 'TileImage':
@@ -353,17 +335,21 @@ MapOL.prototype.setShapes = function (shapes) {
     });
 }
 
-MapOL.prototype.loadGeoJson = function (json, dataProjection) {
+MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
+    var that = this;
+
     if (this.GeoLayer) {
         var source = this.GeoLayer.getSource();
-
         source.clear();
     }
 
     if (!json) return;
 
+    var features = (new ol.format.GeoJSON()).readFeatures(json,
+        { featureProjection: this.Defaults.coordinatesProjection, dataProjection: dataProjection });
+
     var geoSource = new ol.source.Vector({
-        features: (new ol.format.GeoJSON()).readFeatures(json, { featureProjection: this.Defaults.coordinatesProjection, dataProjection: dataProjection })
+        features: features
     });
 
     if (this.GeoLayer) {
@@ -377,6 +363,8 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection) {
 
         this.Map.addLayer(this.GeoLayer);
     }
+
+    if (raiseEvents) features.forEach((f, i, arr) => { that.onFeatureAdded(f) });
 }
 
 MapOL.prototype.setZoom = function (zoom) {
@@ -613,17 +601,14 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
 
     if (geometry != null && !Array.isArray(geometry)) {
         switch (geometry.getType()) {
-            case 'Point':
-                coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
-                break;
             case 'Circle':
                 coordinates = ol.proj.transform(geometry.getCenter(), viewProjection, this.Defaults.coordinatesProjection);
                 break;
-            case 'Polygon':
-                coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
-                break;
             default:
-                coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
+                var g = geometry.getCoordinates();
+                var l = g.length;
+                if (Array.isArray(g[0])) g.forEach((g2) => l = l + g2.length); 
+                if (l < 200) coordinates = ol.proj.transform(geometry.getCoordinates(), viewProjection, this.Defaults.coordinatesProjection);
                 break;
         }
     }
@@ -754,7 +739,7 @@ MapOL.prototype.getDefaultStyle = function (shape) {
         var coordinates = ol.proj.transform(shape.coordinates ?? this.Map.getView().getCenter(), this.Defaults.coordinatesProjection, viewProjection);
         var radius = 5;
         if (shape.radius != null) {
-            radius = shape.radius
+            radius = shape.radius;
         }
         if (coordinates.length > 0) {
             radius = radius / ol.proj.getPointResolution(viewProjection, 1, coordinates);
@@ -767,10 +752,10 @@ MapOL.prototype.getDefaultStyle = function (shape) {
                 }),
                 stroke: new ol.style.Stroke({
                     color: shape.borderColor,
-                    width: shape.borderSize,
-                }),
+                    width: shape.borderSize
+                })
             }),
-            zIndex: Infinity,
+            zIndex: Infinity
         });
     }
     else {
@@ -968,67 +953,30 @@ MapOL.prototype.customImageStyle = function (marker) {
 MapOL.prototype.getGeoStyle = function (feature) {
     var that = this;
 
-    var geoStyles = {
-        'Point': that.awesomeStyle(feature),
-        'LineString': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'green',
-                width: 1
-            })
-        }),
-        'MultiLineString': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'green',
-                width: 1
-            })
-        }),
-        'MultiPolygon': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'yellow',
-                width: 1
-            }),
-            fill: new ol.style.Fill({
-                color: 'rgba(255, 255, 0, 0.3)'
-            })
-        }),
-        'Polygon': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'blue',
-                lineDash: [4],
-                width: 3
-            }),
-            fill: new ol.style.Fill({
-                color: 'rgba(0, 0, 255, 0.3)'
-            })
-        }),
-        'GeometryCollection': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'magenta',
-                width: 2
-            }),
-            fill: new ol.style.Fill({
-                color: 'magenta'
-            }),
-            image: new ol.style.Circle({
-                radius: 10,
-                fill: null,
-                stroke: new ol.style.Stroke({
-                    color: 'magenta'
-                })
-            })
-        }),
-        'Circle': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'red',
-                width: 2
-            }),
-            fill: new ol.style.Fill({
-                color: 'rgba(255,0,0,0.3)'
-            })
-        })
-    };
+    var shape = this.mapFeatureToShape(feature);
+    var style = this.Instance.invokeMethod('OnGetShapeStyle', shape);
 
-    return geoStyles[feature.getGeometry().getType()];
+    var styleObject = new ol.style.Style({
+        stroke: style.stroke != null ? new ol.style.Stroke(MapOL.transformNullToUndefined(style.stroke)) : undefined,
+        fill: style.fill != null ? new ol.style.Fill(MapOL.transformNullToUndefined(style.fill)): undefined,
+        text: style.text != null ? new ol.style.Text(MapOL.transformNullToUndefined(style.text)): undefined,
+        image: style.circle != null ? new ol.style.Circle(MapOL.transformNullToUndefined(style.circle)) : 
+            style.icon != null ? new ol.style.Icon(MapOL.transformNullToUndefined(style.icon)) : undefined
+    });
+
+    return styleObject;
+}
+
+
+MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key) && obj[key] === null) {
+            obj[key] = undefined;
+        } else if (typeof obj[key] === 'object') {
+            transformNullToUndefined(obj[key]);
+        }
+    }
+    return obj;
 }
 
 /*

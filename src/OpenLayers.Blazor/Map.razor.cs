@@ -455,10 +455,11 @@ public partial class Map : IAsyncDisposable
     ///     Loads GeoJson data (https://geojson.org/) to the map
     /// </summary>
     /// <param name="json">GeoJson Data</param>
-    /// <param name="dataProjection"></param>
-    public ValueTask LoadGeoJson(JsonElement json, string? dataProjection = null)
+    /// <param name="dataProjection">Data projection of GeoJson</param>
+    /// <param name="raiseEvents">Raise events for new created features</param>
+    public ValueTask LoadGeoJson(JsonElement json, string? dataProjection = null, bool? raiseEvents = true)
     {
-        return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json, dataProjection) ?? ValueTask.CompletedTask;
+        return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json, dataProjection, raiseEvents) ?? ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -526,6 +527,19 @@ public partial class Map : IAsyncDisposable
         if (_module != null) await _module.InvokeVoidAsync("MapOLSetVisibleExtent", _mapId, extent);
     }
 
+    [JSInvokable]
+    public StyleOptions OnGetShapeStyle(Internal.Shape shape)
+    {
+#if DEBUG
+        Console.WriteLine($"OnGetShapeStyle: {System.Text.Json.JsonSerializer.Serialize(shape)}");
+#endif
+
+        return ShapeStyleCallback(new Shape(shape));
+    }
+
+    [Parameter]
+    public Func<Shape, StyleOptions> ShapeStyleCallback { get; set; } = DefaultShapeStyleCallback;
+
     public Task SetDrawingSettings()
     {
         return SetDrawingSettings(EnableNewShapes, EnableEditShapes, EnableShapeSnap, NewShapeTemplate);
@@ -544,6 +558,10 @@ public partial class Map : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Undo last drawing interaction
+    /// </summary>
+    /// <returns></returns>
     public async Task Undo()
     {
         if (_module != null) await _module.InvokeVoidAsync("MapOLUndoDrawing", _mapId);
@@ -586,5 +604,27 @@ public partial class Map : IAsyncDisposable
         Console.WriteLine($"UpdateShape: {System.Text.Json.JsonSerializer.Serialize(shape.InternalFeature)}");
 #endif
         return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.InternalFeature) ?? ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Default Style Callback
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
+    public static StyleOptions DefaultShapeStyleCallback(Shape shape)
+    {
+        return new StyleOptions()
+        {
+            Stroke = new StyleOptions.StrokeOptions()
+            {
+                Color = "blue",
+                Width = 3,
+                LineDash = new double[] { 4 }
+            },
+            Fill = new StyleOptions.FillOptions()
+            {
+                Color = "rgba(0, 0, 255, 0.3)"
+            }
+        };
     }
 }

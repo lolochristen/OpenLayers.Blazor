@@ -1,5 +1,8 @@
 ﻿@page "/geojsondemo"
 @using System.Text.Json
+@using OpenLayers.Blazor.Internal
+@using Shape = OpenLayers.Blazor.Shape
+@using System.ComponentModel.Design
 
 <div class="card mt-2 mb-2">
 
@@ -11,7 +14,7 @@
     </div>
 </div>
 
-<SwissMap @ref="_map" Style="height:800px;" Class="card"></SwissMap>
+<SwissMap @ref="_map" Style="height:800px;" Class="card" ShapeStyleCallback="GetShapeStyle"></SwissMap>
 
 <CodeView Source="GeoJsonDemo.razor"/>
 
@@ -26,5 +29,22 @@
         // e.g. https://labs.karavia.ch/swiss-boundaries-geojson or https://api3.geo.admin.ch/services/sdiservices.html
         var json = await HttpClient.GetFromJsonAsync<JsonElement>("https://labs.karavia.ch/swiss-boundaries-geojson/geojson/2020/swissBOUNDARIES3D_1_3_TLM_LANDESGEBIET.geojson");
         await _map.LoadGeoJson(json);
+    }
+
+    private StyleOptions GetShapeStyle(Shape shape)
+    {
+        return new StyleOptions()
+        {
+            Stroke = new StyleOptions.StrokeOptions()
+            {
+                Color = "red",
+                Width = 3,
+                LineDash = new double[] { 4 }
+            },
+            Fill = new StyleOptions.FillOptions()
+            {
+                Color = shape.Properties["NAME"].ToString() == "Liechtenstein" ? "rgba(0, 255, 50, 0.5)" : "rgba(0, 0, 255, 0.3)"
+            }
+        };
     }
 }

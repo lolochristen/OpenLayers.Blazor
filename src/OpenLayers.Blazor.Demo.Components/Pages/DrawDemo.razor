@@ -1,13 +1,10 @@
 ﻿@page "/drawdemo"
 
 <div class="card mt-2 mb-2">
-
     <div class="card-header">
         <h3 class="card-title">Drawing Demo</h3>
     </div>
-
     <div class="card-body">
-
         <div class="btn-toolbar" role="toolbar">
             <div class="btn-group" data-toggle="buttons">
                 <input type="checkbox" class="btn-check" id="btndraw" autocomplete="off" @bind="_enabledraw">
@@ -26,7 +23,6 @@
             <input type="color" class="form-control form-control-color" id="bgColorInput" title="Background" @bind="_styleOptions.Fill.Color">
             <input type="color" class="form-control form-control-color" id="borderColorInput" title="Background" @bind="_styleOptions.Stroke.Color">
             <input type="range" min="1" max="30" @bind="_styleOptions.Stroke.Width" title="Border Size">
-
             <input type="button" class="btn btn-primary" value="Undo" @onclick="() => _map.Undo()" />
             <input type="button" class="btn btn-secondary" value="Clear" @onclick="() => _map.ShapesList.Clear()" />
             <input type="range" min="1080000" max="1280000" value="@_y" @onchange="OnYChange"> <code>@_y</code>
@@ -43,7 +39,6 @@
             }
         </div>
     </Popup>
-
     <Features>
         <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="red" BorderSize="2"></Line>
         <Circle @ref="_circle" Center="_center" Radius="2000" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>

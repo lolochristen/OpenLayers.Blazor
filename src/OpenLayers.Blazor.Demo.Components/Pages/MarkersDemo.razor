@@ -1,11 +1,9 @@
 ﻿@page "/markersdemo"
 
 <div class="card mt-2 mb-2">
-
     <div class="card-header">
         <h3 class="card-title">Markers</h3>
     </div>
-
     <div class="card-body">
         <select @bind="_selectedMarkerType">
             <option value="@MarkerType.MarkerPin">Pin</option>
@@ -13,7 +11,6 @@
             <option value="@MarkerType.MarkerFlag">Flag</option>
             <option value="@MarkerType.MarkerCustomImage">Custom Image</option>
         </select>
-
     </div>
 </div>
 
@@ -32,8 +29,7 @@
         <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(1177650, 2624200)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
      </Features>
  </SwissMap>
-
-
+ 
  <CodeView Source="MarkersDemo.razor" />
 
  @code {

@@ -1,13 +1,10 @@
 ﻿@page "/drawdemo"
 
 <div class="card mt-2 mb-2">
-
     <div class="card-header">
         <h3 class="card-title">Drawing Demo</h3>
     </div>
-
     <div class="card-body">
-
         <div class="btn-toolbar" role="toolbar">
             <div class="btn-group" data-toggle="buttons">
                 <input type="checkbox" class="btn-check" id="btndraw" autocomplete="off" @bind="_enabledraw">
@@ -23,10 +20,9 @@
                 <option value="@(ShapeType.Polygon)">Polygon</option>
                 <option value="@(ShapeType.Circle)">Circle</option>
             </select>
-            <input type="color" class="form-control form-control-color" id="bgColorInput" title="Background" @bind="_bgcolor">
-            <input type="color" class="form-control form-control-color" id="borderColorInput" title="Background" @bind="_bordercolor">
-            <input type="range" min="1" max="30" @bind="_borderSize" title="Border Size">
-
+            <input type="color" class="form-control form-control-color" id="bgColorInput" title="Background" @bind="_styleOptions.Fill.Color">
+            <input type="color" class="form-control form-control-color" id="borderColorInput" title="Background" @bind="_styleOptions.Stroke.Color">
+            <input type="range" min="1" max="30" @bind="_styleOptions.Stroke.Width" title="Border Size">
             <input type="button" class="btn btn-primary" value="Undo" @onclick="() => _map.Undo()" />
             <input type="button" class="btn btn-secondary" value="Clear" @onclick="() => _map.ShapesList.Clear()" />
             <input type="range" min="1080000" max="1280000" value="@_y" @onchange="OnYChange"> <code>@_y</code>
@@ -34,7 +30,7 @@
     </div>
 </div>
 
-<SwissMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" OnShapeChanged="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" NewShapeTemplate="_shapeTemplate">
+<SwissMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" OnShapeChanged="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType">
     <Popup>
         <div id="popup" class="ol-box">
             @if (@context != null)
@@ -43,16 +39,12 @@
             }
         </div>
     </Popup>
-
     <Features>
         <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="red" BorderSize="2"></Line>
         <Circle @ref="_circle" Center="_center" Radius="2000" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>
         <Point Coordinate="new Coordinate(1247123.8311215444, 2683276.620804008)" BackgroundColor="green" Radius="20"></Point>
     </Features>
 </SwissMap>
-
-<!-- Template Shape -->
-<Shape @ref="_shapeTemplate" ShapeType="@_shapeType" Color="red" BorderColor="@_bordercolor" BackgroundColor="@_bgcolor" BorderSize="@_borderSize"></Shape>
 
 <CodeView Source="DrawDemo.razor" />
 
@@ -85,15 +77,24 @@
 
 @code {
     private SwissMap _map = null!;
-    private ShapeType _shapeType;
+    private ShapeType _shapeType = ShapeType.LineString;
     private double _y = 1197650;
     private Circle _circle;
     private Coordinate _center = new Coordinate(1197650, 2604200);
     private bool _enabledraw, _enableedit, _snap = true;
-    private Shape _shapeTemplate;
-    private string _bgcolor = "#563d7c";
-    private string _bordercolor = "#dd1111";
-    private int _borderSize = 2;
+
+    private StyleOptions _styleOptions = new StyleOptions()
+    {
+        Stroke = new StyleOptions.StrokeOptions()
+        {
+            Color = "#dd1111",
+            Width = 2
+        },
+        Fill = new StyleOptions.FillOptions()
+        {
+            Color = "#563d7c"
+        }
+    };
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {

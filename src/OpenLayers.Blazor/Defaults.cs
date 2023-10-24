@@ -18,4 +18,6 @@ public class Defaults
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ScaleLineUnit ScaleLineUnit { get; set; } = ScaleLineUnit.Metric;
+
+    public int SerializationCoordinatesLimit { get; set; } = 255;
 }

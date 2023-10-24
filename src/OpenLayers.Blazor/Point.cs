@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
-using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
 public class Point : Shape
 {
-    public Point() : base (ShapeType.Point)
+    public Point() : base(ShapeType.Point)
     {
         Radius = 5;
         BorderSize = 1;

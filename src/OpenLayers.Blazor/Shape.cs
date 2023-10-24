@@ -3,14 +3,6 @@ using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
-public enum ShapeType
-{
-    Point,
-    LineString,
-    Polygon,
-    Circle
-}
-
 public abstract class Shape<T> : Shape where T : Internal.Shape, new()
 {
     internal Shape(T shape) : base(shape)
@@ -37,14 +29,15 @@ public class Shape : Feature, IDisposable
     }
 
     internal new Internal.Shape InternalFeature
-    { 
+    {
         get => (Internal.Shape)base.InternalFeature;
         set => base.InternalFeature = value;
     }
 
     [CascadingParameter] public Map? ParentMap { get; set; }
 
-    [Parameter] public ShapeType ShapeType
+    [Parameter]
+    public ShapeType ShapeType
     {
         get
         {
@@ -126,7 +119,7 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.BorderColor = value;
     }
 
-    
+
     [Parameter]
     public int? BorderSize
     {
@@ -178,28 +171,6 @@ public class Shape : Feature, IDisposable
             ParentMap?.MarkersList.Add((Marker)this);
         else
             ParentMap?.ShapesList.Add(this);
-    }
-
-    private bool _drawSettingsChanged;
-
-    public override Task SetParametersAsync(ParameterView parameters)
-    {
-        _drawSettingsChanged = false;
-        if (parameters.TryGetValue(nameof(BackgroundColor), out string? bgColor) && bgColor != BackgroundColor) _drawSettingsChanged = true;
-        if (parameters.TryGetValue(nameof(Color), out string? color) && color != Color) _drawSettingsChanged = true;
-        if (parameters.TryGetValue(nameof(BorderColor), out string? bcolor) && bcolor != BorderColor) _drawSettingsChanged = true;
-        if (parameters.TryGetValue(nameof(BorderSize), out int? size) && size != BorderSize) _drawSettingsChanged = true;
-        if (parameters.TryGetValue(nameof(ShapeType), out ShapeType shapeType) && shapeType != ShapeType) _drawSettingsChanged = true;
-
-        return base.SetParametersAsync(parameters);
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (ParentMap != null && ReferenceEquals(ParentMap.NewShapeTemplate, this) && _drawSettingsChanged)
-            await ParentMap.SetDrawingSettings();
-
-        await base.OnParametersSetAsync();
     }
 
     public async Task UpdateShape()

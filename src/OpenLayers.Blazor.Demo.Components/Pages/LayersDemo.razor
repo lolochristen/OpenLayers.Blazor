@@ -1,11 +1,9 @@
 ﻿@page "/layersdemo"
 
 <div class="card mt-2 mb-2">
-
     <div class="card-header">
         <h3 class="card-title">Layers</h3>
     </div>
-
     <div class="card-body">
         <input type="checkbox" @bind="_visibility0" />
         <input type="range" min="0" max="1" step="0.05" @bind="_opacity0" />
@@ -13,7 +11,6 @@
         <input type="range" min="0" max="1" step="0.05" @bind="_opacity2" />
         <input type="range" min="0" max="1" step="0.05" @bind="_opacity3" />
     </div>
-
 </div>
 
 <Map @ref="_map" Style="height:800px" CoordinatesProjection="EPSG:2056" class="card">
@@ -35,9 +32,8 @@
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        {
             StateHasChanged(); // update _map
-        }
+
         return base.OnAfterRenderAsync(firstRender);
     }
 }

@@ -3,13 +3,10 @@
 @using System.Threading
 @using System.Text.Json
 
-
 <div class="card mt-2 mb-2">
-
     <div class="card-header">
         <h3 class="card-title">SwissMapLayersDemo</h3>
     </div>
-
     <div class="card-body">
         <select @bind="_selectedLayer">
             @if (_layerList != null)
@@ -101,5 +98,4 @@
     {
         _currentFeature = feature;
     }
-
 }

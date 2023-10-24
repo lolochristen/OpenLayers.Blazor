@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
@@ -26,7 +25,7 @@ public class Feature : ComponentBase
     }
 
     /// <summary>
-    /// Identifier
+    ///     Identifier
     /// </summary>
     [Parameter]
     public string Id
@@ -48,5 +47,4 @@ public class Feature : ComponentBase
     public IEnumerable<Coordinate>? Coordinates => CoordinatesHelper.GetCoordinates(InternalFeature.Coordinates);
 
     public IEnumerable<IEnumerable<Coordinate>> MultiCoordinates => CoordinatesHelper.GetMultiCoordinates(InternalFeature.Coordinates);
-
 }

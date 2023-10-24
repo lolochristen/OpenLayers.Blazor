@@ -1,0 +1,17 @@
+﻿@page "/gdzdemo"
+
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">German GDZ Demo</h3>
+    </div>
+    <div class="card-body">
+    </div>
+</div>
+
+<Map Style="height:800px;" Class="card" CoordinatesProjection="EPSG:3857" Zoom="6" Center="new Coordinate(6549858, 1128088)">
+    <Layers>
+        <Layer SourceType="SourceType.TileWMS" CrossOrigin="anomymous" Url="https://sgx.geodatenzentrum.de/wms_topplus_open" Format="image/png" Layers="web" Styles="default" ></Layer>
+    </Layers>
+</Map>
+
+<CodeView Source="GermanGdzDemo.razor" />

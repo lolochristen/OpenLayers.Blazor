@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Demo.Maui
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Tests", "test\OpenLayers.Blazor.Tests\OpenLayers.Blazor.Tests.csproj", "{D235BF12-E194-49CA-AB16-27E23D87B9C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLayers.Blazor.Demo.Components", "src\OpenLayers.Blazor.Demo.Components\OpenLayers.Blazor.Demo.Components.csproj", "{9BEEE062-7A06-4391-9934-B3963D62B50D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Demo.Components", "src\OpenLayers.Blazor.Demo.Components\OpenLayers.Blazor.Demo.Components.csproj", "{9BEEE062-7A06-4391-9934-B3963D62B50D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

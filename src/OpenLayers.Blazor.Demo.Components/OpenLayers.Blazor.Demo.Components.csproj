@@ -20,6 +20,7 @@
 		<EmbeddedResource Include="Pages\ShapesDemo.razor" />
 		<EmbeddedResource Include="Pages\SwissMapLayersDemo.razor" />
 		<EmbeddedResource Include="Pages\DrawDemo.razor" />
+		<EmbeddedResource Include="Pages\GermanGdzDemo.razor" />
 	</ItemGroup>
 
 	<ItemGroup>

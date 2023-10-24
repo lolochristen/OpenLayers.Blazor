@@ -15,7 +15,7 @@ Zoom: @_map?.Zoom
 
 <OpenStreetMap @ref="_map" Style="height:480px; width:640px" Class="card mb-2" @bind-Center="_center"></OpenStreetMap>
 
-<OpenStreetMap Style="height:480px; width:640px" Class="card" Zoom="5" @bind-Center="_center" ScaleLineUnit="ScaleLineUnit.US">
+<OpenStreetMap Style="height:800px" Class="card" Zoom="5" @bind-Center="_center" ScaleLineUnit="ScaleLineUnit.US">
     <Layers>
         <Layer SourceType="SourceType.TileWMS"
                Url="https://sedac.ciesin.columbia.edu/geoserver/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=gpw-v3%3Agpw-v3-population-density_2000&LANG=en"

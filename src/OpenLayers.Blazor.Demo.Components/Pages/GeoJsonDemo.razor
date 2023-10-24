@@ -16,6 +16,7 @@
         else
         {
             <button class="btn btn-primary" @onclick="LoadGeoJson">Load geojson</button>
+            <button class="btn btn-primary" @onclick="Reformat">Reformat</button>
         }
     </div>
 </div>
@@ -55,5 +56,16 @@
                 Color = shape.Properties["NAME"].ToString() == "Liechtenstein" ? "rgba(0, 255, 50, 0.5)" : "rgba(0, 0, 255, 0.3)"
             }
         };
+    }
+
+    private async Task Reformat()
+    {
+        foreach (var shape in _map.ShapesList)
+        {
+            shape.BorderSize = 5;
+            shape.BorderColor = "green";
+            shape.BackgroundColor = "rgba(0, 255, 50, 0.5)";
+            await _map.UpdateShape(shape);
+        }
     }
 }

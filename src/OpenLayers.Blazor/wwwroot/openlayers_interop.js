@@ -677,35 +677,34 @@ MapOL.prototype.mapShapeToFeature = function(shape) {
 
     var geometry;
     const viewProjection = this.Map.getView().getProjection().getCode();
-    var coordinates;
-    if (shape.coordinates)
-        coordinates = ol.proj.transform(shape.coordinates, this.Defaults.coordinatesProjection, viewProjection);
+    if (shape.coordinates) {
+        var coordinates = ol.proj.transform(shape.coordinates, this.Defaults.coordinatesProjection, viewProjection);
 
-    switch (shape.geometryType) {
-    case "Point":
-        geometry = new ol.geom.Point(coordinates);
-        break;
-    case "LineString":
-        geometry = new ol.geom.LineString(coordinates);
-        break;
-    case "Polygon":
-        geometry = new ol.geom.Polygon(coordinates);
-        break;
-    case "Circle":
-        geometry = new ol.geom.Circle(coordinates,
-            shape.radius / ol.proj.getPointResolution(viewProjection, 1, coordinates));
-        break;
-    case "MultiPoint":
-        geometry = new ol.geom.MultiPoint(coordinates);
-        break;
-    case "MultiLineString":
-        geometry = new ol.geom.MultiLineString(coordinates);
-        break;
-    case "MultiPolygon":
-        geometry = new ol.geom.MultiPolygon(coordinates);
-        break;
+        switch (shape.geometryType) {
+        case "Point":
+            geometry = new ol.geom.Point(coordinates);
+            break;
+        case "LineString":
+            geometry = new ol.geom.LineString(coordinates);
+            break;
+        case "Polygon":
+            geometry = new ol.geom.Polygon(coordinates);
+            break;
+        case "Circle":
+            geometry = new ol.geom.Circle(coordinates,
+                shape.radius / ol.proj.getPointResolution(viewProjection, 1, coordinates));
+            break;
+        case "MultiPoint":
+            geometry = new ol.geom.MultiPoint(coordinates);
+            break;
+        case "MultiLineString":
+            geometry = new ol.geom.MultiLineString(coordinates);
+            break;
+        case "MultiPolygon":
+            geometry = new ol.geom.MultiPolygon(coordinates);
+            break;
+        }
     }
-
     const feature = new ol.Feature({
         type: shape.properties.type,
         popup: shape.properties.popup,
@@ -809,12 +808,15 @@ MapOL.prototype.onFeatureChanged = function(feature) {
 };
 
 MapOL.prototype.updateShape = function(shape) {
-    const source = this.Geometries.getSource();
-    const feature = source.getFeatureById(shape.id);
+
+    var feature = this.Geometries.getSource().getFeatureById(shape.id);
+    if (!feature && this.GeoLayer) feature = this.GeoLayer.getSource().getFeatureById(shape.id);
 
     if (feature) {
         const newFeature = this.mapShapeToFeature(shape);
-        feature.setGeometry(newFeature.getGeometry());
+        const geometry = newFeature.getGeometry();
+        if (geometry)
+            feature.setGeometry(geometry);
         feature.setStyle(newFeature.getStyle());
     }
 };

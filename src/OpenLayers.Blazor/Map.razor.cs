@@ -448,7 +448,7 @@ public partial class Map : IAsyncDisposable
     /// </summary>
     /// <param name="json">GeoJson Data</param>
     /// <param name="dataProjection">Data projection of GeoJson</param>
-    /// <param name="raiseEvents">Raise events for new created features</param>
+    /// <param name="raiseEvents">Raise events for new created features and add it to list of shapes</param>
     public ValueTask LoadGeoJson(JsonElement json, string? dataProjection = null, bool? raiseEvents = true)
     {
         return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json, dataProjection, raiseEvents) ?? ValueTask.CompletedTask;

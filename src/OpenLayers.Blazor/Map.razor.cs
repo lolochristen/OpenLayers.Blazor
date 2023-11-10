@@ -310,7 +310,7 @@ public partial class Map : IAsyncDisposable
 #if DEBUG
         Console.WriteLine($"OnInternalMarkerClick: {JsonSerializer.Serialize(marker)}");
 #endif
-        var m = MarkersList.FirstOrDefault(p => p.InternalFeature.Id == marker.Id);
+        var m = MarkersList.FirstOrDefault(p => string.Equals(p.InternalFeature.Id.ToString(), marker.Id.ToString(), StringComparison.OrdinalIgnoreCase));
 
         if (m != null)
         {

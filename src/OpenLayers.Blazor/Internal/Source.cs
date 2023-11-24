@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor.Internal;
 
-public class TileSource
+public class Source
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public SourceType SourceType { get; set; }

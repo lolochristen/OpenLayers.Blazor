@@ -255,10 +255,69 @@ MapOL.prepareLayers = function(layers) {
         case "TileDebug":
             source = new ol.source.TileDebug(l.source);
             break;
+        case "VectorKML":
+            l.source.format = new ol.format.KML();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorEsriJson":
+            l.source.format = new ol.format.EsriJSON();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorGeoJson":
+            l.source.format = new ol.format.GeoJSON();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorTopoJson":
+            l.source.format = new ol.format.TopoJson();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorMVT":
+            l.source.format = new ol.format.MVT();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorIGC":
+            l.source.format = new ol.format.IGC();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorPolyline":
+            l.source.format = new ol.format.Polyline();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorWKT":
+            l.source.format = new ol.format.WKT();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorWKB":
+            l.source.format = new ol.format.WKB();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorGML2":
+            l.source.format = new ol.format.GML2();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorGML3":
+            l.source.format = new ol.format.GML3();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorGPX":
+            l.source.format = new ol.format.GPX();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorOSMXML":
+            l.source.format = new ol.format.OSMXML();
+            source = new ol.source.Vector(l.source);
+            break;
+        case "VectorWFS":
+            l.source.format = new ol.format.WFS();
+            source = new ol.source.Vector(l.source);
+            break;
         }
 
         l.source = source;
-        ollayers.push(new ol.layer.Tile(l));
+        if (source instanceof ol.source.Vector)
+            ollayers.push(new ol.layer.Vector(l));
+        else
+            ollayers.push(new ol.layer.Tile(l));
     });
 
     return ollayers;

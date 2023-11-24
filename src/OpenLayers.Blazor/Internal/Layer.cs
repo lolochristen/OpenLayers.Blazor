@@ -12,7 +12,7 @@ public class Layer
     public double? MinZoom { get; set; }
     public double? MaxZoom { get; set; }
     public double Preload { get; set; } = 0;
-    public TileSource Source { get; set; } = new();
+    public Source Source { get; set; } = new();
     public bool UseInterimTilesOnError { get; set; } = true;
 
     public Dictionary<string, object>? Properties { get; set; } = new();

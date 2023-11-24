@@ -520,13 +520,14 @@ public partial class Map : IAsyncDisposable
     }
 
     [JSInvokable]
-    public StyleOptions OnGetShapeStyle(Internal.Shape shape)
+    public Task<StyleOptions> OnGetShapeStyle(Internal.Shape shape)
     {
 #if DEBUG
         Console.WriteLine($"OnGetShapeStyle: {JsonSerializer.Serialize(shape)}");
 #endif
 
-        return ShapeStyleCallback(new Shape(shape));
+        var result = ShapeStyleCallback(new Shape(shape));
+        return Task.FromResult(result);
     }
 
     /// <summary>

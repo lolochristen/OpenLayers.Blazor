@@ -25,14 +25,17 @@ public class SwissMap : Map
 
     protected void SetBaseLayer(string layerId)
     {
+#if DEBUG
         Console.WriteLine($"SetBaseLayer {layerId}");
+#endif
         var layer = new Layer
         {
             Extent = new double[] { 2420000, 1030000, 2900000, 1350000 },
             SourceType = SourceType.TileWMS,
             Url = "https://wms.geo.admin.ch/",
             CrossOrigin = "anonymous",
-            SourceParameters = new Dictionary<string, object> { { "LAYERS", layerId }, { "FORMAT", "image/jpeg" } },
+            Layers = layerId,
+            Format = "image/jpeg",
             ServerType = "mapserver",
             Attributions = "© <a href=\"https://www.swisstopo.admin.ch/en/home.html\" target=\"_blank\">swisstopo</a>"
         };

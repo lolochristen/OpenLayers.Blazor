@@ -213,6 +213,13 @@ public class Layer : ComponentBase
         set => _internalLayer.Properties["TITLE"] = value;
     }
 
+    [Parameter]
+    public dynamic? FormatOptions
+    {
+        get => _internalLayer.Source.FormatOptions;
+        set => _internalLayer.Source.FormatOptions = value;
+    }
+
     protected override void OnInitialized()
     {
         if (ParentMap != null)

@@ -347,8 +347,8 @@ public partial class Map : IAsyncDisposable
     {
         if (!coordinate.Equals(Center))
         {
-            await CenterChanged.InvokeAsync(coordinate);
             Center = coordinate;
+            await CenterChanged.InvokeAsync(coordinate);
         }
     }
 

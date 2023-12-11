@@ -976,7 +976,7 @@ MapOL.prototype.getShapeStyle = async function(feature) {
     const that = this;
 
     const shape = this.mapFeatureToShape(feature);
-    var style = await this.Instance.invokeMethod("OnGetShapeStyle", shape);
+    var style = await this.Instance.InvokeMethodAsync("OnGetShapeStyle", shape);
     style = MapOL.transformNullToUndefined(style);
 
     if (feature.getGeometry().getType() == "Point") {

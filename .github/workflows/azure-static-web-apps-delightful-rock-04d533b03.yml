@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
+      - name: git config
+        run: git config --global --add safe.directory /github/workspace
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0

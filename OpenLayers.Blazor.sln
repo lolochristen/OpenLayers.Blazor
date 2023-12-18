@@ -15,6 +15,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.Demo.Components", "src\OpenLayers.Blazor.Demo.Components\OpenLayers.Blazor.Demo.Components.csproj", "{9BEEE062-7A06-4391-9934-B3963D62B50D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{67C34A9D-CA3C-4313-93E1-DE9564C8BCCB}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		icon.png = icon.png
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6A316A55-944A-4222-ACE2-EFA591915C2E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{717EBEE2-DC73-4FFA-BF30-A3591D310620}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +58,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{26DEF966-E500-4817-8D6D-C1AC0A3ACA02} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
+		{558FC061-5215-43DC-A7C1-CE3DA8D3112A} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
+		{56CA5376-8AD9-481C-81B1-D82D0716989A} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
+		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
+		{D235BF12-E194-49CA-AB16-27E23D87B9C5} = {717EBEE2-DC73-4FFA-BF30-A3591D310620}
+		{9BEEE062-7A06-4391-9934-B3963D62B50D} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CD0B2594-9026-4061-B859-28912AB5C59F}

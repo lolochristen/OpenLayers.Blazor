@@ -16,7 +16,7 @@
         <ApplicationTitle>OpenLayers.Blazor.Demo.Maui</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.openlayers.blazor.demo.maui</ApplicationId>
+        <ApplicationId>lolochristen.openlayers.blazor.demo.maui</ApplicationId>
         <ApplicationIdGuid>A5D16598-6678-4633-B4AC-99A2B9A30D12</ApplicationIdGuid>
 
         <!-- Versions -->
@@ -50,8 +50,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+	    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+	    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.3" />
     </ItemGroup>
 
     <ItemGroup>

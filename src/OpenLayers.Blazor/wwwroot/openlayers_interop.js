@@ -508,8 +508,9 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
 
             if (shape) {
                 showPopup = shape.properties.popup;
-            } else if (that.Defaults.autoPopup) {
-                showPopup = true;
+            } 
+            if (showPopup == undefined) {
+                showPopup = that.Defaults.autoPopup;
             }
 
             if (showPopup) {

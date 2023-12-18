@@ -180,6 +180,16 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
+    ///     Auto PopUp
+    /// </summary>
+    [Parameter]
+    public bool AutoPopup
+    {
+        get => Defaults.AutoPopup;
+        set => Defaults.AutoPopup = value;
+    }
+
+    /// <summary>
     ///     Sets or gets the visible extent of the map
     /// </summary>
     [Parameter]

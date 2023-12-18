@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<SwissMap @ref="_map" OnClick="OnMapClick" Style="height:800px;" Class="card">
+<SwissMap @ref="_map" OnClick="OnMapClick" Style="height:800px;" Class="card" AutoPopup>
     <Popup>
         <div id="popup" class="ol-box">
             @if (context is Marker marker)

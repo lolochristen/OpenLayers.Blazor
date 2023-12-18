@@ -219,6 +219,12 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public bool EnableEditShapes { get; set; }
 
+    /// <summary>
+    ///     Get or sets if drawing shapes is in freehand mode.
+    /// </summary>
+    [Parameter]
+    public bool Freehand { get; set; }
+
     private DotNetObjectReference<Map>? Instance { get; set; }
 
     [Parameter] public EventCallback<Shape> OnShapeAdded { get; set; }
@@ -277,8 +283,13 @@ public partial class Map : IAsyncDisposable
         else
             shapeType = NewShapeType;
 
+        if (parameters.TryGetValue(nameof(Freehand), out bool freehand) && freehand != Freehand)
+            drawingChanges++;
+        else
+            freehand = Freehand;
+
         if (drawingChanges > 0)
-            _ = SetDrawingSettings(newShapes, editShapes, shapeSnap, shapeType);
+            _ = SetDrawingSettings(newShapes, editShapes, shapeSnap, shapeType, freehand);
 
         return base.SetParametersAsync(parameters);
     }
@@ -547,13 +558,14 @@ public partial class Map : IAsyncDisposable
     /// <param name="editShapes"></param>
     /// <param name="shapeSnap"></param>
     /// <param name="shapeType"></param>
+    /// <param name="freehand"></param>
     /// <returns></returns>
-    public async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, ShapeType shapeType)
+    public async Task SetDrawingSettings(bool newShapes, bool editShapes, bool shapeSnap, ShapeType shapeType, bool freehand)
     {
         try
         {
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, newShapes, editShapes, shapeSnap, shapeType);
+                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, newShapes, editShapes, shapeSnap, shapeType, freehand);
         }
         catch (Exception exp)
         {

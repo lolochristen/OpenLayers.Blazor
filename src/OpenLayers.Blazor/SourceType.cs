@@ -29,5 +29,6 @@ public enum SourceType
     VectorGML3,
     VectorGPX,
     VectorOSMXML,
-    VectorWFS
+    VectorWFS,
+    Graticule
 }

@@ -14,6 +14,8 @@
                 <label class="btn btn-outline-primary" for="btnedit">Edit</label>
                 <input type="checkbox" class="btn-check" id="btnsnap" autocomplete="off" @bind="_snap">
                 <label class="btn btn-outline-primary" for="btnsnap">Snap</label>
+                <input type="checkbox" class="btn-check" id="btnfreehand" autocomplete="off" @bind="_freehand">
+                <label class="btn btn-outline-primary" for="btnfreehand">Freehand</label>
             </div>
             <select id="type" @bind="_shapeType">
                 <option value="@(ShapeType.Point)">Point</option>
@@ -31,7 +33,7 @@
     </div>
 </div>
 
-<SwissMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" OnShapeChanged="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType">
+<SwissMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" OnShapeChanged="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
     <Popup>
         <div id="popup" class="ol-box">
             @if (@context != null)
@@ -82,7 +84,7 @@
     private double _y = 1197650;
     private Circle _circle;
     private Coordinate _center = new Coordinate(1197650, 2604200);
-    private bool _enabledraw, _enableedit, _snap = true;
+    private bool _enabledraw, _enableedit, _snap = true, _freehand;
 
     private StyleOptions _styleOptions = new StyleOptions()
     {

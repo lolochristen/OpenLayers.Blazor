@@ -81,4 +81,8 @@
 		</PackageReference>
 	</ItemGroup>
 
+  <PropertyGroup>
+    <MinVerVerbosity>diagnostic</MinVerVerbosity>
+  </PropertyGroup>  
+
 </Project>

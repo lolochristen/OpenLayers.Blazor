@@ -623,8 +623,8 @@ MapOL.prototype.setDrawingSettings = function(enableNewShapes, enableEditShapes,
         });
         this.currentDraw.on("drawend",
             function(evt) {
-                const style = that.getShapeStyle(evt.feature);
-                evt.feature.setStyle(style);
+                that.getShapeStyle(evt.feature)
+                    .then(style => evt.feature.setStyle(style));
             });
 
         this.Map.addInteraction(this.currentDraw);
@@ -1031,11 +1031,11 @@ MapOL.prototype.customImageStyle = function(marker) {
 };
 
 // Shape Style
-MapOL.prototype.getShapeStyle = function(feature) {
+MapOL.prototype.getShapeStyle = async function(feature) {
     const that = this;
 
     const shape = this.mapFeatureToShape(feature);
-    var style = this.Instance.invokeMethod("OnGetShapeStyle", shape);
+    var style = await this.Instance.InvokeMethodAsync("OnGetShapeStyle", shape);
     style = MapOL.transformNullToUndefined(style);
 
     if (feature.getGeometry().getType() == "Point") {

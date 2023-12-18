@@ -337,8 +337,8 @@ MapOL.prototype.removeLayer = function (layer) {
             if (source.urls[0] == layer.source.url) {
                 this.Map.removeLayer(l);
             }
-        } catch { }
-
+        } catch (e) {
+        }
     });
 };
 
@@ -367,8 +367,9 @@ MapOL.prototype.findLayer = function (layer) {
             if (source.urls[0] == layerSource.urls[0] && source.getKey() == layerSource.getKey()) {
                 foundLayer = l;
             }
-        } catch { }
-
+        }
+        catch (ex) {
+        }
     });
     return foundLayer;
 };
@@ -1034,11 +1035,11 @@ MapOL.prototype.customImageStyle = function (marker) {
 };
 
 // Shape Style
-MapOL.prototype.getShapeStyle = function(feature) {
+MapOL.prototype.getShapeStyle = async function(feature) {
     const that = this;
 
     const shape = this.mapFeatureToShape(feature);
-    var style = await this.Instance.InvokeMethodAsync("OnGetShapeStyle", shape);
+    var style = await this.Instance.invokeMethodAsync("OnGetShapeStyle", shape);
     style = MapOL.transformNullToUndefined(style);
 
     if (feature.getGeometry().getType() == "Point") {

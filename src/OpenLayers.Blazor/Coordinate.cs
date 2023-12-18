@@ -40,7 +40,7 @@ public class Coordinate : IEquatable<Coordinate>
         Value = coordinates;
     }
 
-    public double Latitude => Y;
+    public double Latitude => X;
 
     public double Y
     {
@@ -48,7 +48,7 @@ public class Coordinate : IEquatable<Coordinate>
         set => Value[1] = value;
     }
 
-    public double Longitude => X;
+    public double Longitude => Y;
 
     public double X
     {

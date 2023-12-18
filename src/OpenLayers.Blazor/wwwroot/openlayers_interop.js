@@ -64,8 +64,8 @@ export function MapOLSetVisibleExtent(mapId, extent) {
     _MapOL[mapId].setVisibleExtent(extent);
 }
 
-export function MapOLSetDrawingSettings(mapId, enableNewShapes, enableEditShapes, enableShapeSnap, geometryType) {
-    _MapOL[mapId].setDrawingSettings(enableNewShapes, enableEditShapes, enableShapeSnap, geometryType);
+export function MapOLSetDrawingSettings(mapId, enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand) {
+    _MapOL[mapId].setDrawingSettings(enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand);
 }
 
 export function MapOLUndoDrawing(mapId) {
@@ -213,9 +213,10 @@ MapOL.prepareLayers = function (layers) {
     layers.forEach((l, i, arr) => {
 
         let source;
+        let sourceType = l.source.sourceType;
         l = MapOL.transformNullToUndefined(l);
 
-        switch (l.source.sourceType) {
+        switch (sourceType) {
             case "TileImage":
                 source = new ol.source.TileImage(l.source);
                 break;
@@ -314,11 +315,22 @@ MapOL.prepareLayers = function (layers) {
                 l.source.format = new ol.format.WFS(l.source.formatOptions);
                 source = new ol.source.Vector(l.source);
                 break;
+            case "Graticule":
+                source = l.source.formatOptions;
+                if (source == undefined) {
+                    source = {
+                        showLabels: true,
+                        wrapX: false,
+                    };
+                }
+                break;
         }
 
         l.source = source;
         if (source instanceof ol.source.Vector)
             ollayers.push(new ol.layer.Vector(l));
+        else if (sourceType == "Graticule")
+            ollayers.push(new ol.layer.Graticule(source));
         else
             ollayers.push(new ol.layer.Tile(l));
     });
@@ -608,7 +620,7 @@ MapOL.prototype.setVisibleExtent = function (extent) {
 MapOL.prototype.currentDraw = null;
 MapOL.prototype.currentSnap = null;
 MapOL.prototype.currentModify = null;
-MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes, enableShapeSnap, geometryType) {
+MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand) {
     var that = this;
     this.removeDrawingInteractions();
 
@@ -624,7 +636,8 @@ MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes
     if (enableNewShapes) {
         this.currentDraw = new ol.interaction.Draw({
             source: source,
-            type: geometryType
+            type: geometryType,
+            freehand: freehand
         });
         this.currentDraw.on("drawend",
             function(evt) {

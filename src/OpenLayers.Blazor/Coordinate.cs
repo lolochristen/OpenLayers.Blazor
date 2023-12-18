@@ -20,16 +20,16 @@ public class Coordinate : IEquatable<Coordinate>
     ///     New Point
     /// </summary>
     /// <param name="coordinates">Latitude, Longitude</param>
-    public Coordinate(double y, double x)
+    public Coordinate(double x, double y)
     {
-        Y = y;
         X = x;
+        Y = y;
     }
 
     public Coordinate(Coordinate coordinate)
     {
-        Y = coordinate.Y;
         X = coordinate.X;
+        Y = coordinate.Y;
     }
 
 
@@ -40,7 +40,7 @@ public class Coordinate : IEquatable<Coordinate>
         Value = coordinates;
     }
 
-    public double Latitude => Y;
+    public double Latitude => X;
 
     public double Y
     {
@@ -48,7 +48,7 @@ public class Coordinate : IEquatable<Coordinate>
         set => Value[1] = value;
     }
 
-    public double Longitude => X;
+    public double Longitude => Y;
 
     public double X
     {

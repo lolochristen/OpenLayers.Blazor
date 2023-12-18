@@ -7,8 +7,8 @@ public class CoordinateTests
     {
         var c = new Coordinate(10, 20);
 
-        Assert.Equal(10, c.Y);
-        Assert.Equal(20, c.X);
+        Assert.Equal(10, c.X);
+        Assert.Equal(20, c.Y);  
 
         Assert.Equal(10, c.Latitude);
         Assert.Equal(20, c.Longitude);

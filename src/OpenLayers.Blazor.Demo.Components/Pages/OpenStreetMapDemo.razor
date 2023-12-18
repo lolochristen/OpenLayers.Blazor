@@ -14,7 +14,14 @@ Zoom: @_map?.Zoom
     </div>
 </div>
 
-<OpenStreetMap @ref="_map" Style="height:480px; width:640px" Class="card mb-2" @bind-Center="_center"></OpenStreetMap>
+<OpenStreetMap @ref="_map" Style="height:480px; width:640px" Class="card mb-2" @bind-Center="_center">
+    <Layers>
+        <Layer SourceType="SourceType.VectorKML"
+               Url="https://openlayers.org/en/latest/examples/data/kml/2012-02-10.kml"
+               FormatOptions="@_kmlOptions">
+        </Layer>
+    </Layers>
+</OpenStreetMap>
 
 <OpenStreetMap Style="height:800px" Class="card" Zoom="5" @bind-Center="_center" ScaleLineUnit="ScaleLineUnit.US">
     <Layers>
@@ -29,6 +36,7 @@ Zoom: @_map?.Zoom
 <CodeView Source="OpenStreetMapDemo.razor"/>
 
 @code {
-    private Coordinate _center = new(51, 1);
+    private Coordinate _center = new(7.6, 46.5);
     private OpenStreetMap _map;
+    private dynamic _kmlOptions = new { ShowPointNames = true, ExtractStyles = true };
 }

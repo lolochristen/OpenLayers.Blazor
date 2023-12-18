@@ -10,7 +10,11 @@ jobs:
     timeout-minutes: 5
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        filter: tree:0
+        submodules: true
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
     - name: Build

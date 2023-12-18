@@ -15,7 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v2
+      - name: Config
+        run: git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Build And Deploy

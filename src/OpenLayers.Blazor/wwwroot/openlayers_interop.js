@@ -76,6 +76,15 @@ export function MapOLUpdateShape(mapId, shape) {
     _MapOL[mapId].updateShape(shape);
 }
 
+export function MapOLRemoveShape(mapId, shape) {
+    _MapOL[mapId].removeShape(shape);
+}
+
+export function MapOLAddShape(mapId, shape) {
+    _MapOL[mapId].addShape(shape);
+}
+
+
 // --- MapOL ----------------------------------------------------------------------------//
 
 function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
@@ -432,7 +441,7 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
     } else {
         this.GeoLayer = new ol.layer.Vector({
             source: geoSource,
-            style: (feature) => this.getShapeStyle(feature)
+            style: (feature) => that.getShapeStyle(feature) // needs to be sync
         });
 
         this.Map.addLayer(this.GeoLayer);
@@ -440,6 +449,11 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
 
     if (raiseEvents) features.forEach((f, i, arr) => { that.onFeatureAdded(f) });
 };
+
+//MapOL.wait = async function wait() {
+//    await new Promise(resolve => setTimeout(resolve, 500));
+//    return null;
+//}
 
 MapOL.prototype.setZoom = function (zoom) {
     this.Map.getView().setZoom(zoom);
@@ -535,7 +549,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
     if (invokeMethod) {
         invokeMethod = false;
         const coordinate = ol.proj.transform(evt.coordinate, "EPSG:3857", this.Defaults.coordinatesProjection);
-        const point = { Y: coordinate[1], X: coordinate[0] };
+        const point = coordinate[0] + "/" + coordinate[1];
         this.Instance.invokeMethodAsync("OnInternalClick", point);
     }
 };
@@ -547,7 +561,7 @@ MapOL.prototype.onMapPointerMove = function (evt, element) {
     const coordinate = ol.proj.transform(evt.coordinate,
         this.Map.getView().getProjection().getCode(),
         this.Defaults.coordinatesProjection);
-    const point = { Y: coordinate[1], X: coordinate[0] };
+    const point = coordinate[0] + "/" + coordinate[1];
     this.Instance.invokeMethodAsync("OnInternalPointerMove", point);
 };
 
@@ -561,7 +575,7 @@ MapOL.prototype.onMapCenterChanged = function () {
     const coordinate = ol.proj.transform(center,
         this.Map.getView().getProjection().getCode(),
         this.Defaults.coordinatesProjection);
-    const point = { Y: coordinate[1], X: coordinate[0] };
+    const point = coordinate[0] + "/" + coordinate[1];
     this.Instance.invokeMethodAsync("OnInternalCenterChanged", point);
     this.onVisibleExtentChanged();
 };
@@ -600,7 +614,7 @@ MapOL.prototype.getCurrentGeoLocation = function () {
                 const coordinate = ol.proj.transform([position.coords.longitude, position.coords.latitude],
                     "EPSG:4326",
                     projection);
-                const point = { Y: coordinate[1], X: coordinate[0] };
+                const point = coordinate[0] + "/" + coordinate[1]; 
                 resolve(point);
             });
         } else {
@@ -641,7 +655,7 @@ MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes
         });
         this.currentDraw.on("drawend",
             function(evt) {
-                that.getShapeStyle(evt.feature)
+                that.getShapeStyleAsync(evt.feature)
                     .then(style => evt.feature.setStyle(style));
             });
 
@@ -898,6 +912,28 @@ MapOL.prototype.updateShape = function (shape) {
     }
 };
 
+MapOL.prototype.removeShape = function (shape) {
+    var source;
+    if (shape.type == "Marker")
+        source = this.Markers.getSource();
+    else
+        source = this.Geometries.getSource();
+    var feature = this.Geometries.getSource().getFeatureById(shape.id);
+    if (feature) {
+        source.removeFeature(feature);
+    }
+};
+
+MapOL.prototype.addShape = function (shape) {
+    var source;
+    if (shape.type == "Marker")
+        source = this.Markers.getSource();
+    else
+        source = this.Geometries.getSource();
+    var feature = this.mapShapeToFeature(shape);
+    source.addFeature(feature);
+};
+
 //--- Styles -----------------------------------------------------------------//
 
 MapOL.prototype.pinStyle = function (marker) {
@@ -1049,11 +1085,19 @@ MapOL.prototype.customImageStyle = function (marker) {
 };
 
 // Shape Style
-MapOL.prototype.getShapeStyle = async function(feature) {
-    const that = this;
-
+MapOL.prototype.getShapeStyleAsync = async function(feature) {
     const shape = this.mapFeatureToShape(feature);
-    var style = await this.Instance.invokeMethodAsync("OnGetShapeStyle", shape);
+    var style = await this.Instance.invokeMethodAsync("OnGetShapeStyleAsync", shape);
+    return this.mapStyleOptionsToStyle(style, feature);
+}
+MapOL.prototype.getShapeStyle = function(feature) {
+    const shape = this.mapFeatureToShape(feature);
+    var style = this.Instance.invokeMethod("OnGetShapeStyle", shape);
+    return this.mapStyleOptionsToStyle(style, feature);
+}
+
+MapOL.prototype.mapStyleOptionsToStyle = function(style, feature) {
+
     style = MapOL.transformNullToUndefined(style);
 
     if (feature.getGeometry().getType() == "Point") {

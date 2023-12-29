@@ -8,8 +8,11 @@ using OpenLayers.Blazor;
 using OpenLayers.Blazor.Model;
 */
 
+using System.Text.Json.Serialization;
+
 namespace OpenLayers.Blazor;
 
+[JsonConverter(typeof(CoordinateConverter))]
 public class Coordinate : IEquatable<Coordinate>
 {
     public Coordinate()
@@ -40,6 +43,7 @@ public class Coordinate : IEquatable<Coordinate>
         Value = coordinates;
     }
 
+    [JsonIgnore]
     public double Latitude => X;
 
     public double Y
@@ -48,6 +52,7 @@ public class Coordinate : IEquatable<Coordinate>
         set => Value[1] = value;
     }
 
+    [JsonIgnore]
     public double Longitude => Y;
 
     public double X
@@ -59,8 +64,8 @@ public class Coordinate : IEquatable<Coordinate>
     /// <summary>
     ///     Coordinate in OpenLayers Style: [Longitude, Latitude]
     /// </summary>
+    [JsonIgnore]
     public double[] Value { get; set; } = new double[2] { 0, 0 };
-
 
     public bool Equals(Coordinate? other)
     {
@@ -86,7 +91,7 @@ public class Coordinate : IEquatable<Coordinate>
         return new Coordinate(val[0], val[1]);
     }
 
-    private static Coordinate Parse(string val)
+    public static Coordinate Parse(string val)
     {
         val = val.Trim();
         var parts = val.Split(',', '/', ':');
@@ -95,6 +100,20 @@ public class Coordinate : IEquatable<Coordinate>
             throw new InvalidOperationException("Cannot parse coordinate");
 
         return new Coordinate(double.Parse(parts[0]), double.Parse(parts[1]));
+    }
+
+    public static bool TryParse(string val, out Coordinate? result)
+    {
+        try
+        {
+            result = Parse(val);
+            return true;
+        }
+        catch
+        {
+            result = null;
+            return false;
+        }
     }
 
     /// <summary>
@@ -159,6 +178,6 @@ public class Coordinate : IEquatable<Coordinate>
 
     public override int GetHashCode()
     {
-        return X.GetHashCode() + Y.GetHashCode();
+        return HashCode.Combine(X, Y);
     }
 }

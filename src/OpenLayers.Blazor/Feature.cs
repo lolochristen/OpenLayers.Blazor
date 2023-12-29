@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
@@ -14,6 +15,8 @@ public class Feature<T> : Feature where T : Internal.Feature
 
 public class Feature : ComponentBase
 {
+    private Internal.Feature _internalFeature;
+
     public Feature()
     {
         InternalFeature = new Internal.Feature();
@@ -34,7 +37,17 @@ public class Feature : ComponentBase
         set => InternalFeature.Id = value;
     }
 
-    protected Internal.Feature InternalFeature { get; set; }
+    protected Internal.Feature InternalFeature
+    {
+        get => _internalFeature;
+        set
+        {
+            _internalFeature = value;
+
+            if (_internalFeature.Coordinates is JsonElement e)
+                _internalFeature.Coordinates = CoordinatesHelper.DeserializeCoordinates(e);
+        }
+    }
 
     public GeometryTypes? GeometryType => InternalFeature.GeometryType;
 

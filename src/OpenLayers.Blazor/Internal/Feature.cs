@@ -34,7 +34,6 @@ public class Feature : IEquatable<Feature>
 
     public Dictionary<string, dynamic> Properties { get; set; } = new();
 
-
     public bool Equals(Feature? other)
     {
         if (ReferenceEquals(null, other)) return false;
@@ -56,7 +55,10 @@ public class Feature : IEquatable<Feature>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id, GeometryType, Coordinates, Properties);
+        if (Coordinates is JsonElement || Coordinates != null)
+            return HashCode.Combine(Id, GeometryType ?? GeometryTypes.None, Coordinates, Properties);
+        else
+            return HashCode.Combine(Id, GeometryType ?? GeometryTypes.None, Properties);
     }
 
     public override bool Equals(object? obj)

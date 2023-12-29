@@ -535,7 +535,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
     if (invokeMethod) {
         invokeMethod = false;
         const coordinate = ol.proj.transform(evt.coordinate, "EPSG:3857", this.Defaults.coordinatesProjection);
-        const point = { Y: coordinate[1], X: coordinate[0] };
+        const point = coordinate[0] + "/" + coordinate[1];
         this.Instance.invokeMethodAsync("OnInternalClick", point);
     }
 };
@@ -547,7 +547,7 @@ MapOL.prototype.onMapPointerMove = function (evt, element) {
     const coordinate = ol.proj.transform(evt.coordinate,
         this.Map.getView().getProjection().getCode(),
         this.Defaults.coordinatesProjection);
-    const point = { Y: coordinate[1], X: coordinate[0] };
+    const point = coordinate[0] + "/" + coordinate[1];
     this.Instance.invokeMethodAsync("OnInternalPointerMove", point);
 };
 
@@ -561,7 +561,7 @@ MapOL.prototype.onMapCenterChanged = function () {
     const coordinate = ol.proj.transform(center,
         this.Map.getView().getProjection().getCode(),
         this.Defaults.coordinatesProjection);
-    const point = { Y: coordinate[1], X: coordinate[0] };
+    const point = coordinate[0] + "/" + coordinate[1];
     this.Instance.invokeMethodAsync("OnInternalCenterChanged", point);
     this.onVisibleExtentChanged();
 };

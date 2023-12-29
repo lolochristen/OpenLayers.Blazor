@@ -1,4 +1,7 @@
-﻿namespace OpenLayers.Blazor.Internal;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text.Json;
+
+namespace OpenLayers.Blazor.Internal;
 
 internal static class CoordinatesHelper
 {
@@ -48,5 +51,26 @@ internal static class CoordinatesHelper
     public static double[][][] SetMultiCoordinates(IEnumerable<IEnumerable<Coordinate>> coordinates)
     {
         return coordinates.Select(p => p.Select(p => p.Value).ToArray()).ToArray();
+    }
+
+    public static dynamic DeserializeCoordinates(JsonElement element)
+    {
+        try
+        {
+            return element.Deserialize<double[][]>();
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            return element.Deserialize<double[]>();
+        }
+        catch
+        {
+        }
+
+        return null;
     }
 }

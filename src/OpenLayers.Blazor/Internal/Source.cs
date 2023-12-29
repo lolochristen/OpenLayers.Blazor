@@ -16,7 +16,7 @@ public class Source
     public Dictionary<string, object> Params { get; set; } = new();
     public double Gutter { get; set; } = 0;
     public bool Hidpi { get; set; } = true;
-    public JsonElement? Projection { get; set; }
+    public dynamic? Projection { get; set; }
     public double? ReprojectionErrorThreshold { get; set; }
     public string? ServerType { get; set; }
     public string? Url { get; set; }

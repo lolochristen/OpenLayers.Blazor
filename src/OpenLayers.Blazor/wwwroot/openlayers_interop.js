@@ -432,7 +432,7 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
     } else {
         this.GeoLayer = new ol.layer.Vector({
             source: geoSource,
-            style: (feature) => this.getShapeStyle(feature)
+            style: (feature) => that.getShapeStyle(feature) // needs to be sync
         });
 
         this.Map.addLayer(this.GeoLayer);
@@ -440,6 +440,11 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
 
     if (raiseEvents) features.forEach((f, i, arr) => { that.onFeatureAdded(f) });
 };
+
+//MapOL.wait = async function wait() {
+//    await new Promise(resolve => setTimeout(resolve, 500));
+//    return null;
+//}
 
 MapOL.prototype.setZoom = function (zoom) {
     this.Map.getView().setZoom(zoom);
@@ -641,7 +646,7 @@ MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes
         });
         this.currentDraw.on("drawend",
             function(evt) {
-                that.getShapeStyle(evt.feature)
+                that.getShapeStyleAsync(evt.feature)
                     .then(style => evt.feature.setStyle(style));
             });
 
@@ -1049,11 +1054,19 @@ MapOL.prototype.customImageStyle = function (marker) {
 };
 
 // Shape Style
-MapOL.prototype.getShapeStyle = async function(feature) {
-    const that = this;
-
+MapOL.prototype.getShapeStyleAsync = async function(feature) {
     const shape = this.mapFeatureToShape(feature);
-    var style = await this.Instance.invokeMethodAsync("OnGetShapeStyle", shape);
+    var style = await this.Instance.invokeMethodAsync("OnGetShapeStyleAsync", shape);
+    return this.mapStyleOptionsToStyle(style, feature);
+}
+MapOL.prototype.getShapeStyle = function(feature) {
+    const shape = this.mapFeatureToShape(feature);
+    var style = this.Instance.invokeMethod("OnGetShapeStyle", shape);
+    return this.mapStyleOptionsToStyle(style, feature);
+}
+
+MapOL.prototype.mapStyleOptionsToStyle = function(style, feature) {
+
     style = MapOL.transformNullToUndefined(style);
 
     if (feature.getGeometry().getType() == "Point") {
@@ -1305,3 +1318,52 @@ MapOL.LV95toWGSlng = function LV95toWGSlng(y, x) {
     // Convert to degrees
     return (longitude * 100 / 36);
 };
+
+/* 10 seconds */
+const DEFAULT_TIMEOUTS = 10 * 1000;
+
+const STATE = {
+    INITIAL: 'INITIAL',
+    RESOLVED: 'RESOLVED',
+    REJECTED: 'REJECTED'
+}
+
+const DEFAULT_TICK = 100;
+
+/**
+ * @param {Function} func Promise-base function that want to be transformed
+ * @param {Object} options Additional options
+ * @param {number} options.timeouts Function call timeouts
+ * @param {number} options.tick deasync tick, default to 100
+ * @returns {Function}
+ */
+function sp (func, options = {}) {
+    return (...args) => {
+        let promiseError, promiseValue
+        let promiseStatus = STATE.INITIAL
+        const timeouts = options.timeouts || DEFAULT_TIMEOUTS
+        const tick = options.tick || DEFAULT_TICK
+
+        func.apply(this, args).then(value => {
+            promiseValue = value
+            promiseStatus = STATE.RESOLVED
+        }).catch(e => {
+            promiseError = e
+            promiseStatus = STATE.REJECTED
+        })
+        
+        const waitUntil = new Date(new Date().getTime() + timeouts)
+        while ((waitUntil > new Date()) && promiseStatus === STATE.INITIAL) {
+            setTimeout(null, tick);
+        //    require('deasync').sleep(tick)
+        }
+
+        if (promiseStatus === STATE.RESOLVED) {
+            return promiseValue;
+        } else if (promiseStatus === STATE.REJECTED) {
+            throw promiseError;
+        } else {
+            throw new Error(`${func.name} called timeout`)
+        }
+    }
+}

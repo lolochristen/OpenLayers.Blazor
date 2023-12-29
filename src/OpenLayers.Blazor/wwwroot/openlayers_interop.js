@@ -605,7 +605,7 @@ MapOL.prototype.getCurrentGeoLocation = function () {
                 const coordinate = ol.proj.transform([position.coords.longitude, position.coords.latitude],
                     "EPSG:4326",
                     projection);
-                const point = { Y: coordinate[1], X: coordinate[0] };
+                const point = coordinate[0] + "/" + coordinate[1]; 
                 resolve(point);
             });
         } else {

@@ -9,8 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+    - name: Config
+      run: git config --global --add safe.directory /github/workspace
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        filter: tree:0        
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
     - name: Build

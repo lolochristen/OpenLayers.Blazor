@@ -76,6 +76,15 @@ export function MapOLUpdateShape(mapId, shape) {
     _MapOL[mapId].updateShape(shape);
 }
 
+export function MapOLRemoveShape(mapId, shape) {
+    _MapOL[mapId].removeShape(shape);
+}
+
+export function MapOLAddShape(mapId, shape) {
+    _MapOL[mapId].addShape(shape);
+}
+
+
 // --- MapOL ----------------------------------------------------------------------------//
 
 function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
@@ -901,6 +910,28 @@ MapOL.prototype.updateShape = function (shape) {
             feature.setGeometry(geometry);
         feature.setStyle(newFeature.getStyle());
     }
+};
+
+MapOL.prototype.removeShape = function (shape) {
+    var source;
+    if (shape.type == "Marker")
+        source = this.Markers.getSource();
+    else
+        source = this.Geometries.getSource();
+    var feature = this.Geometries.getSource().getFeatureById(shape.id);
+    if (feature) {
+        source.removeFeature(feature);
+    }
+};
+
+MapOL.prototype.addShape = function (shape) {
+    var source;
+    if (shape.type == "Marker")
+        source = this.Markers.getSource();
+    else
+        source = this.Geometries.getSource();
+    var feature = this.mapShapeToFeature(shape);
+    source.addFeature(feature);
 };
 
 //--- Styles -----------------------------------------------------------------//

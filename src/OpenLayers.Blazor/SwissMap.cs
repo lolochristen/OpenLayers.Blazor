@@ -30,7 +30,7 @@ public class SwissMap : Map
 #endif
         var layer = new Layer
         {
-            Extent = new double[] { 2420000, 1030000, 2900000, 1350000 },
+            Extent = new double[] { 2485071.58, 1074261.72, 2837119.8, 1299941.79 },
             SourceType = SourceType.TileWMS,
             Url = "https://wms.geo.admin.ch/",
             CrossOrigin = "anonymous",

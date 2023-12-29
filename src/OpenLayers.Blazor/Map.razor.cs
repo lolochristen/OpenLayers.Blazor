@@ -239,7 +239,7 @@ public partial class Map : IAsyncDisposable
     /// <returns>ValueTask</returns>
     public async ValueTask DisposeAsync()
     {
-        MarkersList.CollectionChanged -= MarkersOnCollectionChanged;
+        MarkersList.CollectionChanged -= ShapesOnCollectionChanged;
         ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
         LayersList.CollectionChanged -= LayersOnCollectionChanged;
 
@@ -310,7 +310,7 @@ public partial class Map : IAsyncDisposable
                     LayersList.Select(p => p.InternalLayer).ToArray(),
                     Instance);
 
-            MarkersList.CollectionChanged += MarkersOnCollectionChanged;
+            MarkersList.CollectionChanged += ShapesOnCollectionChanged;
             ShapesList.CollectionChanged += ShapesOnCollectionChanged;
             LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
@@ -645,11 +645,22 @@ public partial class Map : IAsyncDisposable
 
     private void ShapesOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        _ = SetShapes(ShapesList);
-    }
+        if (_module == null)
+            return;
 
-    private void MarkersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        _ = SetMarkers(MarkersList);
+        if (e.NewItems != null)
+            foreach (var newShape in e.NewItems.OfType<Shape>())
+                newShape.ParentMap = this;
+
+        Task.Run(async () =>
+        {
+            if (e.OldItems != null)
+                foreach (var oldShape in e.OldItems.OfType<Shape>())
+                    await _module.InvokeVoidAsync("MapOLRemoveShape", _mapId, oldShape.InternalFeature);
+
+            if (e.NewItems != null)
+                foreach (var newShape in e.NewItems.OfType<Shape>())
+                    await _module.InvokeVoidAsync("MapOLAddShape", _mapId, newShape.InternalFeature);
+        });
     }
 }

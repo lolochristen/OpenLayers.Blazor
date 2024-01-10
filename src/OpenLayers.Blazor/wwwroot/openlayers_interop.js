@@ -900,8 +900,13 @@ MapOL.prototype.onFeatureChanged = function (feature) {
 
 MapOL.prototype.updateShape = function (shape) {
 
-    var feature = this.Geometries.getSource().getFeatureById(shape.id);
-    if (!feature && this.GeoLayer) feature = this.GeoLayer.getSource().getFeatureById(shape.id);
+    var feature;
+    if (shape.properties.type == "Marker") {
+        feature = this.Markers.getSource().getFeatureById(shape.id);
+    } else {
+        feature = this.Geometries.getSource().getFeatureById(shape.id);
+        if (!feature && this.GeoLayer) feature = this.GeoLayer.getSource().getFeatureById(shape.id);
+    }
 
     if (feature) {
         const newFeature = this.mapShapeToFeature(shape);
@@ -914,7 +919,7 @@ MapOL.prototype.updateShape = function (shape) {
 
 MapOL.prototype.removeShape = function (shape) {
     var source;
-    if (shape.type == "Marker")
+    if (shape.properties.type == "Marker")
         source = this.Markers.getSource();
     else
         source = this.Geometries.getSource();
@@ -926,7 +931,7 @@ MapOL.prototype.removeShape = function (shape) {
 
 MapOL.prototype.addShape = function (shape) {
     var source;
-    if (shape.type == "Marker")
+    if (shape.properties.type == "Marker")
         source = this.Markers.getSource();
     else
         source = this.Geometries.getSource();
@@ -1076,6 +1081,7 @@ MapOL.prototype.customImageStyle = function (marker) {
                 offset: [0, 0],
                 opacity: 1,
                 scale: marker.scale,
+                rotation: marker.rotation,
                 anchorXUnits: "pixels",
                 anchorYUnits: "pixels",
                 src: marker.properties["content"]

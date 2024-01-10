@@ -18,6 +18,8 @@ public class Marker : Shape
 
     public float[]? Anchor { get; set; }
 
+    public double? Rotation { get; set; }
+
     public override int GetHashCode()
     {
         return HashCode.Combine(base.GetHashCode(), Size, Anchor);

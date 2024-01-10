@@ -70,7 +70,7 @@
             var c2 = new Coordinate(_map.VisibleExtent.X2, _map.VisibleExtent.Y2);
             var visibleDistance = c1.DistanceTo(c2);
             var nmVisibleRadius = visibleDistance / 2 * 0.5399568; // to nm
-
+            
             var response = await _httpClient.GetAsync($"https://api.adsb.lol/v2/point/{center.Y}/{center.X}/{(int)nmVisibleRadius}");
             _flightData = await response.Content.ReadFromJsonAsync<AdsbResponse>();
 
@@ -96,6 +96,8 @@
         {
             _logger.LogError(exp, "Error reading flight tracking data");
         }
+
+        StateHasChanged();
     }
 
     public class AdsbResponse

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -22,6 +22,7 @@
 		<EmbeddedResource Include="Pages\SwissMapLayersDemo.razor" />
 		<EmbeddedResource Include="Pages\DrawDemo.razor" />
 		<EmbeddedResource Include="Pages\GermanGdzDemo.razor" />
+		<EmbeddedResource Include="Pages\FlightTracker.razor" />
 	</ItemGroup>
 
 	<ItemGroup>

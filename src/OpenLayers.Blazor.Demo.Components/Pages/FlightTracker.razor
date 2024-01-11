@@ -1,6 +1,7 @@
 ﻿@page "/flighttracker"
-@using System.Threading
 @using Microsoft.Extensions.Logging
+@using System.Timers
+@using System.Runtime.InteropServices
 @using System.Text.Json.Serialization
 @rendermode Components.RenderMode.DefaultRenderMode
 
@@ -22,7 +23,7 @@
                 <h4>Flight @flight.Name</h4>
                 <p>Location: @marker.Coordinate.X / @marker.Coordinate.Y</p>
                 <p>Registration: @flight.Registration @flight.Type</p>
-                <p>Altitude: @flight.AltitudeBaro  Speed (ground): @flight.GroundSpeed</p>
+                <p>Altitude: @flight.AltitudeBaro Speed (ground): @flight.GroundSpeed</p>
             }
         </div>
     </Popup>
@@ -37,7 +38,7 @@
     [Inject]
     HttpClient _httpClient { get; set; }
 
-    private System.Timers.Timer _timer;
+    private Timer _timer;
 
     [Inject]
     private ILogger<FlightTracker> _logger { get; set; }
@@ -52,7 +53,7 @@
             _map.Zoom = 9;
             await LoadTrackingData(_map.Center);
 
-            _timer = new System.Timers.Timer(new TimeSpan(0, 0, 3));
+            _timer = new Timer(new TimeSpan(0, 0, 3));
             _timer.Elapsed += async (sender, args) => await LoadTrackingData(_map.Center);
             _timer.Start();
         }
@@ -70,8 +71,19 @@
             var c2 = new Coordinate(_map.VisibleExtent.X2, _map.VisibleExtent.Y2);
             var visibleDistance = c1.DistanceTo(c2);
             var nmVisibleRadius = visibleDistance / 2 * 0.5399568; // to nm
-            
-            var response = await _httpClient.GetAsync($"https://api.adsb.lol/v2/point/{center.Y}/{center.X}/{(int)nmVisibleRadius}");
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.adsb.lol/v2/point/{center.Y}/{center.X}/{(int)nmVisibleRadius}");
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("Browser")))
+            {
+                // disable CORS
+                request.SetBrowserRequestMode(BrowserRequestMode.NoCors);
+                request.Headers.Add("Access-Control-Allow-Origin", "*");
+                request.Headers.Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            }
+
+            var response = await _httpClient.SendAsync(request);
+
             _flightData = await response.Content.ReadFromJsonAsync<AdsbResponse>();
 
             foreach (var ac in _flightData.Flights)
@@ -81,13 +93,13 @@
                 if (marker == null)
                 {
                     marker = new Marker(new Coordinate(ac.Lon, ac.Lat), "_content/OpenLayers.Blazor.Demo.Components/airplane.png", 512, 512, 256, 256)
-                    { Scale = 0.05, Popup = true, Title = ac.Name, Rotation = (ac.TrueHeading * Math.PI / 180) };
+                    { Scale = 0.05, Popup = true, Title = ac.Name, Rotation = ac.TrueHeading * Math.PI / 180 };
                     marker.Id = ac.Id;
                     _map.MarkersList.Add(marker);
                 }
                 {
                     marker.Coordinate = new Coordinate(ac.Lon, ac.Lat);
-                    marker.Rotation = (ac.TrueHeading * Math.PI / 180);
+                    marker.Rotation = ac.TrueHeading * Math.PI / 180;
                     await marker.UpdateShape();
                 }
             }
@@ -97,7 +109,7 @@
             _logger.LogError(exp, "Error reading flight tracking data");
         }
 
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     public class AdsbResponse
@@ -132,4 +144,5 @@
         [JsonPropertyName("gs")]
         public double? GroundSpeed { get; set; }
     }
+
 }

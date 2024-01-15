@@ -9,8 +9,8 @@ public class SwissMap : Map
         LayerId = "ch.swisstopo.pixelkarte-farbe";
         SetBaseLayer(LayerId);
         Center = new Coordinate { X = 2660013.54, Y = 1185171.98 }; // Swiss Center
-        Zoom = 2.4;
         Defaults.CoordinatesProjection = "EPSG:2056"; // VT95
+        Zoom = 2.4;
     }
 
 

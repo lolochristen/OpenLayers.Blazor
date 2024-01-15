@@ -9,6 +9,5 @@ public class OpenStreetMap : Map
             SourceType = SourceType.OSM
         });
         Center = new Coordinate(0, 0);
-        Zoom = 10;
     }
 }

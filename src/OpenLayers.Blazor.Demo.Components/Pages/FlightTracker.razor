@@ -1,0 +1,155 @@
+﻿@page "/flighttracker"
+@using Microsoft.Extensions.Logging
+@using System.Timers
+@using System.Runtime.InteropServices
+@using System.Text.Json.Serialization
+@rendermode Components.RenderMode.DefaultRenderMode
+@implements IDisposable
+
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">Flight Tracker</h3>
+    </div>
+    <div class="card-body">
+        @* CORS might make some troubles. Works best in Blazor Server Mode Demo solution (just a demo, never just create server sided timers). *@
+        <p>Using markers to show flights using API https://api.adsb.lol.</p>
+    </div>
+</div>
+
+<OpenStreetMap @ref="_map" Style="height: 800px" Class="card mb-2" AutoPopup>
+    <Popup>
+        <div id="popup" class="ol-box">
+            @if (context is Marker marker)
+            {
+                var flight = _flightData.Flights.FirstOrDefault(p => p.Id == marker.Id);
+                <h4>Flight @flight.Name</h4>
+                <p>Location: @marker.Coordinate.X / @marker.Coordinate.Y</p>
+                <p>Registration: @flight.Registration @flight.Type</p>
+                <p>Altitude: @flight.AltitudeBaro Speed (ground): @flight.GroundSpeed</p>
+            }
+        </div>
+    </Popup>
+
+</OpenStreetMap>
+
+<CodeView Source="FlightTracker.razor"/>
+
+@code {
+    private OpenStreetMap? _map;
+
+    [Inject]
+    HttpClient _httpClient { get; set; }
+
+    private Timer? _timer;
+
+    [Inject]
+    private ILogger<FlightTracker> _logger { get; set; }
+
+    private AdsbResponse? _flightData;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _map.Center = new Coordinate(2.79437, 51.89508);
+            _map.Zoom = 9;
+            await LoadTrackingData(_map.Center);
+
+            _timer = new Timer(new TimeSpan(0, 0, 3));
+            _timer.Elapsed += async (sender, args) => await LoadTrackingData(_map.Center);
+            _timer.Start();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadTrackingData(Coordinate center)
+    {
+        try
+        {
+            if (_map == null || _map.VisibleExtent == null)
+                return;
+
+            var c1 = new Coordinate(_map.VisibleExtent.X1, _map.VisibleExtent.Y1);
+            var c2 = new Coordinate(_map.VisibleExtent.X2, _map.VisibleExtent.Y2);
+            var visibleDistance = c1.DistanceTo(c2);
+            var nmVisibleRadius = visibleDistance / 2 * 0.5399568; // to nm
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.adsb.lol/v2/point/{center.Y}/{center.X}/{(int)nmVisibleRadius}");
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("Browser")))
+            {
+                // disable CORS
+                request.SetBrowserRequestMode(BrowserRequestMode.NoCors);
+                request.Headers.Add("Access-Control-Allow-Origin", "*");
+                request.Headers.Add("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
+            }
+
+            var response = await _httpClient.SendAsync(request);
+
+            _flightData = await response.Content.ReadFromJsonAsync<AdsbResponse>();
+
+            foreach (var ac in _flightData.Flights)
+            {
+                var marker = _map.MarkersList.FirstOrDefault(p => p.Id == ac.Id);
+
+                if (marker == null)
+                {
+                    marker = new Marker(new Coordinate(ac.Lon, ac.Lat), "_content/OpenLayers.Blazor.Demo.Components/airplane.png", 512, 512, 256, 256)
+                    { Scale = 0.05, Popup = true, Title = ac.Name, Rotation = ac.TrueHeading * Math.PI / 180 };
+                    marker.Id = ac.Id;
+                    _map.MarkersList.Add(marker);
+                }
+                {
+                    marker.Coordinate = new Coordinate(ac.Lon, ac.Lat);
+                    marker.Rotation = ac.TrueHeading * Math.PI / 180;
+                    await marker.UpdateShape();
+                }
+            }
+        }
+        catch (Exception exp)
+        {
+            _logger.LogError(exp, "Error reading flight tracking data");
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
+    public class AdsbResponse
+    {
+        [JsonPropertyName("ac")]
+        public AdsbFlight[] Flights { get; set; }
+    }
+
+    public class AdsbFlight
+    {
+        [JsonPropertyName("hex")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("flight")]
+        public string? Name { get; set; }
+
+        public double Lon { get; set; }
+        public double Lat { get; set; }
+
+        [JsonPropertyName("t")]
+        public string? Type { get; set; }
+
+        [JsonPropertyName("r")]
+        public string? Registration { get; set; }
+
+        [JsonPropertyName("true_heading")]
+        public double? TrueHeading { get; set; }
+
+        [JsonPropertyName("alt_baro")]
+        public object? AltitudeBaro { get; set; }
+
+        [JsonPropertyName("gs")]
+        public double? GroundSpeed { get; set; }
+    }
+
+}

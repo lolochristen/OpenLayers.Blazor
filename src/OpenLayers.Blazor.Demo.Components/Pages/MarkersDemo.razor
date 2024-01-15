@@ -12,6 +12,7 @@
             <option value="@MarkerType.MarkerFlag">Flag</option>
             <option value="@MarkerType.MarkerCustomImage">Custom Image</option>
         </select>
+        <button class="btn btn-primary" @onclick="() => _map.MarkersList.Clear()">Clear</button>
     </div>
 </div>
 

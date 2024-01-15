@@ -1,0 +1,87 @@
+﻿@page "/events"
+
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">Events</h3>
+        @if (_map != null)
+        {
+            <pre>
+Zoom: @_map.Zoom
+Center: @_map.Center
+Extent: @_map.VisibleExtent
+Pointer: @_pointer
+</pre>
+        }
+    </div>
+    <div class="card-body small font-monospace" style="height: 400px; overflow-y: auto;">
+        @foreach (var m in _msg)
+        {
+            <span>
+                @m<br/>
+            </span>
+        }
+    </div>
+</div>
+
+<OpenStreetMap @ref="_map" Style="height: 500px" Class="card mb-2" 
+               CenterChanged="OnCenterChanged" 
+               OnRenderComplete="OnRenderComplete" 
+               OnClick="OnClick" 
+               VisibleExtentChanged="VisibleExtentChanged" 
+               OnPointerMove="OnPointerMove" 
+               ZoomChanged="ZoomChanged"></OpenStreetMap>
+
+@code {
+    private OpenStreetMap? _map;
+    private Coordinate? _pointer;
+    private readonly List<string> _msg = [];
+
+    protected override void OnInitialized()
+    {
+        AddMessage("Page.OnInitialized");
+        base.OnInitialized();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            AddMessage($"Page.OnAfterRender firstRender: {firstRender}");
+        base.OnAfterRender(firstRender);
+    }
+
+    private void OnCenterChanged(Coordinate c)
+    {
+        AddMessage($"CenterChanged {c}");
+    }
+
+    private void AddMessage(string msg)
+    {
+        _msg.Insert(0, msg);
+    }
+
+    private void OnRenderComplete()
+    {
+        AddMessage("RenderComplete");
+    }
+
+    private void OnClick(Coordinate c)
+    {
+        AddMessage($"OnClick {c}");
+    }
+
+    private void VisibleExtentChanged(Extent e)
+    {
+        AddMessage($"VisibleExtentChanged {e}");
+    }
+
+    private void OnPointerMove(Coordinate c)
+    {
+        _pointer = c;
+    }
+
+    private void ZoomChanged(double z)
+    {
+        AddMessage($"ZoomChanged {z}");
+    }
+
+}

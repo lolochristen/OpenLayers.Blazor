@@ -46,7 +46,7 @@ public partial class Map : IAsyncDisposable
     ///     Zoom level of the map
     /// </summary>
     [Parameter]
-    public double Zoom { get; set; } = 2;
+    public double Zoom { get; set; } = 5;
 
     /// <summary>
     ///     Event on zoom changes

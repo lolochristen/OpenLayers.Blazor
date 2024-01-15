@@ -11,7 +11,8 @@
         <h3 class="card-title">Flight Tracker</h3>
     </div>
     <div class="card-body">
-        <p>Using markers to show flights using API https://api.adsb.lol. CORS might make some troubles. Works best in Blazor Server Mode Demo solution.</p>
+        @* CORS might make some troubles. Works best in Blazor Server Mode Demo solution (just a demo, never just create server sided timers). *@
+        <p>Using markers to show flights using API https://api.adsb.lol.</p>
     </div>
 </div>
 
@@ -80,7 +81,7 @@
                 // disable CORS
                 request.SetBrowserRequestMode(BrowserRequestMode.NoCors);
                 request.Headers.Add("Access-Control-Allow-Origin", "*");
-                request.Headers.Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                request.Headers.Add("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
             }
 
             var response = await _httpClient.SendAsync(request);

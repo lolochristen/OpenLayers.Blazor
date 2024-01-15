@@ -4,13 +4,14 @@
 @using System.Runtime.InteropServices
 @using System.Text.Json.Serialization
 @rendermode Components.RenderMode.DefaultRenderMode
+@implements IDisposable
 
 <div class="card mt-2 mb-2">
     <div class="card-header">
         <h3 class="card-title">Flight Tracker</h3>
     </div>
     <div class="card-body">
-        <p>Using markers to show flights using API https://api.adsb.lol</p>
+        <p>Using markers to show flights using API https://api.adsb.lol.</p>
     </div>
 </div>
 
@@ -38,7 +39,7 @@
     [Inject]
     HttpClient _httpClient { get; set; }
 
-    private Timer _timer;
+    private Timer? _timer;
 
     [Inject]
     private ILogger<FlightTracker> _logger { get; set; }
@@ -110,6 +111,11 @@
         }
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
     }
 
     public class AdsbResponse

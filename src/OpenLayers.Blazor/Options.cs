@@ -2,7 +2,7 @@
 
 namespace OpenLayers.Blazor;
 
-public class Defaults
+public class Options
 {
     public bool AutoPopup { get; set; }
 
@@ -15,6 +15,8 @@ public class Defaults
     public string BorderColor { get; set; } = "#FFFFFF";
 
     public string CoordinatesProjection { get; set; } = "EPSG:4326";
+
+    public string? ViewProjection { get; set; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ScaleLineUnit ScaleLineUnit { get; set; } = ScaleLineUnit.Metric;

@@ -8,7 +8,7 @@
     <div class="card-body">
     <p>Demo with a loaded KML Layer on first map, custom WMS source on second map, synced center and a Graticule Layer on second map.</p>
     <pre>
-Center: @_center
+Center: @_map?.Center
 VisibleExtent: @_map?.VisibleExtent
 Zoom: @_map?.Zoom
     </pre>
@@ -40,7 +40,8 @@ Zoom: @_map?.Zoom
 <CodeView Source="OpenStreetMapDemo.razor"/>
 
 @code {
-    private Coordinate _center = new(7.6, 46.5);
-    private OpenStreetMap _map;
+    private Coordinate _center = new(11, 49);
+    //private OpenStreetMap _map;
+    private Map _map;
     private dynamic _kmlOptions = new { ShowPointNames = true, ExtractStyles = true };
 }

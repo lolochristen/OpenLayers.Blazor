@@ -8,6 +8,7 @@
     </div>
 
     <div class="card-body">
+        <input type="text" @bind-value="_key" width="400px" placeholder="Your Bing Maps Key from https://www.bingmapsportal.com/ ">
         <select @bind="_layerselect">
             <option value="Aerial">Aerial</option>
             <option value="AerialWithLabelsOnDemand">Aerial with labels</option>
@@ -18,10 +19,14 @@
     </div>
 </div>
 
-<BingMap Style="height:800px;" Class="card" ImagerySet="@(_layerselect != null ? Enum.Parse<BingMapImagerySet>(_layerselect) : BingMapImagerySet.RoadOnDemand)" Key="Your Bing Maps Key from https://www.bingmapsportal.com/ here"></BingMap>
+@if (!string.IsNullOrEmpty(_key))
+{
+    <BingMap Style="height: 800px;" Class="card" ImagerySet="@(_layerselect != null ? Enum.Parse<BingMapImagerySet>(_layerselect) : BingMapImagerySet.RoadOnDemand)" Key="@_key"></BingMap>
+}
 
 <CodeView Source="BingMapDemo.razor" />
 
 @code {
     private string? _layerselect;
+    private string? _key;
 }

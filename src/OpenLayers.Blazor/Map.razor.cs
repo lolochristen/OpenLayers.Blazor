@@ -141,9 +141,9 @@ public partial class Map : IAsyncDisposable
     public ObservableCollection<Layer> LayersList { get; } = new();
 
     /// <summary>
-    ///     Defaults to use for the map rendering
+    ///     Options to use for the map rendering
     /// </summary>
-    public Defaults Defaults { get; } = new();
+    public Options Options { get; } = new();
 
     /// <summary>
     ///     Class of the map element
@@ -165,8 +165,15 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public string CoordinatesProjection
     {
-        get => Defaults.CoordinatesProjection;
-        set => Defaults.CoordinatesProjection = value;
+        get => Options.CoordinatesProjection;
+        set => Options.CoordinatesProjection = value;
+    }
+
+    [Parameter]
+    public string ViewProjection
+    {
+        get => Options.ViewProjection;
+        set => Options.ViewProjection = value;
     }
 
     /// <summary>
@@ -175,8 +182,8 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public ScaleLineUnit ScaleLineUnit
     {
-        get => Defaults.ScaleLineUnit;
-        set => Defaults.ScaleLineUnit = value;
+        get => Options.ScaleLineUnit;
+        set => Options.ScaleLineUnit = value;
     }
 
     /// <summary>
@@ -185,8 +192,8 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public bool AutoPopup
     {
-        get => Defaults.AutoPopup;
-        set => Defaults.AutoPopup = value;
+        get => Options.AutoPopup;
+        set => Options.AutoPopup = value;
     }
 
     /// <summary>
@@ -304,7 +311,7 @@ public partial class Map : IAsyncDisposable
             Instance ??= DotNetObjectReference.Create(this);
 
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Defaults, Center.Value, Zoom,
+                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center.Value, Zoom,
                     MarkersList.Select(p => p.InternalFeature).ToArray(),
                     ShapesList.Select(p => p.InternalFeature).ToArray(),
                     LayersList.Select(p => p.InternalLayer).ToArray(),

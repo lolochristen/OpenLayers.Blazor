@@ -16,14 +16,17 @@ public partial class Map : IAsyncDisposable
     private IJSObjectReference? _module;
     private Feature? _popupContext;
     private string _popupId;
+    private static int _counter = 0;
+
 
     /// <summary>
     ///     Default Constructor
     /// </summary>
     public Map()
     {
-        _mapId = Guid.NewGuid().ToString();
-        _popupId = Guid.NewGuid().ToString();
+        _counter++;
+        _mapId = "map_" + _counter;
+        _popupId = "map_popup_" + _counter;
 
         EnableShapeSnap = true;
     }

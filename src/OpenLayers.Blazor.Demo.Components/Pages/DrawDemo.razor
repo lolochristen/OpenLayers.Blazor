@@ -35,20 +35,17 @@
 </div>
 
 <SwissMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
-    <Popup>
-        <div id="popup" class="ol-box">
-            @if (@context != null)
-            {
-                <h3>@context.Type</h3>
-            }
-        </div>
-    </Popup>
     <Features>
         <Line Points="new []{new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650)}" BorderColor="red" BorderSize="2"></Line>
         <Circle @ref="_circle" Center="_center" Radius="2000" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>
         <Point Coordinate="new Coordinate(2683276.620804008, 1247123.8311215444)" BackgroundColor="green" Radius="20"></Point>
     </Features>
 </SwissMap>
+
+@*
+    <OpenStreetMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
+    </OpenStreetMap>
+*@
 
 @if (_map != null)
 {
@@ -76,7 +73,7 @@
 <CodeView Source="DrawDemo.razor" />
 
 @code {
-    private SwissMap _map = null!;
+    private Map _map = null!;
     private ShapeType _shapeType = ShapeType.LineString;
     private double _y = 1197650;
     private Circle _circle;

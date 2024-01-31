@@ -554,7 +554,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
                 showPopup = shape.properties.popup;
             } 
             if (showPopup == undefined) {
-                showPopup = that.Defaults.autoPopup;
+                showPopup = that.Options.autoPopup;
             }
 
             if (showPopup) {
@@ -730,7 +730,7 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
                 var l = g.length;
                 if (Array.isArray(g[0])) g.forEach((g2) => l = l + g2.length);
                 if (l < this.Options.serializationCoordinatesLimit)
-                    coordinates = ol.proj.transform(geometry.getCoordinates(),
+                    coordinates = MapOL.transformCoordinates(geometry.getCoordinates(),
                         viewProjection,
                         this.Options.coordinatesProjection);
                 break;
@@ -787,8 +787,7 @@ MapOL.prototype.mapShapeToFeature = function (shape) {
     var geometry;
     const viewProjection = this.Map.getView().getProjection();
     if (shape.coordinates) {
-        var coordinates = ol.proj.transform(shape.coordinates, this.Options.coordinatesProjection, viewProjection);
-
+        var coordinates = MapOL.transformCoordinates(shape.coordinates, this.Options.coordinatesProjection, viewProjection);
         switch (shape.geometryType) {
             case "Point":
                 geometry = new ol.geom.Point(coordinates);
@@ -1156,7 +1155,6 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style, feature) {
     return styleObject;
 };
 
-
 MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {
     for (const key in obj) {
         if (obj.hasOwnProperty(key) && obj[key] === null) {
@@ -1167,6 +1165,29 @@ MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {
     }
     return obj;
 };
+
+MapOL.transformCoordinates = function(coordinates, source, destination) {
+    var newCoordinates;
+    if (source === destination)
+        return coordinates;
+    if (Array.isArray(coordinates) && Array.isArray(coordinates[0])) {
+        newCoordinates = Array(coordinates.length);
+        for (var i = 0; i < coordinates.length; i++) {
+
+            if (Array.isArray(coordinates[i][0])) {
+                newCoordinates[i] = Array(coordinates[i].length);
+                for (var i2 = 0; i2 < coordinates[i].length; i2++) {
+                    newCoordinates[i][i2] = ol.proj.transform(coordinates[i][i2], source, destination);
+                }
+            } else {
+                newCoordinates[i] = ol.proj.transform(coordinates[i], source, destination);
+            }
+        }
+    } else {
+        newCoordinates = ol.proj.transform(coordinates, source, destination);
+    }
+    return newCoordinates;
+}
 
 /*
  * Swiss projection transform functions downloaded from

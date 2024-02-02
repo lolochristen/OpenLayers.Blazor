@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
@@ -631,6 +632,34 @@ public partial class Map : IAsyncDisposable
             }
         };
     }
+
+    /// <summary>
+    /// Reads and updates the coordinates of a shape.
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task ReadCoordinates(Feature feature)
+    {
+        if (_module == null)
+            return;
+
+        if (FeaturesList.All(p => p.Id != feature.Id))
+        {
+            throw new InvalidOperationException("Given shape is not assigned to map");
+        }
+
+        var c = await _module.InvokeAsync<dynamic>("MapOLGetCoordinates", _mapId, feature.Id);
+        if (c is JsonElement)
+            feature.InternalFeature.Coordinates = CoordinatesHelper.DeserializeCoordinates((JsonElement)c);
+        else
+            feature.InternalFeature.Coordinates = c;
+    }
+
+    /// <summary>
+    /// Returns a IEnumerable of all features assigned to map.
+    /// </summary>
+    public IEnumerable<Feature> FeaturesList => ShapesList.OfType<Feature>().Union(MarkersList);
 
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {

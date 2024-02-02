@@ -37,7 +37,7 @@ public class Feature : ComponentBase
         set => InternalFeature.Id = value;
     }
 
-    protected Internal.Feature InternalFeature
+    internal Internal.Feature InternalFeature
     {
         get => _internalFeature;
         set
@@ -49,15 +49,33 @@ public class Feature : ComponentBase
         }
     }
 
+    /// <summary>
+    /// Gets the geometry type of the feature.
+    /// </summary>
     public GeometryTypes? GeometryType => InternalFeature.GeometryType;
 
+    /// <summary>
+    /// Gets to type of feature.
+    /// </summary>
     public string? Type => InternalFeature.Type;
 
+    /// <summary>
+    /// Gets a dictionary of all dynamic properties of a feature.
+    /// </summary>
     public Dictionary<string, dynamic> Properties => InternalFeature.Properties;
 
-    public Coordinate? Point => Coordinates?.FirstOrDefault();
+    /// <summary>
+    /// Gets the point coordinate if the shape is defined by a single coordinate e.g. point, circle.
+    /// </summary>
+    public Coordinate? Point => CoordinatesHelper.IsSingleCoordinate(InternalFeature.Coordinates) ? Coordinates?.FirstOrDefault() : null;
 
-    public IEnumerable<Coordinate>? Coordinates => CoordinatesHelper.GetCoordinates(InternalFeature.Coordinates);
+    /// <summary>
+    /// Gets an enumerator of coordinates e.g. for a line.
+    /// </summary>
+    public IEnumerable<Coordinate>? Coordinates => !CoordinatesHelper.IsMultiCoordinate(InternalFeature.Coordinates) ? CoordinatesHelper.GetCoordinates(InternalFeature.Coordinates) : null;
 
-    public IEnumerable<IEnumerable<Coordinate>> MultiCoordinates => CoordinatesHelper.GetMultiCoordinates(InternalFeature.Coordinates);
+    /// <summary>
+    /// Gets an enumerator of multi coordinates e.g. for a multi line or multi polygon shape.
+    /// </summary>
+    public IEnumerable<IEnumerable<Coordinate>>? MultiCoordinates => CoordinatesHelper.IsMultiCoordinate(InternalFeature.Coordinates) ? CoordinatesHelper.GetMultiCoordinates(InternalFeature.Coordinates) : null;
 }

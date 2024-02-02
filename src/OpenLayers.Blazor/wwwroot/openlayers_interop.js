@@ -84,6 +84,10 @@ export function MapOLAddShape(mapId, shape) {
     _MapOL[mapId].addShape(shape);
 }
 
+export function MapOLGetCoordinates(mapId, shapeId) {
+    return _MapOL[mapId].getCoordinates(shapeId);
+}
+
 
 // --- MapOL ----------------------------------------------------------------------------//
 
@@ -955,6 +959,17 @@ MapOL.prototype.addShape = function (shape) {
     var feature = this.mapShapeToFeature(shape);
     source.addFeature(feature);
 };
+
+MapOL.prototype.getCoordinates = function(featureId) {
+    var feature = this.Geometries.getSource().getFeatureById(featureId);
+    if (feature) {
+        var coord = feature.getGeometry().getCoordinates();
+        if (!coord)
+            coord = feature.getGeometry().getCenter();
+        return coord;
+    }
+    return null;
+}
 
 //--- Styles -----------------------------------------------------------------//
 

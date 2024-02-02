@@ -1,4 +1,4 @@
-﻿@page "/drawdemo"
+﻿@page "/drawdemo/{MapType?}"
 @using System.Text.Json
 @rendermode Components.RenderMode.DefaultRenderMode
 
@@ -29,23 +29,25 @@
             <input type="range" min="1" max="30" @bind="_styleOptions.Stroke.Width" title="Border Size">
             <input type="button" class="btn btn-primary" value="Undo" @onclick="() => _map.Undo()" />
             <input type="button" class="btn btn-secondary" value="Clear" @onclick="() => _map.ShapesList.Clear()" />
-            <input type="range" min="1080000" max="1280000" value="@_y" @onchange="OnYChange"> <code>@_y</code>
         </div>
     </div>
 </div>
 
-<SwissMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
-    <Features>
-        <Line Points="new []{new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650)}" BorderColor="red" BorderSize="2"></Line>
-        <Circle @ref="_circle" Center="_center" Radius="2000" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>
-        <Point Coordinate="new Coordinate(2683276.620804008, 1247123.8311215444)" BackgroundColor="green" Radius="20"></Point>
-    </Features>
-</SwissMap>
-
-@*
+@if (MapType == "osm")
+{
     <OpenStreetMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
     </OpenStreetMap>
-*@
+}
+else
+{
+    <SwissMap @ref="_map" Style="height: 800px;" Class="card" OnShapeAdded="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
+        <Features>
+            <Line Points="new[] { new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650) }" BorderColor="red" BorderSize="2"></Line>
+            <Circle Center="_center" Radius="2000" BorderSize="3" BorderColor="blue" BackgroundColor="#55229933"></Circle>
+            <Point Coordinate="new Coordinate(2683276.620804008, 1247123.8311215444)" BackgroundColor="green" Radius="20"></Point>
+        </Features>
+    </SwissMap>
+}
 
 @if (_map != null)
 {
@@ -73,10 +75,9 @@
 <CodeView Source="DrawDemo.razor" />
 
 @code {
-    private Map _map = null!;
+    [Parameter] public string? MapType { get; set; }
+    private Map? _map;
     private ShapeType _shapeType = ShapeType.LineString;
-    private double _y = 1197650;
-    private Circle _circle;
     private Coordinate _center = new(2604200, 1197650);
     private bool _enabledraw, _enableedit, _snap = true, _freehand;
 
@@ -98,13 +99,5 @@
         if (firstRender)
             StateHasChanged();
         return base.OnAfterRenderAsync(firstRender);
-    }
-
-    private void OnYChange(ChangeEventArgs obj)
-    {
-        _y = Double.Parse(obj.Value.ToString());
-        _center.Y = _y;
-        _circle.Center = _center;
-        _ = _circle.UpdateShape();
     }
 }

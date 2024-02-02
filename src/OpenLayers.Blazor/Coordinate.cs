@@ -76,7 +76,7 @@ public class Coordinate : IEquatable<Coordinate>
 
     public override string ToString()
     {
-        return $"{X}, {Y}";
+        return $"{X}/{Y}";
     }
 
     public static implicit operator Coordinate(string val)

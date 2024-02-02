@@ -8,7 +8,7 @@
     <div class="card-body">
     <p>Demo with a loaded KML Layer on first map, custom WMS source on second map, synced center and a Graticule Layer on second map.</p>
     <pre>
-Center: @_center
+Center: @_map?.Center
 VisibleExtent: @_map?.VisibleExtent
 Zoom: @_map?.Zoom
     </pre>
@@ -35,12 +35,24 @@ Zoom: @_map?.Zoom
         </Layer>
         <Layer SourceType="SourceType.Graticule" />
     </Layers>
+    
+    <Features>
+        <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(x, y)" Title="You are Here" Popup></Marker>
+        <Circle Center="new Coordinate(x, y)" Radius="50" BackgroundColor="#2222AA66"></Circle>
+        <Point Coordinate="new Coordinate(x, y)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
+        <Point Coordinate="new Coordinate(x2, y2)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
+         <Line Points="new []{ new Coordinate(x, y), new Coordinate(x2, y2) }" BorderColor="cyan" BorderSize="20" BackgroundColor="cyan" Title="Test"></Line>
+    </Features>
+
+
 </OpenStreetMap>
 
 <CodeView Source="OpenStreetMapDemo.razor"/>
 
 @code {
-    private Coordinate _center = new(7.6, 46.5);
-    private OpenStreetMap _map;
+    private double x = 11, y = 49, x2 = 12, y2 = 48;
+    private Coordinate _center = new(11, 49);
+    //private OpenStreetMap _map;
+    private Map _map;
     private dynamic _kmlOptions = new { ShowPointNames = true, ExtractStyles = true };
 }

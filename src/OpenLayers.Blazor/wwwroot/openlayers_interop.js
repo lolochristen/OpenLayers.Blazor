@@ -1,7 +1,7 @@
 ﻿var _MapOL = new Array();
 
-export function MapOLInit(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
-    _MapOL[mapId] = new MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance);
+export function MapOLInit(mapId, popupId, options, center, zoom, markers, shapes, layers, instance) {
+    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, markers, shapes, layers, instance);
 }
 
 export function MapOLDispose(mapId) {
@@ -16,8 +16,8 @@ export function MapOLZoom(mapId, zoom) {
     _MapOL[mapId].setZoom(zoom);
 }
 
-export function MapOLSetDefaults(mapId, defaults) {
-    _MapOL[mapId].setDefaults(defaults);
+export function MapOLSetOptions(mapId, options) {
+    _MapOL[mapId].setOptions(options);
 }
 
 export function MapOLLoadGeoJson(mapId, json, dataProjection, raiseEvents) {
@@ -84,18 +84,22 @@ export function MapOLAddShape(mapId, shape) {
     _MapOL[mapId].addShape(shape);
 }
 
+export function MapOLGetCoordinates(mapId, shapeId) {
+    return _MapOL[mapId].getCoordinates(shapeId);
+}
+
 
 // --- MapOL ----------------------------------------------------------------------------//
 
-function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, instance) {
+function MapOL(mapId, popupId, options, center, zoom, markers, shapes, layers, instance) {
     this.Instance = instance;
-    this.Defaults = defaults;
+    this.Options = options;
 
     //LV03
     const projectionLV03 = new ol.proj.Projection({
         code: "EPSG:21781",
         extent: [485869.5728, 76443.1884, 837076.5648, 299941.7864],
-        units: "m",
+        units: "m"
     });
     ol.proj.addProjection(projectionLV03);
 
@@ -103,7 +107,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     const projectionLV95 = new ol.proj.Projection({
         code: "EPSG:2056",
         extent: [2485071.58, 1074261.72, 2837119.8, 1299941.79],
-        units: "m",
+        units: "m"
     });
     ol.proj.addProjection(projectionLV95);
 
@@ -113,13 +117,13 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
         function (coordinate) {
             return [
                 MapOL.WGStoLV03y(coordinate[1], coordinate[0]),
-                MapOL.WGStoLV03x(coordinate[1], coordinate[0]),
+                MapOL.WGStoLV03x(coordinate[1], coordinate[0])
             ];
         },
         function (coordinate) {
             return [
                 MapOL.CHtoLV03lng(coordinate[0], coordinate[1]),
-                MapOL.CHtoLV03lat(coordinate[0], coordinate[1]),
+                MapOL.CHtoLV03lat(coordinate[0], coordinate[1])
             ];
         }
     );
@@ -130,39 +134,51 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
         function (coordinate) {
             return [
                 MapOL.WGStoLV95y(coordinate[1], coordinate[0]),
-                MapOL.WGStoLV95x(coordinate[1], coordinate[0]),
+                MapOL.WGStoLV95x(coordinate[1], coordinate[0])
             ];
         },
         function (coordinate) {
             return [
                 MapOL.LV95toWGSlng(coordinate[0], coordinate[1]),
-                MapOL.LV95toWGSlat(coordinate[0], coordinate[1]),
+                MapOL.LV95toWGSlat(coordinate[0], coordinate[1])
             ];
         }
     );
 
-    const ollayers = MapOL.prepareLayers(layers);
+    if (!this.Options.coordinatesProjection)
+        this.Options.coordinatesProjection = "EPSG:4326"; // default coordinates
 
-    let viewProjection = undefined;
+    const ollayers = this.prepareLayers(layers);
+
+    let viewProjection = (ollayers.length > 0) ? ollayers[0].getSource().getProjection() : undefined;
     let viewExtent = (ollayers.length > 0) ? ollayers[0].getExtent() : undefined;
     let viewCenter = (center && center) ? center : undefined;
-    if (this.Defaults.coordinatesProjection == "EPSG:2056") {
-        viewProjection = projectionLV95;
-    } else if (this.Defaults.coordinatesProjection == "EPSG:21781") {
-        viewProjection = projectionLV03;
-    } else if (this.Defaults.coordinatesProjection == "EPSG:4326") {
-        if (viewCenter)
-            viewCenter = ol.proj.transform(viewCenter, "EPSG:4326", "EPSG:3857");
+
+    if (this.Options.viewProjection) {
+        viewProjection = this.Options.viewProjection;
+    } else {
+        if (!viewProjection) {
+            if (this.Options.coordinatesProjection == "EPSG:2056") {
+                viewProjection = projectionLV95;
+            } else if (this.Options.coordinatesProjection == "EPSG:21781") {
+                viewProjection = projectionLV03;
+            } else {
+                viewProjection = "EPSG:3857"; // default view
+            }
+        }
     }
+
+    if (viewCenter)
+        viewCenter = ol.proj.transform(viewCenter, this.Options.coordinatesProjection, viewProjection);
 
     this.Map = new ol.Map({
         layers: ollayers,
         target: mapId,
-        controls: defaults.scaleLineUnit != "none"
+        controls: this.Options.scaleLineUnit != "none"
             ? ol.control.defaults.defaults().extend([
                 new ol.control.ScaleLine({
-                    units: defaults.scaleLineUnit.toLowerCase(),
-                }),
+                    units: this.Options.scaleLineUnit.toLowerCase()
+                })
             ])
             : null,
         view: new ol.View({
@@ -200,7 +216,7 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
         element: popupElement,
         positioning: "bottom-center",
         stopEvent: false,
-        offset: [0, -50],
+        offset: [0, -50]
     });
 
     this.Map.addOverlay(popup);
@@ -216,14 +232,20 @@ function MapOL(mapId, popupId, defaults, center, zoom, markers, shapes, layers, 
     this.onMapCenterChanged();
 }
 
-MapOL.prepareLayers = function (layers) {
+MapOL.prototype.prepareLayers = function (layers) {
     const ollayers = new Array();
+    let that = this;
 
     layers.forEach((l, i, arr) => {
 
         let source;
         let sourceType = l.source.sourceType;
         l = MapOL.transformNullToUndefined(l);
+
+        if (l.extent && this.Options.coordinatesProjection) {
+            let projection = l.source.projection ?? "EPSG:3857";
+            l.extent = ol.proj.transformExtent(l.extent, that.Options.coordinatesProjection, projection);
+        }
 
         switch (sourceType) {
             case "TileImage":
@@ -329,7 +351,7 @@ MapOL.prepareLayers = function (layers) {
                 if (source == undefined) {
                     source = {
                         showLabels: true,
-                        wrapX: false,
+                        wrapX: false
                     };
                 }
                 break;
@@ -348,7 +370,7 @@ MapOL.prepareLayers = function (layers) {
 };
 
 MapOL.prototype.setLayers = function (layers) {
-    this.Map.setLayers(MapOL.prepareLayers(layers));
+    this.Map.setLayers(this.prepareLayers(layers));
 };
 
 MapOL.prototype.removeLayer = function (layer) {
@@ -364,12 +386,12 @@ MapOL.prototype.removeLayer = function (layer) {
 };
 
 MapOL.prototype.addLayer = function (layer) {
-    const ollayers = MapOL.prepareLayers([layer]);
+    const ollayers = this.prepareLayers([layer]);
     this.Map.addLayer(ollayers[0]);
 };
 
 MapOL.prototype.updateLayer = function (layer) {
-    const ollayers = MapOL.prepareLayers([layer]);
+    const ollayers = this.prepareLayers([layer]);
     const olayer = this.findLayer(ollayers[0]);
     if (olayer != undefined) {
         olayer.setVisible(layer.visibility);
@@ -430,7 +452,7 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
     if (!json) return;
 
     const features = (new ol.format.GeoJSON()).readFeatures(json,
-        { featureProjection: this.Defaults.coordinatesProjection, dataProjection: dataProjection });
+        { featureProjection: this.Options.coordinatesProjection, dataProjection: dataProjection });
 
     const geoSource = new ol.source.Vector({
         features: features
@@ -477,12 +499,12 @@ MapOL.prototype.setZoomToExtent = function (extent) {
 
 MapOL.prototype.setCenter = function (point) {
     this.Map.getView().setCenter(ol.proj.transform(point,
-        this.Defaults.coordinatesProjection,
-        this.Map.getView().getProjection().getCode()));
+        this.Options.coordinatesProjection,
+        this.Map.getView().getProjection()));
 };
 
-MapOL.prototype.setDefaults = function (defaults) {
-    this.Defaults = defaults;
+MapOL.prototype.setOptions = function (options) {
+    this.Options = options;
 };
 
 MapOL.prototype.getReducedFeature = function (feature) {
@@ -536,7 +558,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
                 showPopup = shape.properties.popup;
             } 
             if (showPopup == undefined) {
-                showPopup = that.Defaults.autoPopup;
+                showPopup = that.Options.autoPopup;
             }
 
             if (showPopup) {
@@ -548,7 +570,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
 
     if (invokeMethod) {
         invokeMethod = false;
-        const coordinate = ol.proj.transform(evt.coordinate, "EPSG:3857", this.Defaults.coordinatesProjection);
+        const coordinate = ol.proj.transform(evt.coordinate, this.Map.getView().getProjection(), this.Options.coordinatesProjection);
         const point = coordinate[0] + "/" + coordinate[1];
         this.Instance.invokeMethodAsync("OnInternalClick", point);
     }
@@ -559,8 +581,8 @@ MapOL.prototype.onMapPointerMove = function (evt, element) {
         return;
     }
     const coordinate = ol.proj.transform(evt.coordinate,
-        this.Map.getView().getProjection().getCode(),
-        this.Defaults.coordinatesProjection);
+        this.Map.getView().getProjection(),
+        this.Options.coordinatesProjection);
     const point = coordinate[0] + "/" + coordinate[1];
     this.Instance.invokeMethodAsync("OnInternalPointerMove", point);
 };
@@ -573,8 +595,8 @@ MapOL.prototype.onMapCenterChanged = function () {
     const center = this.Map.getView().getCenter();
     if (!center) return;
     const coordinate = ol.proj.transform(center,
-        this.Map.getView().getProjection().getCode(),
-        this.Defaults.coordinatesProjection);
+        this.Map.getView().getProjection(),
+        this.Options.coordinatesProjection);
     const point = coordinate[0] + "/" + coordinate[1];
     this.Instance.invokeMethodAsync("OnInternalCenterChanged", point);
     this.onVisibleExtentChanged();
@@ -584,11 +606,11 @@ MapOL.prototype.onVisibleExtentChanged = function () {
     if (this.disableVisibleExtentChanged) return;
     const extentArray = this.Map.getView().calculateExtent(this.Map.getSize());
     const coordinate1 = ol.proj.transform([extentArray[0], extentArray[1]],
-        this.Map.getView().getProjection().getCode(),
-        this.Defaults.coordinatesProjection);
+        this.Map.getView().getProjection(),
+        this.Options.coordinatesProjection);
     const coordinate2 = ol.proj.transform([extentArray[2], extentArray[3]],
-        this.Map.getView().getProjection().getCode(),
-        this.Defaults.coordinatesProjection);
+        this.Map.getView().getProjection(),
+        this.Options.coordinatesProjection);
     const extent = { X1: coordinate1[0], Y1: coordinate1[1], X2: coordinate2[0], Y2: coordinate2[1] };
     this.Instance.invokeMethodAsync("OnInternalVisibleExtentChanged", extent);
 };
@@ -699,22 +721,22 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
     if (feature == null) return null;
 
     var geometry = feature.getGeometry();
-    var viewProjection = this.Map.getView().getProjection().getCode();
+    var viewProjection = this.Map.getView().getProjection();
     var coordinates = null;
 
     if (geometry != null && !Array.isArray(geometry)) {
         switch (geometry.getType()) {
             case "Circle":
-                coordinates = ol.proj.transform(geometry.getCenter(), viewProjection, this.Defaults.coordinatesProjection);
+                coordinates = ol.proj.transform(geometry.getCenter(), viewProjection, this.Options.coordinatesProjection);
                 break;
             default:
                 var g = geometry.getCoordinates();
                 var l = g.length;
                 if (Array.isArray(g[0])) g.forEach((g2) => l = l + g2.length);
-                if (l < this.Defaults.serializationCoordinatesLimit)
-                    coordinates = ol.proj.transform(geometry.getCoordinates(),
+                if (l < this.Options.serializationCoordinatesLimit)
+                    coordinates = MapOL.transformCoordinates(geometry.getCoordinates(),
                         viewProjection,
-                        this.Defaults.coordinatesProjection);
+                        this.Options.coordinatesProjection);
                 break;
         }
     }
@@ -767,10 +789,9 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
 MapOL.prototype.mapShapeToFeature = function (shape) {
 
     var geometry;
-    const viewProjection = this.Map.getView().getProjection().getCode();
+    const viewProjection = this.Map.getView().getProjection();
     if (shape.coordinates) {
-        var coordinates = ol.proj.transform(shape.coordinates, this.Defaults.coordinatesProjection, viewProjection);
-
+        var coordinates = MapOL.transformCoordinates(shape.coordinates, this.Options.coordinatesProjection, viewProjection);
         switch (shape.geometryType) {
             case "Point":
                 geometry = new ol.geom.Point(coordinates);
@@ -841,9 +862,9 @@ MapOL.prototype.mapShapeToFeature = function (shape) {
 MapOL.prototype.getDefaultStyle = function (shape) {
 
     if (shape.geometryType == "Point") {
-        const viewProjection = this.Map.getView().getProjection().getCode();
+        const viewProjection = this.Map.getView().getProjection();
         const coordinates = ol.proj.transform(shape.coordinates ?? this.Map.getView().getCenter(),
-            this.Defaults.coordinatesProjection,
+            this.Options.coordinatesProjection,
             viewProjection);
         let radius = 5;
         if (shape.radius != null) {
@@ -938,6 +959,17 @@ MapOL.prototype.addShape = function (shape) {
     var feature = this.mapShapeToFeature(shape);
     source.addFeature(feature);
 };
+
+MapOL.prototype.getCoordinates = function(featureId) {
+    var feature = this.Geometries.getSource().getFeatureById(featureId);
+    if (feature) {
+        var coord = feature.getGeometry().getCoordinates();
+        if (!coord)
+            coord = feature.getGeometry().getCenter();
+        return coord;
+    }
+    return null;
+}
 
 //--- Styles -----------------------------------------------------------------//
 
@@ -1043,7 +1075,7 @@ MapOL.prototype.awesomeStyle = function (marker) {
                 offset: [0, 0],
                 opacity: 1,
                 scale: 0.5,
-                color: marker.color ?? this.Defaults.color,
+                color: marker.color ?? this.Options.color,
                 anchorXUnits: "pixels",
                 anchorYUnits: "pixels",
                 src: "./_content/OpenLayers.Blazor/img/pin-back.png"
@@ -1055,18 +1087,18 @@ MapOL.prototype.awesomeStyle = function (marker) {
                 scale: 2,
                 font: '900 18px "Font Awesome 6 Free"',
                 textBaseline: "bottom",
-                fill: new ol.style.Fill({ color: marker.backgroundColor ?? this.Defaults.backgroundColor }),
-                stroke: new ol.style.Stroke({ color: marker.borderColor ?? this.Defaults.borderColor, width: 3 })
+                fill: new ol.style.Fill({ color: marker.backgroundColor ?? this.Options.backgroundColor }),
+                stroke: new ol.style.Stroke({ color: marker.borderColor ?? this.Options.borderColor, width: 3 })
             })
         }),
         new ol.style.Style({
             text: new ol.style.Text({
-                text: marker.properties?.label ?? this.Defaults.label,
+                text: marker.properties?.label ?? this.Options.label,
                 offsetY: -22,
                 opacity: 1,
                 scale: 1,
                 font: '900 18px "Font Awesome 6 Free"',
-                fill: new ol.style.Fill({ color: marker.color ?? this.Defaults.color })
+                fill: new ol.style.Fill({ color: marker.color ?? this.Options.color })
             })
         })
     ];
@@ -1138,7 +1170,6 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style, feature) {
     return styleObject;
 };
 
-
 MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {
     for (const key in obj) {
         if (obj.hasOwnProperty(key) && obj[key] === null) {
@@ -1149,6 +1180,29 @@ MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {
     }
     return obj;
 };
+
+MapOL.transformCoordinates = function(coordinates, source, destination) {
+    var newCoordinates;
+    if (source === destination)
+        return coordinates;
+    if (Array.isArray(coordinates) && Array.isArray(coordinates[0])) {
+        newCoordinates = Array(coordinates.length);
+        for (var i = 0; i < coordinates.length; i++) {
+
+            if (Array.isArray(coordinates[i][0])) {
+                newCoordinates[i] = Array(coordinates[i].length);
+                for (var i2 = 0; i2 < coordinates[i].length; i2++) {
+                    newCoordinates[i][i2] = ol.proj.transform(coordinates[i][i2], source, destination);
+                }
+            } else {
+                newCoordinates[i] = ol.proj.transform(coordinates[i], source, destination);
+            }
+        }
+    } else {
+        newCoordinates = ol.proj.transform(coordinates, source, destination);
+    }
+    return newCoordinates;
+}
 
 /*
  * Swiss projection transform functions downloaded from

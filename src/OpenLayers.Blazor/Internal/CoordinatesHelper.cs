@@ -21,6 +21,16 @@ internal static class CoordinatesHelper
         return coordinate.Value;
     }
 
+    public static bool IsSingleCoordinate(dynamic coordinates)
+    {
+        return !IsMultiCoordinate(coordinates) && (coordinates is double[] || ((coordinates is IEnumerable<double[]> c1) && c1.Count() == 1));
+    }
+
+    public static bool IsMultiCoordinate(dynamic coordinates)
+    {
+        return coordinates is IEnumerable<IEnumerable<double[]>>;
+    }
+
     public static IEnumerable<Coordinate>? GetCoordinates(dynamic coordinates)
     {
         if (coordinates is double[] c1)

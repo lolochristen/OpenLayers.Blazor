@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
@@ -16,14 +17,17 @@ public partial class Map : IAsyncDisposable
     private IJSObjectReference? _module;
     private Feature? _popupContext;
     private string _popupId;
+    private static int _counter = 0;
+
 
     /// <summary>
     ///     Default Constructor
     /// </summary>
     public Map()
     {
-        _mapId = Guid.NewGuid().ToString();
-        _popupId = Guid.NewGuid().ToString();
+        _counter++;
+        _mapId = "map_" + _counter;
+        _popupId = "map_popup_" + _counter;
 
         EnableShapeSnap = true;
     }
@@ -141,9 +145,9 @@ public partial class Map : IAsyncDisposable
     public ObservableCollection<Layer> LayersList { get; } = new();
 
     /// <summary>
-    ///     Defaults to use for the map rendering
+    ///     Options to use for the map rendering
     /// </summary>
-    public Defaults Defaults { get; } = new();
+    public Options Options { get; } = new();
 
     /// <summary>
     ///     Class of the map element
@@ -165,8 +169,15 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public string CoordinatesProjection
     {
-        get => Defaults.CoordinatesProjection;
-        set => Defaults.CoordinatesProjection = value;
+        get => Options.CoordinatesProjection;
+        set => Options.CoordinatesProjection = value;
+    }
+
+    [Parameter]
+    public string ViewProjection
+    {
+        get => Options.ViewProjection;
+        set => Options.ViewProjection = value;
     }
 
     /// <summary>
@@ -175,8 +186,8 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public ScaleLineUnit ScaleLineUnit
     {
-        get => Defaults.ScaleLineUnit;
-        set => Defaults.ScaleLineUnit = value;
+        get => Options.ScaleLineUnit;
+        set => Options.ScaleLineUnit = value;
     }
 
     /// <summary>
@@ -185,8 +196,8 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public bool AutoPopup
     {
-        get => Defaults.AutoPopup;
-        set => Defaults.AutoPopup = value;
+        get => Options.AutoPopup;
+        set => Options.AutoPopup = value;
     }
 
     /// <summary>
@@ -304,7 +315,7 @@ public partial class Map : IAsyncDisposable
             Instance ??= DotNetObjectReference.Create(this);
 
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Defaults, Center.Value, Zoom,
+                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center.Value, Zoom,
                     MarkersList.Select(p => p.InternalFeature).ToArray(),
                     ShapesList.Select(p => p.InternalFeature).ToArray(),
                     LayersList.Select(p => p.InternalLayer).ToArray(),
@@ -621,6 +632,34 @@ public partial class Map : IAsyncDisposable
             }
         };
     }
+
+    /// <summary>
+    /// Reads and updates the coordinates of a shape.
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task ReadCoordinates(Feature feature)
+    {
+        if (_module == null)
+            return;
+
+        if (FeaturesList.All(p => p.Id != feature.Id))
+        {
+            throw new InvalidOperationException("Given shape is not assigned to map");
+        }
+
+        var c = await _module.InvokeAsync<dynamic>("MapOLGetCoordinates", _mapId, feature.Id);
+        if (c is JsonElement)
+            feature.InternalFeature.Coordinates = CoordinatesHelper.DeserializeCoordinates((JsonElement)c);
+        else
+            feature.InternalFeature.Coordinates = c;
+    }
+
+    /// <summary>
+    /// Returns a IEnumerable of all features assigned to map.
+    /// </summary>
+    public IEnumerable<Feature> FeaturesList => ShapesList.OfType<Feature>().Union(MarkersList);
 
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {

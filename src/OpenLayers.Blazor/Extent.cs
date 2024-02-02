@@ -48,7 +48,7 @@ public class Extent : IEquatable<Extent>
 
     public override string ToString()
     {
-        return $"{X1}/{Y1}:{X2}/{Y2}";
+        return $"{X1}, {Y1} : {X2}, {Y2}";
     }
 
     public double[] ToArray()

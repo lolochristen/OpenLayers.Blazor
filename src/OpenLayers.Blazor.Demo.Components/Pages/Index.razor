@@ -30,9 +30,9 @@
         <p>
             <pre>
 Center:@_map?.Center
-Last Position: @_lastPosition?.X / @_lastPosition?.Y
+Last Position: @_lastPosition
 Altitude @(_altitude)m
-Mouse Position: @_mousePosition?.X / @_mousePosition?.Y
+Mouse Position: @_mousePosition
 Visible Extent: @_map?.VisibleExtent
 @_info
         </pre>
@@ -46,7 +46,7 @@ Visible Extent: @_map?.VisibleExtent
             @if (context is Marker marker)
             {
                 <h3>@marker.Title</h3>
-                <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
+                <p>@marker.Coordinate.X,@marker.Coordinate.Y</p>
             }
         </div>
     </Popup>

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor;
@@ -10,7 +11,7 @@ public class CoordinateConverter : JsonConverter<Coordinate>
         if (reader.TokenType == JsonTokenType.String)
         {
             var val = reader.GetString();
-            Coordinate.TryParse(val, out var coordinate);
+            Coordinate.TryParse(val, out var coordinate, CultureInfo.InvariantCulture);
             return coordinate;
         }
 

@@ -2,11 +2,17 @@
 
 namespace OpenLayers.Blazor;
 
+/// <summary>
+/// Shape types.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ShapeType
 {
     Point,
     LineString,
     Polygon,
-    Circle
+    Circle,
+    MultiPoint,
+    MultiPolygon,
+    MultiLineString
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components;
 using OpenLayers.Blazor.Internal;
 
@@ -78,4 +79,14 @@ public class Feature : ComponentBase
     /// Gets an enumerator of multi coordinates e.g. for a multi line or multi polygon shape.
     /// </summary>
     public IEnumerable<IEnumerable<Coordinate>>? MultiCoordinates => CoordinatesHelper.IsMultiCoordinate(InternalFeature.Coordinates) ? CoordinatesHelper.GetMultiCoordinates(InternalFeature.Coordinates) : null;
+
+    /// <summary>
+    /// Gets or sets the raw coordinates of the shape
+    /// </summary>
+    [JsonIgnore]
+    public dynamic RawCoordinates
+    {
+        get => InternalFeature.Coordinates;
+        set => InternalFeature.Coordinates = value;
+    }
 }

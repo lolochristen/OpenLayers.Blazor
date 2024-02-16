@@ -44,13 +44,17 @@ public class Shape : Feature, IDisposable
             switch (InternalFeature.GeometryType)
             {
                 case GeometryTypes.MultiLineString:
+                    return ShapeType.MultiLineString;
                 case GeometryTypes.LineString:
                     return ShapeType.LineString;
                 case GeometryTypes.MultiPolygon:
+                    return ShapeType.MultiPolygon;
                 case GeometryTypes.Polygon:
                     return ShapeType.Polygon;
                 case GeometryTypes.Circle:
                     return ShapeType.Circle;
+                case GeometryTypes.MultiPoint:
+                    return ShapeType.MultiPoint;
                 default:
                     return ShapeType.Point;
             }
@@ -71,6 +75,17 @@ public class Shape : Feature, IDisposable
                 case ShapeType.Circle:
                     InternalFeature.GeometryType = GeometryTypes.Circle;
                     break;
+                case ShapeType.MultiPolygon:
+                    InternalFeature.GeometryType = GeometryTypes.MultiPolygon;
+                    break;
+                case ShapeType.MultiLineString:
+                    InternalFeature.GeometryType = GeometryTypes.MultiLineString;
+                    break;
+                case ShapeType.MultiPoint:
+                    InternalFeature.GeometryType = GeometryTypes.MultiPoint;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
             }
         }
     }

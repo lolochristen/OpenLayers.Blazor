@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Authors>Laurent Christen</Authors>
@@ -36,12 +36,24 @@
 		</None>
 	</ItemGroup>
 
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<DefineConstants>$(DefineConstants);NET6_0</DefineConstants>
+	</PropertyGroup>
+
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
 		<DefineConstants>$(DefineConstants);NET7_0</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
 		<DefineConstants>$(DefineConstants);NET8_0</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+		<NoWarn>1701;1702;BL0005;BL0007</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
+		<NoWarn>1701;1702;BL0005;BL0007</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0|AnyCPU'">
@@ -59,6 +71,11 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0|AnyCPU'">
 		<NoWarn>1701;1702;BL0005;BL0007</NoWarn>
 	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.*" />
+	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.*" />

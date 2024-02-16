@@ -59,11 +59,11 @@ else
         @foreach (var shape in _map.ShapesList)
         {
             <p>
-                @shape.Id @shape.Type @shape.GeometryType
+                <strong>@shape.Id @shape.Type @shape.GeometryType</strong>
                 <ul>
-                    @if (shape.Coordinates != null)
+                    @if (shape.RawCoordinates != null)
                     {
-                        @JsonSerializer.Serialize(shape.Coordinates)
+                        @JsonSerializer.Serialize(shape.RawCoordinates)
                     }
                 </ul>
             </p>

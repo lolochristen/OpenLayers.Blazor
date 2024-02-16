@@ -8,6 +8,7 @@ using OpenLayers.Blazor;
 using OpenLayers.Blazor.Model;
 */
 
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor;
@@ -15,6 +16,9 @@ namespace OpenLayers.Blazor;
 [JsonConverter(typeof(CoordinateConverter))]
 public class Coordinate : IEquatable<Coordinate>
 {
+    private static readonly char[] _separatorsAlt = new[] { '/', ':' };
+    private static readonly char[] _separators = new[] { ',', '/', ':' };
+
     public Coordinate()
     {
     }
@@ -44,7 +48,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     [JsonIgnore]
-    public double Latitude => X;
+    public double Latitude => Y;
 
     public double Y
     {
@@ -53,7 +57,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     [JsonIgnore]
-    public double Longitude => Y;
+    public double Longitude => X;
 
     public double X
     {
@@ -91,22 +95,25 @@ public class Coordinate : IEquatable<Coordinate>
         return new Coordinate(val[0], val[1]);
     }
 
-    public static Coordinate Parse(string val)
+    public static Coordinate Parse(string val, IFormatProvider? formatProvider = null)
     {
         val = val.Trim();
-        var parts = val.Split(',', '/', ':');
+
+        var numberFormatInfo = formatProvider?.GetFormat(typeof(NumberFormatInfo)) as NumberFormatInfo ?? CultureInfo.CurrentCulture.NumberFormat;
+
+        var parts = val.Split(numberFormatInfo.CurrencyDecimalSeparator == "," ? _separatorsAlt : _separators);
 
         if (parts.Length != 2)
             throw new InvalidOperationException("Cannot parse coordinate");
 
-        return new Coordinate(double.Parse(parts[0]), double.Parse(parts[1]));
+        return new Coordinate(double.Parse(parts[0], formatProvider), double.Parse(parts[1], formatProvider));
     }
 
-    public static bool TryParse(string val, out Coordinate? result)
+    public static bool TryParse(string val, out Coordinate? result, IFormatProvider? formatProvider = null)
     {
         try
         {
-            result = Parse(val);
+            result = Parse(val, formatProvider);
             return true;
         }
         catch

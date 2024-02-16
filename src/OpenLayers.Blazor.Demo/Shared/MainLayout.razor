@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Globalization
+@inherits LayoutComponentBase
 
 <div class="page">
     <div class="sidebar">
@@ -7,6 +8,7 @@
 
     <main>
         <div class="top-row px-4">
+            @CultureInfo.CurrentCulture
             <a href="https://github.com/lolochristen/OpenLayers.Blazor" target="_blank">About</a>
         </div>
 

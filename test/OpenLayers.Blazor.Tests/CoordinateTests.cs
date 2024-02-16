@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 
 namespace OpenLayers.Blazor.Tests;
 
@@ -39,6 +40,24 @@ public class CoordinateTests
     {
         var c = Coordinate.Parse("1,1/2,2", new CultureInfo("it-IT"));
 
+        Assert.Equal(1.1, c.X);
+        Assert.Equal(2.2, c.Y);  
+    }
+
+    [Fact]
+    public void Coordinate_JsonDeserialize_AsString()
+    {
+        string json = "\"1.1/2.2\"";
+        var c = JsonSerializer.Deserialize<Coordinate>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        Assert.Equal(1.1, c.X);
+        Assert.Equal(2.2, c.Y);  
+    }
+
+    [Fact]
+    public void Coordinate_JsonDeserialize_AsXY()
+    {
+        string json = "{\"x\":1.1,\"y\":2.2}";
+        var c = JsonSerializer.Deserialize<Coordinate>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         Assert.Equal(1.1, c.X);
         Assert.Equal(2.2, c.Y);  
     }

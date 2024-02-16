@@ -63,24 +63,26 @@ internal static class CoordinatesHelper
         return coordinates.Select(p => p.Select(p => p.Value).ToArray()).ToArray();
     }
 
-    public static dynamic DeserializeCoordinates(JsonElement element)
+    public static object? DeserializeCoordinates(JsonElement element)
     {
-        try
+        int level = 0;
+        var levelElement = element;
+        while (levelElement.ValueKind == JsonValueKind.Array)
         {
-            return element.Deserialize<double[][]>();
-        }
-        catch
-        {
-        }
-
-        try
-        {
-            return element.Deserialize<double[]>();
-        }
-        catch
-        {
+            level++;
+            levelElement  = levelElement[0];
         }
 
-        return null;
+        switch (level)
+        {
+            case 1: 
+                return element.Deserialize<double[]>();
+            case 2: 
+                return element.Deserialize<double[][]>();
+            case 3: 
+                return element.Deserialize<double[][][]>();
+            default:
+                return null;
+        }
     }
 }

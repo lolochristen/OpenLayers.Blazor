@@ -77,7 +77,7 @@
             };
             layer.SourceParameters["Abstract"] = p.Element(ns + "Abstract").Value;
             return layer;
-        }).OrderBy(p => p.Title).ToList();
+        }).OrderBy(p => p.Key).ToList();
     }
 
     private void AddSelectedLayer()

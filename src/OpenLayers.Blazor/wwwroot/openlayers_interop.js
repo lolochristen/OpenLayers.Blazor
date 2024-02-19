@@ -571,8 +571,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
     if (invokeMethod) {
         invokeMethod = false;
         const coordinate = ol.proj.transform(evt.coordinate, this.Map.getView().getProjection(), this.Options.coordinatesProjection);
-        const point = { x: coordinate[0], y: coordinate[1] };
-        this.Instance.invokeMethodAsync("OnInternalClick", point);
+        this.Instance.invokeMethodAsync("OnInternalClick", coordinate);
     }
 };
 
@@ -583,8 +582,7 @@ MapOL.prototype.onMapPointerMove = function (evt, element) {
     const coordinate = ol.proj.transform(evt.coordinate,
         this.Map.getView().getProjection(),
         this.Options.coordinatesProjection);
-    const point = { x: coordinate[0], y: coordinate[1] };
-    this.Instance.invokeMethodAsync("OnInternalPointerMove", point);
+    this.Instance.invokeMethodAsync("OnInternalPointerMove", coordinate);
 };
 
 MapOL.prototype.onMapResolutionChanged = function () {
@@ -597,8 +595,7 @@ MapOL.prototype.onMapCenterChanged = function () {
     const coordinate = ol.proj.transform(center,
         this.Map.getView().getProjection(),
         this.Options.coordinatesProjection);
-    const point = { x: coordinate[0], y: coordinate[1] };
-    this.Instance.invokeMethodAsync("OnInternalCenterChanged", point);
+    this.Instance.invokeMethodAsync("OnInternalCenterChanged", coordinate);
     this.onVisibleExtentChanged();
 };
 
@@ -636,8 +633,7 @@ MapOL.prototype.getCurrentGeoLocation = function () {
                 const coordinate = ol.proj.transform([position.coords.longitude, position.coords.latitude],
                     "EPSG:4326",
                     projection);
-                const point = { x: coordinate[0], y: coordinate[1] };
-                resolve(point);
+                resolve(coordinate);
             });
         } else {
             reject("No geolocation received");

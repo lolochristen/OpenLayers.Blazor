@@ -1,4 +1,6 @@
 ﻿@using System.Globalization
+@using System.Diagnostics
+@using System.Reflection
 @inherits LayoutComponentBase
 
 <div class="page">
@@ -8,8 +10,8 @@
 
     <main>
         <div class="top-row px-4">
-            @CultureInfo.CurrentCulture
-            <a href="https://github.com/lolochristen/OpenLayers.Blazor" target="_blank">About</a>
+            (@CultureInfo.CurrentCulture)
+            <a href="https://github.com/lolochristen/OpenLayers.Blazor" target="_blank">GitHub</a>
         </div>
 
         <article>

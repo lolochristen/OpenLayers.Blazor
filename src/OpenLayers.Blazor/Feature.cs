@@ -5,24 +5,23 @@ using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
-public class Feature<T> : Feature where T : Internal.Feature
-{
-    public Feature(T value) : base(value)
-    {
-    }
-
-    internal new T InternalFeature => (T)base.InternalFeature;
-}
-
+/// <summary>
+///     Base class of a map feature.
+/// </summary>
 public class Feature : ComponentBase
 {
-    private Internal.Feature _internalFeature;
-
+    /// <summary>
+    /// Initializes a new instance of <see cref="Feature"/>.
+    /// </summary>
     public Feature()
     {
         InternalFeature = new Internal.Feature();
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="Feature"/>.
+    /// </summary>
+    /// <param name="feature"></param>
     internal Feature(Internal.Feature feature)
     {
         InternalFeature = feature;
@@ -38,17 +37,7 @@ public class Feature : ComponentBase
         set => InternalFeature.Id = value;
     }
 
-    internal Internal.Feature InternalFeature
-    {
-        get => _internalFeature;
-        set
-        {
-            _internalFeature = value;
-
-            if (_internalFeature.Coordinates is JsonElement e)
-                _internalFeature.Coordinates = CoordinatesHelper.DeserializeCoordinates(e);
-        }
-    }
+    internal Internal.Feature InternalFeature { get; set; }
 
     /// <summary>
     /// Gets the geometry type of the feature.
@@ -68,23 +57,14 @@ public class Feature : ComponentBase
     /// <summary>
     /// Gets the point coordinate if the shape is defined by a single coordinate e.g. point, circle.
     /// </summary>
-    public Coordinate? Point => CoordinatesHelper.IsSingleCoordinate(InternalFeature.Coordinates) ? Coordinates?.FirstOrDefault() : null;
-
-    /// <summary>
-    /// Gets an enumerator of coordinates e.g. for a line.
-    /// </summary>
-    public IEnumerable<Coordinate>? Coordinates => !CoordinatesHelper.IsMultiCoordinate(InternalFeature.Coordinates) ? CoordinatesHelper.GetCoordinates(InternalFeature.Coordinates) : null;
-
-    /// <summary>
-    /// Gets an enumerator of multi coordinates e.g. for a multi line or multi polygon shape.
-    /// </summary>
-    public IEnumerable<IEnumerable<Coordinate>>? MultiCoordinates => CoordinatesHelper.IsMultiCoordinate(InternalFeature.Coordinates) ? CoordinatesHelper.GetMultiCoordinates(InternalFeature.Coordinates) : null;
-
-    /// <summary>
-    /// Gets or sets the raw coordinates of the shape
-    /// </summary>
     [JsonIgnore]
-    public dynamic RawCoordinates
+    public Coordinate? Point => InternalFeature.Point;
+
+    /// <summary>
+    /// Gets or sets the coordinates of a feature or shape.
+    /// </summary>
+    [Parameter]
+    public Coordinates Coordinates
     {
         get => InternalFeature.Coordinates;
         set => InternalFeature.Coordinates = value;

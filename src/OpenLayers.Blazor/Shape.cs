@@ -12,12 +12,22 @@ public abstract class Shape<T> : Shape where T : Internal.Shape, new()
     internal new T InternalFeature => (T)base.InternalFeature;
 }
 
+/// <summary>
+///     A base class for a shape on a map. 
+/// </summary>
 public class Shape : Feature, IDisposable
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="Shape"/>.
+    /// </summary>
     public Shape() : this(ShapeType.Point)
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="Shape"/>.
+    /// </summary>
+    /// <param name="shapeType"></param>
     public Shape(ShapeType shapeType)
     {
         InternalFeature = new Internal.Shape();
@@ -34,8 +44,14 @@ public class Shape : Feature, IDisposable
         set => base.InternalFeature = value;
     }
 
+    /// <summary>
+    /// Gets or sets the attached parent map.
+    /// </summary>
     [CascadingParameter] public Map? ParentMap { get; set; }
 
+    /// <summary>
+    /// Gets or sets the type of shape.
+    /// </summary>
     [Parameter]
     public ShapeType ShapeType
     {

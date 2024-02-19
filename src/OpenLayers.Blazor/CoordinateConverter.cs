@@ -1,18 +1,19 @@
 ﻿using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace OpenLayers.Blazor;
 
 internal class CoordinateConverter : JsonConverter<Coordinate>
 {
-    public override Coordinate? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Coordinate Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.String)
         {
             var val = reader.GetString();
-            Coordinate.TryParse(val, out var coordinate, CultureInfo.InvariantCulture);
-            return coordinate;
+            return Coordinate.Parse(val, CultureInfo.InvariantCulture);
         }
         else if (reader.TokenType == JsonTokenType.StartObject)
         {
@@ -36,11 +37,32 @@ internal class CoordinateConverter : JsonConverter<Coordinate>
             }
             return new Coordinate(x, y);
         }
-        return null;
+        else if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            reader.Read();
+            reader.TryGetDouble(out var x);
+            reader.Read();
+            reader.TryGetDouble(out var y);
+            while (reader.TokenType != JsonTokenType.EndArray)
+                reader.Read();
+            return new Coordinate(x, y);
+        }
+        else if (reader.TokenType == JsonTokenType.Number)
+        {
+            reader.TryGetDouble(out var x);
+            reader.Read();
+            reader.TryGetDouble(out var y);
+            return new Coordinate(x, y);
+        }
+
+        throw new JsonException("Cannot deserialize Coordinate");
     }
 
     public override void Write(Utf8JsonWriter writer, Coordinate value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value.ToString());
+        writer.WriteStartArray();
+        writer.WriteNumberValue(value[0]);
+        writer.WriteNumberValue(value[1]);
+        writer.WriteEndArray();
     }
 }

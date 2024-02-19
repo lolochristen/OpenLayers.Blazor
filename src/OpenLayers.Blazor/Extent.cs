@@ -7,6 +7,10 @@ public class Extent : IEquatable<Extent>
 {
     public Extent()
     {
+        X1 = 0;
+        Y1 = 0;
+        X2 = 0;
+        Y2 = 0;
     }
 
     public Extent(double[] array)
@@ -33,14 +37,6 @@ public class Extent : IEquatable<Extent>
     public double X2 { get; set; }
     public double Y2 { get; set; }
 
-    public bool Equals(Extent? other)
-    {
-        if (other == null)
-            return false;
-
-        return GetHashCode() == other.GetHashCode();
-    }
-
     public override int GetHashCode()
     {
         return HashCode.Combine(X1, Y1, X2, Y2);
@@ -54,5 +50,15 @@ public class Extent : IEquatable<Extent>
     public double[] ToArray()
     {
         return new[] { X1, Y1, X2, Y2 };
+    }
+
+    public bool Equals(Extent other)
+    {
+        return X1.Equals(other.X1) && Y1.Equals(other.Y1) && X2.Equals(other.X2) && Y2.Equals(other.Y2);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Extent other && Equals(other);
     }
 }

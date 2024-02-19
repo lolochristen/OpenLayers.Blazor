@@ -1,14 +1,4 @@
-﻿/* Unmerged change from project 'OpenLayers.Blazor (net6.0)'
-Before:
-namespace OpenLayers.Blazor.Model;
-After:
-using OpenLayers;
-using OpenLayers.Blazor;
-using OpenLayers.Blazor;
-using OpenLayers.Blazor.Model;
-*/
-
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor;
@@ -19,8 +9,11 @@ public class Coordinate : IEquatable<Coordinate>
     private static readonly char[] _separatorsAlt = new[] { '/', ':' };
     private static readonly char[] _separators = new[] { ',', '/', ':' };
 
+    private readonly double[] _value;
+
     public Coordinate()
     {
+        _value = new double[2];
     }
 
     /// <summary>
@@ -29,31 +22,30 @@ public class Coordinate : IEquatable<Coordinate>
     /// <param name="coordinates">Latitude, Longitude</param>
     public Coordinate(double x, double y)
     {
-        X = x;
-        Y = y;
+        _value = new[] { x, y };
     }
 
     public Coordinate(Coordinate coordinate)
     {
-        X = coordinate.X;
-        Y = coordinate.Y;
+        _value = coordinate._value;
     }
-
 
     public Coordinate(double[] coordinates)
     {
         if (coordinates.Length < 2)
             throw new ArgumentException(nameof(coordinates));
-        Value = coordinates;
+        _value = coordinates;
     }
+
+    public double[] Value => _value;
 
     [JsonIgnore]
     public double Latitude => Y;
 
     public double Y
     {
-        get => Value[1];
-        set => Value[1] = value;
+        get => _value[1];
+        set => _value[1] = value;
     }
 
     [JsonIgnore]
@@ -61,21 +53,8 @@ public class Coordinate : IEquatable<Coordinate>
 
     public double X
     {
-        get => Value[0];
-        set => Value[0] = value;
-    }
-
-    /// <summary>
-    ///     Coordinate in OpenLayers Style: [Longitude, Latitude]
-    /// </summary>
-    [JsonIgnore]
-    public double[] Value { get; set; } = new double[2] { 0, 0 };
-
-    public bool Equals(Coordinate? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return GetHashCode() == other.GetHashCode();
+        get => _value[0];
+        set => _value[0] = value;
     }
 
     public override string ToString()
@@ -90,9 +69,23 @@ public class Coordinate : IEquatable<Coordinate>
 
     public static implicit operator Coordinate(double[] val)
     {
-        if (val == null)
-            return null;
-        return new Coordinate(val[0], val[1]);
+        return new Coordinate(val);
+    }
+
+    public static bool operator ==(Coordinate c1, Coordinate c2)
+    {
+        return c1.Equals(c2);
+    }
+
+    public static bool operator !=(Coordinate c1, Coordinate c2)
+    {
+        return !c1.Equals(c2);
+    }
+
+    public double this[int key]
+    {
+        get => _value[key];
+        set => _value[key] = value;
     }
 
     public static Coordinate Parse(string val, IFormatProvider? formatProvider = null)
@@ -124,7 +117,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    ///     Distance in kilometers
+    ///     Calculates distance in kilometers
     /// </summary>
     /// <param name="target"></param>
     /// <returns></returns>
@@ -147,7 +140,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    ///     Calcola un punto distante in km
+    ///     Calculates distance.
     /// </summary>
     /// <param name="distance">distance in km</param>
     /// <returns></returns>
@@ -175,16 +168,13 @@ public class Coordinate : IEquatable<Coordinate>
         return new Coordinate(lat2, lon2);
     }
 
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Coordinate)obj);
-    }
-
     public override int GetHashCode()
     {
-        return HashCode.Combine(X, Y);
+        return _value.GetHashCode();
+    }
+
+    public bool Equals(Coordinate other)
+    {
+        return _value[0].Equals(other._value[0]) && _value[1].Equals(other._value[1]);
     }
 }

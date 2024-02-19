@@ -315,7 +315,7 @@ public partial class Map : IAsyncDisposable
             Instance ??= DotNetObjectReference.Create(this);
 
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center.Value, Zoom,
+                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom,
                     MarkersList.Select(p => p.InternalFeature).ToArray(),
                     ShapesList.Select(p => p.InternalFeature).ToArray(),
                     LayersList.Select(p => p.InternalLayer).ToArray(),
@@ -445,7 +445,7 @@ public partial class Map : IAsyncDisposable
     /// <returns>Task</returns>
     public async Task SetCenter(Coordinate center)
     {
-        if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, center.Value);
+        if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, center);
     }
 
     [JSInvokable]

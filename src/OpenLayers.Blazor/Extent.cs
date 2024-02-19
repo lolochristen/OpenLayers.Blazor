@@ -52,8 +52,10 @@ public class Extent : IEquatable<Extent>
         return new[] { X1, Y1, X2, Y2 };
     }
 
-    public bool Equals(Extent other)
+    public bool Equals(Extent? other)
     {
+        if (other is null)
+            return false;
         return X1.Equals(other.X1) && Y1.Equals(other.Y1) && X2.Equals(other.X2) && Y2.Equals(other.Y2);
     }
 

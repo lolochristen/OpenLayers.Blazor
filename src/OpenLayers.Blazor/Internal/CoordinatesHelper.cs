@@ -63,7 +63,7 @@ internal static class CoordinatesHelper
         return coordinates.Select(p => p.Select(p => p.Value).ToArray()).ToArray();
     }
 
-    public static object? DeserializeCoordinates(JsonElement element)
+    public static Coordinates? DeserializeCoordinates(JsonElement element)
     {
         int level = 0;
         var levelElement = element;

@@ -51,9 +51,9 @@ Visible Extent: @_map?.VisibleExtent
         </div>
     </Popup>
     <Features>
-        <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(2604200, 1197650)" Popup></Marker>
+        <Marker Type="MarkerType.MarkerPin" Coordinate="@("2604200/1197650")" Popup></Marker>
         <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
-        <Line Points="new[] { new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650) }" BorderColor="cyan"></Line>
+         <Line Coordinates="new double[][] { new double[] {2604200, 1197650}, new double[] { 2624200, 1177650 } }" BorderColor="cyan"></Line>
      </Features>
  </SwissMap>
 

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Components;
 
 namespace OpenLayers.Blazor.Internal;
 
@@ -9,6 +10,7 @@ public class Feature : IEquatable<Feature>
     {
         Type = nameof(Feature);
         Id = Guid.NewGuid().ToString();
+        Coordinates = new Coordinates();
     }
 
     public object Id { get; set; }
@@ -23,13 +25,18 @@ public class Feature : IEquatable<Feature>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public GeometryTypes? GeometryType { get; set; }
 
-    public dynamic Coordinates { get; set; }
+    [Parameter]
+    public Coordinates Coordinates { get; set; }
 
     [JsonIgnore]
-    public double[]? Point
+    public Coordinate? Point
     {
-        get => CoordinatesHelper.GetPoint(Coordinates)?.Value;
-        set => Coordinates = value;
+        get => Coordinates.Point;
+        set
+        {
+            Coordinates.Point = value;
+            Coordinates.Type = CoordinatesType.Point;
+        }
     }
 
     public Dictionary<string, dynamic> Properties { get; set; } = new();

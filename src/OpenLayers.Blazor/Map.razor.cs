@@ -28,8 +28,6 @@ public partial class Map : IAsyncDisposable
         _counter++;
         _mapId = "map_" + _counter;
         _popupId = "map_popup_" + _counter;
-
-        EnableShapeSnap = true;
     }
 
     [Inject] private IJSRuntime? JSRuntime { get; set; }
@@ -45,6 +43,20 @@ public partial class Map : IAsyncDisposable
     /// </summary>
     [Parameter]
     public EventCallback<Coordinate> CenterChanged { get; set; }
+
+    /// <summary>
+    ///     Gets or set the rotation of the map in radians.
+    ///     Negative value = counter-clockwise
+    ///     Positive value = clockwise
+    /// </summary>
+    [Parameter]
+    public double Rotation { get; set; } = 0;
+
+    /// <summary>
+    ///     Event when rotation changes
+    /// </summary>
+    [Parameter]
+    public EventCallback<double> RotationChanged { get; set; }
 
     /// <summary>
     ///     Zoom level of the map
@@ -245,6 +257,12 @@ public partial class Map : IAsyncDisposable
     [Parameter] public Func<Shape, StyleOptions> ShapeStyleCallback { get; set; } = DefaultShapeStyleCallback;
 
     /// <summary>
+    /// Set or gets if any interaction is active.
+    /// </summary>
+    [Parameter]
+    public bool InteractionsEnabled { get; set; }
+
+    /// <summary>
     ///     Disposing resources.
     /// </summary>
     /// <returns>ValueTask</returns>
@@ -270,8 +288,14 @@ public partial class Map : IAsyncDisposable
         if (parameters.TryGetValue(nameof(Center), out Coordinate center) && !center.Equals(Center))
             _ = SetCenter(center);
 
+        if (parameters.TryGetValue(nameof(Rotation), out double rotation) && !rotation.Equals(Rotation))
+            _ = SetRotation(rotation);
+
         if (parameters.TryGetValue(nameof(VisibleExtent), out Extent extent) && !extent.Equals(VisibleExtent))
             _ = SetVisibleExtent(extent);
+
+        if (parameters.TryGetValue(nameof(InteractionsEnabled), out bool interactionsEnabled) && interactionsEnabled != InteractionsEnabled)
+            _ = SetInteractions(interactionsEnabled);
 
         short drawingChanges = 0;
         if (parameters.TryGetValue(nameof(EnableNewShapes), out bool newShapes) && newShapes != EnableNewShapes)
@@ -315,7 +339,7 @@ public partial class Map : IAsyncDisposable
             Instance ??= DotNetObjectReference.Create(this);
 
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom,
+                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom, Rotation, InteractionsEnabled,
                     MarkersList.Select(p => p.InternalFeature).ToArray(),
                     ShapesList.Select(p => p.InternalFeature).ToArray(),
                     LayersList.Select(p => p.InternalLayer).ToArray(),
@@ -325,6 +349,12 @@ public partial class Map : IAsyncDisposable
             ShapesList.CollectionChanged += ShapesOnCollectionChanged;
             LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
+    }
+
+    protected override void OnInitialized()
+    {
+        EnableShapeSnap = true;
+        InteractionsEnabled = true;
     }
 
     [JSInvokable]
@@ -382,6 +412,13 @@ public partial class Map : IAsyncDisposable
             Center = coordinate;
             await CenterChanged.InvokeAsync(coordinate);
         }
+    }
+
+    [JSInvokable]
+    public async Task OnInternalRotationChanged(double rotation)
+    {
+        Rotation = rotation;
+        await RotationChanged.InvokeAsync(rotation);
     }
 
     [JSInvokable]
@@ -446,6 +483,16 @@ public partial class Map : IAsyncDisposable
     public async Task SetCenter(Coordinate center)
     {
         if (_module != null) await _module.InvokeVoidAsync("MapOLCenter", _mapId, center);
+    }
+
+    /// <summary>
+    ///     Sets the rotation of the map.
+    /// </summary>
+    /// <param name="rotation">Rotation in radians</param>
+    /// <returns>Task</returns>
+    public async Task SetRotation(double rotation)
+    {
+        if (_module != null) await _module.InvokeVoidAsync("MapOLRotate", _mapId, rotation);
     }
 
     [JSInvokable]
@@ -549,6 +596,16 @@ public partial class Map : IAsyncDisposable
     public async Task SetVisibleExtent(Extent extent)
     {
         if (_module != null) await _module.InvokeVoidAsync("MapOLSetVisibleExtent", _mapId, extent);
+    }
+
+    /// <summary>
+    ///     Set interactions settings
+    /// </summary>
+    /// <param name="active"></param>
+    /// <returns></returns>
+    public async Task SetInteractions(bool active)
+    {
+        if (_module != null) await _module.InvokeVoidAsync("MapOLSetInteractions", _mapId, active);
     }
 
     [JSInvokable]

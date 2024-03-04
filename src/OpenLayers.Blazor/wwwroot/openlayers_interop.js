@@ -1,7 +1,7 @@
 ﻿var _MapOL = new Array();
 
-export function MapOLInit(mapId, popupId, options, center, zoom, markers, shapes, layers, instance) {
-    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, markers, shapes, layers, instance);
+export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance) {
+    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance);
 }
 
 export function MapOLDispose(mapId) {
@@ -10,6 +10,10 @@ export function MapOLDispose(mapId) {
 
 export function MapOLCenter(mapId, point) {
     _MapOL[mapId].setCenter(point);
+}
+
+export function MapOLRotate(mapId, rotation) {
+    _MapOL[mapId].setRotation(rotation);
 }
 
 export function MapOLZoom(mapId, zoom) {
@@ -88,10 +92,14 @@ export function MapOLGetCoordinates(mapId, shapeId) {
     return _MapOL[mapId].getCoordinates(shapeId);
 }
 
+export function MapOLSetInteractions(mapId, active) {
+    _MapOL[mapId].setInteractions(active);
+}
+
 
 // --- MapOL ----------------------------------------------------------------------------//
 
-function MapOL(mapId, popupId, options, center, zoom, markers, shapes, layers, instance) {
+function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance) {
     this.Instance = instance;
     this.Options = options;
 
@@ -185,8 +193,10 @@ function MapOL(mapId, popupId, options, center, zoom, markers, shapes, layers, i
             projection: viewProjection,
             center: viewCenter,
             extent: viewExtent,
-            zoom: zoom
-        })
+            zoom: zoom,
+            rotation: rotation
+}),
+        interactions: ol.interaction.defaults.defaults().extend([new ol.interaction.DragRotateAndZoom()])
     });
 
     var that = this;
@@ -226,6 +236,10 @@ function MapOL(mapId, popupId, options, center, zoom, markers, shapes, layers, i
     this.Map.on("rendercomplete", function (evt) { that.Instance.invokeMethodAsync("OnInternalRenderComplete"); });
     this.Map.getView().on("change:resolution", function (evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function (evt) { that.onMapCenterChanged(); });
+    this.Map.getView().on("change:rotation", function (evt) { that.onMapRotationChanged(); });
+
+    this.setInteractions(interactions);
+
     this.setMarkers(markers);
     this.setShapes(shapes);
 
@@ -472,11 +486,6 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
     if (raiseEvents) features.forEach((f, i, arr) => { that.onFeatureAdded(f) });
 };
 
-//MapOL.wait = async function wait() {
-//    await new Promise(resolve => setTimeout(resolve, 500));
-//    return null;
-//}
-
 MapOL.prototype.setZoom = function (zoom) {
     this.Map.getView().setZoom(zoom);
 };
@@ -503,8 +512,18 @@ MapOL.prototype.setCenter = function (point) {
         this.Map.getView().getProjection()));
 };
 
+MapOL.prototype.setRotation = function (rotation) {
+    this.Map.getView().setRotation(rotation);
+};
+
 MapOL.prototype.setOptions = function (options) {
     this.Options = options;
+};
+
+MapOL.prototype.setInteractions = function (active) {
+    this.Map.getInteractions().forEach((interaction, i, arr) => {
+        interaction.setActive(active);
+    });
 };
 
 MapOL.prototype.getReducedFeature = function (feature) {
@@ -597,6 +616,12 @@ MapOL.prototype.onMapCenterChanged = function () {
         this.Options.coordinatesProjection);
     this.Instance.invokeMethodAsync("OnInternalCenterChanged", coordinate);
     this.onVisibleExtentChanged();
+};
+
+MapOL.prototype.onMapRotationChanged = function () {
+    const rotation = this.Map.getView().getRotation();
+    if (!rotation) return;
+    this.Instance.invokeMethodAsync("OnInternalRotationChanged", rotation);
 };
 
 MapOL.prototype.onVisibleExtentChanged = function () {

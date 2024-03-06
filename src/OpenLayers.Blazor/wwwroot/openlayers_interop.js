@@ -534,9 +534,6 @@ MapOL.prototype.setInteractions = function (active) {
     this.Map.getInteractions().forEach((interaction, i, arr) => {
         interaction.setActive(active);
     });
-    this.Map.getControls().forEach((ctrl, i, arr) => {
-        console.info(ctrl.toString());
-    });
 };
 
 MapOL.prototype.getReducedFeature = function (feature) {

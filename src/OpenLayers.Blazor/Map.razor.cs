@@ -262,6 +262,42 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public bool InteractionsEnabled { get; set; }
 
+
+    /// <summary>
+    /// Get or sets if the zoom control is visible
+    /// </summary>
+    [Parameter] public bool ZoomControl { get => Options.ZoomControl; set => Options.ZoomControl = value; }
+
+    /// <summary>
+    /// Gets or sets if the attribution control is visible
+    /// </summary>
+    [Parameter] public bool AttributionControl { get => Options.AttributionControl; set => Options.AttributionControl = value; }
+
+    /// <summary>
+    /// Gets or sets if full screen control is visible 
+    /// </summary>
+    [Parameter] public bool FullScreenControl { get => Options.FullScreenControl; set => Options.FullScreenControl = value; }
+
+    /// <summary>
+    /// Gets or sets boolean if zoom slider control is visible
+    /// </summary>
+    [Parameter] public bool ZoomSliderControl { get => Options.ZoomSliderControl; set => Options.ZoomSliderControl = value; }
+
+    /// <summary>
+    /// Gets or sets boolean if rotate to 0 control is visible
+    /// </summary>
+    [Parameter] public bool RotateControl { get => Options.RotateControl; set => Options.RotateControl = value; }
+
+    /// <summary>
+    /// Gets or sets boolean if a overview map using first layer is visible
+    /// </summary>
+    [Parameter] public bool OverviewMap { get => Options.OverviewMap; set => Options.OverviewMap = value; }
+
+    /// <summary>
+    /// Gets or sets boolean if zoom to extent control is visible
+    /// </summary>
+    [Parameter] public bool ZoomToExtentControl { get => Options.ZoomToExtentControl; set => Options.ZoomToExtentControl = value; }
+
     /// <summary>
     ///     Disposing resources.
     /// </summary>

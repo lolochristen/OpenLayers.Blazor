@@ -34,11 +34,11 @@
         <div class="d-flex">
             <div class="input-group w-25">
                 <label for="zoom" class="form-label small">Zoom @_zoom</label>
-                <input type="range" class="form-range" id="zoom" min="1" max="15" step=".1" @bind-value="_zoom">
+                <input type="range" class="form-range" id="zoom" min="1" max="15" step=".01" @bind="_zoom" @bind:event="oninput">
             </div>
             <div class="input-group w-25 m-lg-2">
                 <label for="rotation" class="form-label small">Rotation @_rotation</label>
-                <input type="range" class="form-range" id="rotation" step=".1" min="-6" max="6" @bind-value="_rotation">
+                <input type="range" class="form-range" id="rotation" step=".01" min="-6" max="6" @bind="_rotation" @bind:event="oninput">
             </div>
         </div>
         <p>
@@ -54,7 +54,7 @@ Visible Extent: @_map?.VisibleExtent
     </div>
 </div>
 
-<SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" OnRenderComplete="@(() => { _info = "Render complete: " + DateTime.Now.ToString("h:mm:ss.ms"); })" @bind-Zoom="_zoom" Style="height:800px;" Class="card" InteractionsEnabled="@_enableInteractions" @bind-Rotation="_rotation">
+<SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" OnRenderComplete="@(() => { _info = "Render complete: " + DateTime.Now.ToString("h:mm:ss.ms"); })" @bind-Zoom="_zoom" Style="height:800px;" Class="card" InteractionsEnabled="@_enableInteractions" @bind-Rotation="_rotation" ZoomSliderControl FullScreenControl>
     <Popup>
         <div id="popup" class="ol-box">
             @if (context is Marker marker)

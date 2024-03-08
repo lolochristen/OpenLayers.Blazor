@@ -49,4 +49,39 @@ public class Options
     /// Sets or gets the limit whenever the list of coordinates of a feature shall be included in events to improve response times.  
     /// </summary>
     public int SerializationCoordinatesLimit { get; set; } = 512;
+
+    /// <summary>
+    /// Get or sets if the zoom control is visible
+    /// </summary>
+    public bool ZoomControl { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets if the attribution control is visible
+    /// </summary>
+    public bool AttributionControl { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets if full screen control is visible 
+    /// </summary>
+    public bool FullScreenControl { get; set; }
+
+    /// <summary>
+    /// Gets or sets boolean if zoom slider control is visible
+    /// </summary>
+    public bool ZoomSliderControl { get; set; }
+
+    /// <summary>
+    /// Gets or sets boolean if rotate to 0 control is visible
+    /// </summary>
+    public bool RotateControl { get; set; }
+
+    /// <summary>
+    /// Gets or sets boolean if a overview map using first layer is visible
+    /// </summary>
+    public bool OverviewMap { get; set; }
+
+    /// <summary>
+    /// Gets or sets boolean if zoom to extent control is visible
+    /// </summary>
+    public bool ZoomToExtentControl { get; set; }
 }

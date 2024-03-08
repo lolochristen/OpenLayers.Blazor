@@ -182,22 +182,32 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, ma
     this.Map = new ol.Map({
         layers: ollayers,
         target: mapId,
-        controls: this.Options.scaleLineUnit != "none"
-            ? ol.control.defaults.defaults().extend([
-                new ol.control.ScaleLine({
-                    units: this.Options.scaleLineUnit.toLowerCase()
-                })
-            ])
-            : null,
+        controls: [],
         view: new ol.View({
             projection: viewProjection,
             center: viewCenter,
             extent: viewExtent,
             zoom: zoom,
             rotation: rotation
-}),
+        }),
         interactions: ol.interaction.defaults.defaults().extend([new ol.interaction.DragRotateAndZoom()])
     });
+
+    if (this.Options.zoomControl) this.Map.addControl(new ol.control.Zoom())
+    if (this.Options.attributionControl) this.Map.addControl(new ol.control.Attribution())
+    if (this.Options.fullScreenControl) this.Map.addControl(new ol.control.FullScreen())
+    if (this.Options.zoomSliderControl) this.Map.addControl(new ol.control.ZoomSlider())
+    if (this.Options.rotateControl) this.Map.addControl(new ol.control.Rotate())
+    if (this.Options.scaleLineUnit != "none") {
+        this.Map.addControl(new ol.control.ScaleLine({
+            units: this.Options.scaleLineUnit.toLowerCase()}));
+    }
+    if (this.Options.overviewMap) {
+        this.Map.addControl(new ol.control.OverviewMap({
+            layers: [new ol.layer.Tile(layers[0])]
+        }))
+    }
+    if (this.Options.zoomToExtentControl) this.Map.addControl(new ol.control.ZoomToExtent())
 
     var that = this;
     var geoSource = new ol.source.Vector();

@@ -975,7 +975,7 @@ MapOL.prototype.removeShape = function (shape) {
         source = this.Markers.getSource();
     else
         source = this.Geometries.getSource();
-    var feature = this.Geometries.getSource().getFeatureById(shape.id);
+    var feature = source.getFeatureById(shape.id);
     if (feature) {
         source.removeFeature(feature);
     }

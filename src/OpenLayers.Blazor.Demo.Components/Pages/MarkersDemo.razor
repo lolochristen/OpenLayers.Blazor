@@ -13,6 +13,7 @@
             <option value="@MarkerType.MarkerCustomImage">Custom Image</option>
         </select>
         <button class="btn btn-primary" @onclick="() => _map.MarkersList.Clear()">Clear</button>
+        <button class="btn btn-primary" @onclick="AddRandom">Add Random</button>
     </div>
 </div>
 
@@ -40,6 +41,8 @@
 
     private async Task OnMapClick(Coordinate coordinate)
     {
+        _map.MarkersList.Clear();
+
         switch (_selectedMarkerType)
         {
             case MarkerType.MarkerPin:
@@ -55,4 +58,14 @@
         }
     }
 
+    private async Task AddRandom()
+    {
+        var random = new Random((int)DateTime.Now.Ticks);
+        var extent = _map.LayersList[0].Extent;
+        for (var i = 0; i < 20; i++)
+        {
+            _map.MarkersList.Add(
+                new Marker(MarkerType.MarkerPin, new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1])));
+        }
+    }
 }

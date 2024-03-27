@@ -443,26 +443,24 @@ MapOL.prototype.findLayer = function (layer) {
 
 MapOL.prototype.setMarkers = function (markers) {
     var source = this.Markers.getSource();
-
     source.clear();
-
-    markers.forEach((marker) => {
-        var feature = this.mapShapeToFeature(marker);
-        source.addFeature(feature);
-    });
+    if (markers) {
+        markers.forEach((marker) => {
+            var feature = this.mapShapeToFeature(marker);
+            source.addFeature(feature);
+        });
+    }
 };
 
 MapOL.prototype.setShapes = function (shapes) {
     var source = this.Geometries.getSource();
-
     source.clear();
-
-    if (!shapes) return;
-
-    shapes.forEach((shape) => {
-        var feature = this.mapShapeToFeature(shape);
-        source.addFeature(feature);
-    });
+    if (shapes) {
+        shapes.forEach((shape) => {
+            var feature = this.mapShapeToFeature(shape);
+            source.addFeature(feature);
+        });
+    }
 };
 
 MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {

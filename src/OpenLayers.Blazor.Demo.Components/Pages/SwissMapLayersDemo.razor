@@ -22,7 +22,7 @@
     </div>
 </div>
 
-<SwissMap @ref="_map" Style="height:800px;" Class="card" OnClick="OnMapClick" OnFeatureClick="OnFeatureClick"></SwissMap>
+<SwissMap @ref="_map" Style="height:800px;" Class="card" OnClick="OnMapClick" OnFeatureClick="OnFeatureClick" OnShapeAdded="OnFeatureClick"></SwissMap>
 
 @if (_currentFeature != null)
 {
@@ -32,7 +32,7 @@
             {
                 <tr>
                     <td class="table-secondary fw-bold">@prop.Key</td>
-                    <td>@prop.Value</td>
+                    <td>@prop.Value.ToString()</td>
                 </tr>
             }
         </table>
@@ -92,7 +92,8 @@
     {
         string url = $"https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry={coordinate.X},{coordinate.Y}&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=975,1117,96&lang=en&layers=all:{_selectedLayer}&limit=10&mapExtent={_map.VisibleExtent.X1},{_map.VisibleExtent.Y1},{_map.VisibleExtent.X2},{_map.VisibleExtent.Y2}&returnGeometry=true&sr=2056&timeInstant=2021&tolerance=10";
         var json = await HttpClient.GetFromJsonAsync<JsonElement>(url);
-        var results = json.GetProperty("results");await _map.LoadGeoJson(results[0], _map.Options.CoordinatesProjection); // json is in EPSG:2056
+        var results = json.GetProperty("results");
+        await _map.LoadGeoJson(results[0], _map.Options.CoordinatesProjection); // json is in EPSG:2056
     }
 
     private void OnFeatureClick(Feature feature)

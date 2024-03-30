@@ -568,7 +568,7 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
             const shape = that.mapFeatureToShape(feature);
 
             if (shape) {
-                that.Instance.invokeMethodAsync("OnInternalFeatureClick", shape); // ?
+                that.Instance.invokeMethodAsync("OnInternalFeatureClick", shape);
 
                 if (shape.properties.type == "Marker") {
                     invokeMethod = false;
@@ -753,7 +753,14 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
     var viewProjection = this.Map.getView().getProjection();
     var coordinates = null;
 
-    if (geometry != null && !Array.isArray(geometry)) {
+    if (geometry != null) {
+        if (geometry.getType() == "GeometryCollection") {
+            geometry = geometry.getGeometriesArray()[0]; // take first only, collections are not supported yet
+        }
+        else if (Array.isArray(geometry)) {
+            geometry = geometry[0];
+        }
+
         switch (geometry.getType()) {
             case "Circle":
                 coordinates = ol.proj.transform(geometry.getCenter(), viewProjection, this.Options.coordinatesProjection);

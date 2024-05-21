@@ -6,6 +6,10 @@
         <h3 class="card-title">OpenStreetMap</h3>
     </div>
     <div class="card-body">
+        <div class="btn-toolbar gap-1" role="toolbar">
+            <button class="btn btn-secondary" @onclick="SetVisibleExtent">Adelboden</button>
+            <button class="btn btn-secondary" @onclick="ZoomToMarkers">Zoom to Markers</button>
+        </div>
     <p>Demo with a loaded KML Layer on first map, custom WMS source on second map, synced center and a Graticule Layer on second map.</p>
     <pre>
 Center: @_map?.Center
@@ -22,6 +26,10 @@ Zoom: @_map?.Zoom
                FormatOptions="@_kmlOptions">
         </Layer>
     </Layers>
+    <Features>
+        <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(x, y)"></Marker>
+        <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(x+2, y+2)"></Marker>
+    </Features>
 </OpenStreetMap>
 
 <OpenStreetMap Style="height:480px" Class="card" @bind-Center="_center" ScaleLineUnit="ScaleLineUnit.US">
@@ -55,4 +63,14 @@ Zoom: @_map?.Zoom
     //private OpenStreetMap _map;
     private Map _map;
     private dynamic _kmlOptions = new { ShowPointNames = true, ExtractStyles = true };
+
+    private async Task SetVisibleExtent()
+    {
+        await _map.SetVisibleExtent(new Extent(7.2797221255061775, 46.325069369932436, 7.852244417871202, 46.59670324642207));
+    }
+
+    private async Task ZoomToMarkers()
+    {
+        await _map.SetZoomToExtent(ExtentType.Markers);
+    }
 }

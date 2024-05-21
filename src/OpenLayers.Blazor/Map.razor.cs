@@ -552,10 +552,11 @@ public partial class Map : IAsyncDisposable
     ///     Zooms to the given extent
     /// </summary>
     /// <param name="extent"></param>
+    /// <param name="padding">Padding (in pixels) to be cleared inside the view. Values in the array are top, right, bottom and left padding. defaults to [0,0,0,0]</param>
     /// <returns></returns>
-    public ValueTask SetZoomToExtent(ExtentType extent)
+    public ValueTask SetZoomToExtent(ExtentType extent, decimal[]? padding = null)
     {
-        return _module?.InvokeVoidAsync("MapOLZoomToExtent", _mapId, extent.ToString()) ?? ValueTask.CompletedTask;
+        return _module?.InvokeVoidAsync("MapOLZoomToExtent", _mapId, extent.ToString(), padding) ?? ValueTask.CompletedTask;
     }
 
     /// <summary>

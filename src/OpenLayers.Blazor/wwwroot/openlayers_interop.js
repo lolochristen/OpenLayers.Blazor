@@ -499,6 +499,8 @@ MapOL.prototype.setZoom = function (zoom) {
 };
 
 MapOL.prototype.setZoomToExtent = function (extentType, padding) {
+    if (padding == null)
+        padding = undefined;
     switch (extentType) {
         case "Markers":
             var extent = this.Markers.getSource().getExtent();

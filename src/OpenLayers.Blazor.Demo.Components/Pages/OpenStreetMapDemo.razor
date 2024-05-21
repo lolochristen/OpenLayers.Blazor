@@ -71,6 +71,6 @@ Zoom: @_map?.Zoom
 
     private async Task ZoomToMarkers()
     {
-        await _map.SetZoomToExtent(ExtentType.Markers, new decimal[] { 20, 20, 20, 20 });
+        await _map.SetZoomToExtent(ExtentType.Markers);
     }
 }

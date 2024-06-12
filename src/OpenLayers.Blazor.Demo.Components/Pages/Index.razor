@@ -49,12 +49,13 @@ Altitude @(_altitude)m
 Mouse Position: @_mousePosition
 Visible Extent: @_map?.VisibleExtent
 @_info
+@_hover_info
         </pre>
         </p>
     </div>
 </div>
 
-<SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" OnRenderComplete="@(() => { _info = "Render complete: " + DateTime.Now.ToString("h:mm:ss.ms"); })" @bind-Zoom="_zoom" Style="height:800px;" Class="card" InteractionsEnabled="@_enableInteractions" @bind-Rotation="_rotation" ZoomSliderControl FullScreenControl>
+<SwissMap @ref="_map" OnHover="OnHover" OnClick="OnMapClick" OnPointerMove="OnPointerMove" OnRenderComplete="@(() => { _info = "Render complete: " + DateTime.Now.ToString("h:mm:ss.ms"); })" @bind-Zoom="_zoom" Style="height:800px;" Class="card" InteractionsEnabled="@_enableInteractions" @bind-Rotation="_rotation" ZoomSliderControl FullScreenControl>
     <Popup>
         <div id="popup" class="ol-box">
             @if (context is Marker marker)
@@ -73,13 +74,14 @@ Visible Extent: @_map?.VisibleExtent
 
  <CodeView Source="Index.razor" />
 
- @code {
+@code {
     private SwissMap _map = null!;
     private Coordinate? _mousePosition;
     private double _zoom = 3;
     private decimal _altitude;
     private Coordinate? _lastPosition;
     private string _info = "";
+    private string _hover_info = "";
     bool _enableInteractions = true;
     private double _rotation;
 
@@ -90,6 +92,12 @@ Visible Extent: @_map?.VisibleExtent
     {
         _lastPosition = coordinate;
         await GetAltitude(coordinate);
+    }
+
+    private async Task OnHover(Shape shape)
+    {
+        _hover_info = $"HOVERED: " + shape.Id;
+        await Task.CompletedTask;
     }
 
     private void OnPointerMove(Coordinate coordinate)

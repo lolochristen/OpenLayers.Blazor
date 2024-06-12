@@ -113,6 +113,12 @@ public partial class Map : IAsyncDisposable
     public EventCallback<Coordinate> OnPointerMove { get; set; }
 
     /// <summary>
+    ///     Event when the pointer hovers over a shape
+    /// </summary>
+    [Parameter]
+    public EventCallback<Shape> OnHover { get; set; }
+
+    /// <summary>
     ///     Event when the rendering is complete
     /// </summary>
     [Parameter]
@@ -438,6 +444,12 @@ public partial class Map : IAsyncDisposable
     public Task OnInternalPointerMove(Coordinate coordinate)
     {
         return OnPointerMove.InvokeAsync(coordinate);
+    }
+
+    [JSInvokable]
+    public Task OnInternalHover(Internal.Shape shape)
+    {
+        return OnHover.InvokeAsync(new Shape(shape));
     }
 
     [JSInvokable]

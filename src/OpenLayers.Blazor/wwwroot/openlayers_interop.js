@@ -608,6 +608,14 @@ MapOL.prototype.onMapPointerMove = function (evt, element) {
     if (evt.dragging || Number.isNaN(evt.coordinate[0])) {
         return;
     }
+
+    var that = this;
+    this.Map.forEachFeatureAtPixel(evt.pixel,
+        function (feature) {
+            const shape = that.mapFeatureToShape(feature);
+            that.Instance.invokeMethodAsync("OnInternalHover", shape);
+        });
+
     const coordinate = ol.proj.transform(evt.coordinate,
         this.Map.getView().getProjection(),
         this.Options.coordinatesProjection);

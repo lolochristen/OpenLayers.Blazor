@@ -16,7 +16,7 @@ public class Source
     public Dictionary<string, object> Params { get; set; } = new();
     public double Gutter { get; set; } = 0;
     public bool Hidpi { get; set; } = true;
-    public dynamic? Projection { get; set; }
+    public string? Projection { get; set; }
     public double? ReprojectionErrorThreshold { get; set; }
     public string? ServerType { get; set; }
     public string? Url { get; set; }
@@ -30,4 +30,6 @@ public class Source
     public string? MatrixSet { get; set; }
     public string? Format { get; set; } 
     public dynamic? FormatOptions { get; set; }
+    public dynamic? Data { get; set; }
+    public dynamic? Options { get; set; }
 }

@@ -10,7 +10,7 @@
             <button class="btn btn-secondary" @onclick="SetVisibleExtent">Adelboden</button>
             <button class="btn btn-secondary" @onclick="ZoomToMarkers">Zoom to Markers</button>
         </div>
-    <p>Demo with a loaded KML Layer on first map, custom WMS source on second map, synced center and a Graticule Layer on second map.</p>
+    <p>Demo with a custom WMS source on second map, synced center and a Graticule Layer on second map.</p>
     <pre>
 Center: @_map?.Center
 VisibleExtent: @_map?.VisibleExtent
@@ -20,12 +20,6 @@ Zoom: @_map?.Zoom
 </div>
 
 <OpenStreetMap @ref="_map" Style="height:480px" Class="card mb-2" @bind-Center="_center">
-    <Layers>
-        <Layer SourceType="SourceType.VectorKML"
-               Url="https://openlayers.org/en/latest/examples/data/kml/2012-02-10.kml"
-               FormatOptions="@_kmlOptions">
-        </Layer>
-    </Layers>
     <Features>
         <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(x, y)"></Marker>
         <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(x+2, y+2)"></Marker>
@@ -41,7 +35,7 @@ Zoom: @_map?.Zoom
                Layers="gpw-v3:gpw-v3-population-density_2000"
                CrossOrigin="anonymous">
         </Layer>
-        <Layer SourceType="SourceType.Graticule" />
+        <Layer LayerType="LayerType.Graticule" />
     </Layers>
     
     <Features>
@@ -62,7 +56,6 @@ Zoom: @_map?.Zoom
     private Coordinate _center = new(11, 49);
     //private OpenStreetMap _map;
     private Map _map;
-    private dynamic _kmlOptions = new { ShowPointNames = true, ExtractStyles = true };
 
     private async Task SetVisibleExtent()
     {

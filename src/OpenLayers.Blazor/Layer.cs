@@ -4,7 +4,7 @@ namespace OpenLayers.Blazor;
 
 public class Layer : ComponentBase
 {
-    internal Internal.Layer _internalLayer = new();
+    internal Internal.Layer _internalLayer = new() { LayerType = LayerType.Tile };
 
     internal Internal.Layer InternalLayer => _internalLayer;
 
@@ -87,11 +87,24 @@ public class Layer : ComponentBase
         set => _internalLayer.Source.Urls = value;
     }
 
+    
+    [Parameter]
+    public LayerType LayerType
+    {
+        get => _internalLayer.LayerType;
+        set => _internalLayer.LayerType = value;
+    }
+
     [Parameter]
     public SourceType SourceType
     {
         get => _internalLayer.Source.SourceType;
-        set => _internalLayer.Source.SourceType = value;
+        set
+        {
+            _internalLayer.Source.SourceType = value;
+            if (value >= SourceType.VectorKML && value <= SourceType.VectorWFS && _internalLayer.LayerType == LayerType.Tile) // for compatibility
+                _internalLayer.LayerType = value == SourceType.VectorMVT ? LayerType.VectorTile : LayerType.Vector;
+        }
     }
 
     [Parameter]
@@ -218,6 +231,43 @@ public class Layer : ComponentBase
     {
         get => _internalLayer.Source.FormatOptions;
         set => _internalLayer.Source.FormatOptions = value;
+    }
+
+    /// <summary>
+    /// Gets or sets direct data for vector layers
+    /// </summary>
+    [Parameter]
+    public dynamic? Data
+    {
+        get => _internalLayer.Source.Data;
+        set => _internalLayer.Source.Data = value;
+    }
+
+    [Parameter]
+    public string? Projection
+    {
+        get => _internalLayer.Source.Projection;
+        set => _internalLayer.Source.Projection = value;
+    }
+
+    /// <summary>
+    /// Gets and set additional options for the layer
+    /// </summary>
+    [Parameter]
+    public dynamic? Options
+    {
+        get => _internalLayer.Options;
+        set => _internalLayer.Options = value;
+    }
+
+    /// <summary>
+    /// Gets and set additional options for the layer
+    /// </summary>
+    [Parameter]
+    public dynamic? SourceOptions
+    {
+        get => _internalLayer.Source.Options;
+        set => _internalLayer.Source.Options = value;
     }
 
     protected override void OnInitialized()

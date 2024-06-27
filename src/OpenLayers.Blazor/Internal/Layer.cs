@@ -1,7 +1,11 @@
-﻿namespace OpenLayers.Blazor.Internal;
+﻿using System.Text.Json.Serialization;
+
+namespace OpenLayers.Blazor.Internal;
 
 public class Layer
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public LayerType LayerType { get; set; }
     public string? ClassName { get; set; }
     public double Opacity { get; set; } = 1;
     public bool Visibility { get; set; } = true;
@@ -14,6 +18,6 @@ public class Layer
     public double Preload { get; set; } = 0;
     public Source Source { get; set; } = new();
     public bool UseInterimTilesOnError { get; set; } = true;
-
     public Dictionary<string, object>? Properties { get; set; } = new();
+    public dynamic? Options { get; set; }
 }

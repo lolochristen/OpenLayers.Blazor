@@ -1,4 +1,5 @@
 ﻿var _MapOL = new Array();
+var _MapOL = new Array();
 
 export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance) {
     _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance);
@@ -264,11 +265,22 @@ MapOL.prototype.prepareLayers = function (layers) {
 
         let source;
         let sourceType = l.source.sourceType;
+
+        // merge options
+        if (l.options) {
+            l = Object.assign(l, l.options);
+            delete l.options;
+        }
+        if (l.source && l.source.options) {
+            l.source = Object.assign(l.source, l.source.options); 
+            delete l.source.options;
+        }
+
         l = MapOL.transformNullToUndefined(l);
 
         if (l.extent && this.Options.coordinatesProjection) {
-            let projection = l.source.projection ?? "EPSG:3857";
-            l.extent = ol.proj.transformExtent(l.extent, that.Options.coordinatesProjection, projection);
+            let projection = that.Options.viewProjection ?? (ollayers.length > 0 ? ollayers[0].getSource().getProjection() : "EPSG:3857");
+            l.extent = ol.proj.transformExtent(l.extent, l.source.projection ?? that.Options.coordinatesProjection, projection);
         }
 
         switch (sourceType) {
@@ -316,78 +328,131 @@ MapOL.prototype.prepareLayers = function (layers) {
                 break;
             case "VectorKML":
                 l.source.format = new ol.format.KML(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorEsriJson":
                 l.source.format = new ol.format.EsriJSON(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
-            case "VectorGeoJson":
+            case "VectorGeoJson": 
                 l.source.format = new ol.format.GeoJSON(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorTopoJson":
                 l.source.format = new ol.format.TopoJson(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorMVT":
                 l.source.format = new ol.format.MVT(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorIGC":
                 l.source.format = new ol.format.IGC(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorPolyline":
                 l.source.format = new ol.format.Polyline(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorWKT":
                 l.source.format = new ol.format.WKT(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorWKB":
                 l.source.format = new ol.format.WKB(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorGML2":
                 l.source.format = new ol.format.GML2(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorGML3":
                 l.source.format = new ol.format.GML3(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorGPX":
                 l.source.format = new ol.format.GPX(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorOSMXML":
                 l.source.format = new ol.format.OSMXML(s);
-                source = new ol.source.Vector(l.source);
                 break;
             case "VectorWFS":
                 l.source.format = new ol.format.WFS(l.source.formatOptions);
-                source = new ol.source.Vector(l.source);
                 break;
-            case "Graticule":
-                source = l.source.formatOptions;
-                if (source == undefined) {
-                    source = {
-                        showLabels: true,
-                        wrapX: false
-                    };
-                }
+            case "ImageArcGISRest":
+                source = new ol.source.ImageArcGISRest(l.source);
+                break;
+            case "ImageCanvasSource":
+                source = new ol.source.ImageCanvasSource(l.source);
+                break;
+            case "ImageMapGuide":
+                source = new ol.source.ImageMapGuide(l.source);
+                break;
+            case "ImageStatic":
+                if (l.extent && !l.source.imageExtent)
+                    l.source.imageExtent = l.extent;
+                source = new ol.source.ImageStatic(l.source);
+                break;
+            case "ImageWMS":
+                source = new ol.source.ImageWMS(l.source);
                 break;
         }
 
-        l.source = source;
-        if (source instanceof ol.source.Vector)
-            ollayers.push(new ol.layer.Vector(l));
-        else if (sourceType == "Graticule")
-            ollayers.push(new ol.layer.Graticule(source));
-        else
-            ollayers.push(new ol.layer.Tile(l));
+        var layer;
+        switch (l.layerType) {
+            case "Image":
+                l.source = source;
+                layer = new ol.layer.Image(l);
+                break;
+
+            case "Vector":
+                if (l.source.data) {
+                    var features = l.source.format.readFeatures(l.source.data,
+                        {
+                            featureProjection: this.Options.viewProjection ?? ollayers.length > 0
+                                ? ollayers[0].getSource().getProjection()
+                                : 'EPSG:3857',
+                            dataProjection: l.source.projection ?? this.Options.coordinatesProjection
+                        });
+                    l.source.features = features;
+                }
+                l.source = new ol.source.Vector(l.source);
+                layer = new ol.layer.Vector(l);
+                break;
+
+            case "VectorTile":
+                if (l.source.data) {
+                    var features = l.source.format.readFeatures(l.source.data,
+                        {
+                            featureProjection: this.Options.viewProjection ?? ollayers.length > 0
+                                ? ollayers[0].getSource().getProjection()
+                                : 'EPSG:3857',
+                            dataProjection: l.source.projection ?? this.Options.coordinatesProjection
+                        });
+                    l.source.features = features;
+                }
+                l.source = new ol.source.VectorTile(l.source);
+                layer = new ol.layer.VectorTile(l);
+                break;
+
+            case "Heatmap":
+                l.source = new ol.source.Vector(l.source);
+                layer = new ol.layer.Heatmap(l);
+                break;
+
+            case "Graticule":
+                if (l.showLabels == undefined) l.showLabels = true;
+                if (l.wrapX == undefined) l.wrapX = false;
+                delete l.source; // remove source, graticule does not like it
+                layer = new ol.layer.Graticule(l);
+                break;
+
+            case "VectorImage":
+                l.source = new ol.source.Vector(l.source);
+                layer = new ol.layer.VectorImage(l);
+                break;
+
+            case "WebGLTile":
+                l.source = source;
+                layer = new ol.layer.WebGLTile(l);
+                break;
+
+            default: // tile
+                l.source = source;
+                layer = new ol.layer.Tile(l);
+                break;
+        }
+
+        ollayers.push(layer);
     });
 
     return ollayers;
@@ -474,7 +539,7 @@ MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
     if (!json) return;
 
     const features = (new ol.format.GeoJSON()).readFeatures(json,
-        { featureProjection: this.Options.coordinatesProjection, dataProjection: dataProjection });
+        { featureProjection: this.Map.getView().getProjection(), dataProjection: dataProjection });
 
     const geoSource = new ol.source.Vector({
         features: features

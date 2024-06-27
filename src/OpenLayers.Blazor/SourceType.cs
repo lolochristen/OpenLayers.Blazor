@@ -30,5 +30,9 @@ public enum SourceType
     VectorGPX,
     VectorOSMXML,
     VectorWFS,
-    Graticule
+    ImageArcGISRest,
+    ImageCanvasSource,
+    ImageMapGuide,
+    ImageStatic,
+    ImageWMS
 }

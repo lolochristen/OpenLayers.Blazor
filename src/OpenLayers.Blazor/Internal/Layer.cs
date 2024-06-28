@@ -20,4 +20,5 @@ public class Layer
     public bool UseInterimTilesOnError { get; set; } = true;
     public Dictionary<string, object>? Properties { get; set; } = new();
     public dynamic? Options { get; set; }
+    public Dictionary<string, object>? Style { get; set; }
 }

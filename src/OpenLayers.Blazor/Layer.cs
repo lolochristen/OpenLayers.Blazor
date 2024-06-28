@@ -10,6 +10,9 @@ public class Layer : ComponentBase
 
     [CascadingParameter] public Map? ParentMap { get; set; }
 
+    /// <summary>
+    /// Gets or sets the opacity of the layer. value must be between 0 and 1.
+    /// </summary>
     [Parameter]
     public double Opacity
     {
@@ -17,6 +20,9 @@ public class Layer : ComponentBase
         set => _internalLayer.Opacity = value;
     }
 
+    /// <summary>
+    /// Gets or sets the visibility of the layer.
+    /// </summary>
     [Parameter]
     public bool Visibility
     {
@@ -24,8 +30,11 @@ public class Layer : ComponentBase
         set => _internalLayer.Visibility = value;
     }
 
+    /// <summary>
+    /// Gets or sets the extent of layer defined
+    /// </summary>
     [Parameter]
-    public double[]? Extent
+    public Extent? Extent
     {
         get => _internalLayer.Extent;
         set => _internalLayer.Extent = value;
@@ -107,6 +116,9 @@ public class Layer : ComponentBase
         }
     }
 
+    /// <summary>
+    /// Gets or sets the attributions of the map layer.
+    /// </summary>
     [Parameter]
     public string? Attributions
     {
@@ -184,6 +196,9 @@ public class Layer : ComponentBase
         set => _internalLayer.Source.MatrixSet = value;
     }
 
+    /// <summary>
+    /// Gets or sets to tile image format such as image/png.
+    /// </summary>
     [Parameter]
     public string? Format
     {
@@ -198,6 +213,9 @@ public class Layer : ComponentBase
         set => _internalLayer.Preload = value;
     }
 
+    /// <summary>
+    /// Gets ot sets the server type for the source of tile layers
+    /// </summary>
     [Parameter]
     public string? ServerType
     {
@@ -205,6 +223,9 @@ public class Layer : ComponentBase
         set => _internalLayer.Source.ServerType = value;
     }
 
+    /// <summary>
+    /// Gets or sets the layers the layer parameter for the source tile layers
+    /// </summary>
     [Parameter]
     public string? Layers
     {
@@ -212,6 +233,9 @@ public class Layer : ComponentBase
         set => _internalLayer.Source.Params["LAYERS"] = value;
     }
 
+    /// <summary>
+    /// Gets or set styles parameter for tile layers.
+    /// </summary>
     [Parameter]
     public string? Styles
     {
@@ -219,6 +243,19 @@ public class Layer : ComponentBase
         set => _internalLayer.Source.Params["STYLES"] = value;
     }
 
+    /// <summary>
+    /// Gets or set flat styles for vector layers. See https://openlayers.org/en/latest/apidoc/module-ol_style_flat.html#~FlatStyleLike
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, object>? Style
+    {
+        get => _internalLayer.Style;
+        set => _internalLayer.Style = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the title of tile layers.
+    /// </summary>
     [Parameter]
     public string? Title
     {

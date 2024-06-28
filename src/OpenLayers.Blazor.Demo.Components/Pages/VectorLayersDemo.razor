@@ -14,7 +14,7 @@
 <OpenStreetMap @ref="_map" Style="height:800px" class="card">
     <Layers>
         <Layer LayerType="LayerType.VectorImage" SourceType="SourceType.VectorGeoJson" Url="https://openlayers.org/data/vector/ecoregions.json" Opacity=".5" Options="@_vectorImageOptions" ></Layer>
-        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorWKT" Data="@_wkt"/>
+        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorWKT" Data="@_wkt" Style="@_wktStyle" />
         <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorKML" Url="https://openlayers.org/en/latest/examples/data/kml/2012-02-10.kml" FormatOptions="@_kmlOptions"></Layer>
         <Layer LayerType="LayerType.Heatmap" SourceType="SourceType.VectorKML" 
                Url="https://openlayers.org/en/latest/examples/data/kml/2012_Earthquakes_Mag5.kml" 
@@ -29,6 +29,12 @@
 @code {
     private Map? _map { get; set; }
     private dynamic _vectorImageOptions = new { imageRatio = 2, style = new Dictionary<string, object>() { { "fill-color", new dynamic[] { "string", new[] { "get", "COLOR" }, "#eee" } } } };
-    private dynamic _wkt = "POLYGON((10.689 -25.092, 34.595 -20.170, 38.814 -35.639, 13.502 -39.155, 10.689 -25.092))";
     private dynamic _kmlOptions = new { ShowPointNames = true, ExtractStyles = true };
+
+    private dynamic _wkt = "POLYGON((10.689 -25.092, 34.595 -20.170, 38.814 -35.639, 13.502 -39.155, 10.689 -25.092))";
+    private Dictionary<string, object> _wktStyle = new()
+    {
+        { "fill-color", "rgba(255,80,200,0.4)" },
+        { "stroke-color", "#3399CC" }
+    };
 }

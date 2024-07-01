@@ -25,10 +25,6 @@ export function MapOLSetOptions(mapId, options) {
     _MapOL[mapId].setOptions(options);
 }
 
-export function MapOLLoadGeoJson(mapId, json, dataProjection, raiseEvents) {
-    _MapOL[mapId].loadGeoJson(json, dataProjection, raiseEvents);
-}
-
 export function MapOLZoomToExtent(mapId, extentType, padding) {
     _MapOL[mapId].setZoomToExtent(extentType, padding);
 }
@@ -262,197 +258,208 @@ MapOL.prototype.prepareLayers = function (layers) {
     let that = this;
 
     layers.forEach((l, i, arr) => {
+        try {
+            let source;
+            let sourceType = l.source.sourceType;
 
-        let source;
-        let sourceType = l.source.sourceType;
+            // merge options
+            if (l.options) {
+                l = Object.assign(l, l.options);
+                delete l.options;
+            }
+            if (l.source && l.source.options) {
+                l.source = Object.assign(l.source, l.source.options);
+                delete l.source.options;
+            }
 
-        // merge options
-        if (l.options) {
-            l = Object.assign(l, l.options);
-            delete l.options;
+            l = MapOL.transformNullToUndefined(l);
+
+            if (l.extent && this.Options.coordinatesProjection) {
+                let projection = that.Options.viewProjection ??
+                    (ollayers.length > 0 ? ollayers[0].getSource().getProjection() : "EPSG:3857");
+                l.extent = ol.proj.transformExtent(l.extent,
+                    l.source.projection ?? that.Options.coordinatesProjection,
+                    projection);
+            }
+
+            switch (sourceType) {
+                case "TileImage":
+                    source = new ol.source.TileImage(l.source);
+                    break;
+                case "BingMaps":
+                    source = new ol.source.BingMaps(l.source);
+                    break;
+                case "OGCMapTile":
+                    source = new ol.source.OGCMapTile(l.source);
+                    break;
+                case "TileArcGISRest":
+                    source = new ol.source.TileArcGISRest(l.source);
+                    break;
+                case "TileJSON":
+                    source = new ol.source.TileJSON(l.source);
+                    break;
+                case "TileWMS":
+                    source = new ol.source.TileWMS(l.source);
+                    break;
+                case "WMTS":
+                    source = new ol.source.WMTS(l.source);
+                    break;
+                case "Zoomify":
+                    source = new ol.source.Zoomify(l.source);
+                    break;
+                case "OSM":
+                    source = new ol.source.OSM(l.source);
+                    break;
+                case "XYZ":
+                    source = new ol.source.XYZ(l.source);
+                    break;
+                case "CartoDB":
+                    source = new ol.source.CartoDB(l.source);
+                    break;
+                case "Stamen":
+                    source = new ol.source.Stamen(l.source);
+                    break;
+                case "StadiaMaps":
+                    source = new ol.source.StadiaMaps(l.source);
+                    break;
+                case "TileDebug":
+                    source = new ol.source.TileDebug(l.source);
+                    break;
+                case "VectorKML":
+                    l.source.format = new ol.format.KML(l.source.formatOptions);
+                    break;
+                case "VectorEsriJson":
+                    l.source.format = new ol.format.EsriJSON(l.source.formatOptions);
+                    break;
+                case "VectorGeoJson":
+                    l.source.format = new ol.format.GeoJSON(l.source.formatOptions);
+                    break;
+                case "VectorTopoJson":
+                    l.source.format = new ol.format.TopoJson(l.source.formatOptions);
+                    break;
+                case "VectorMVT":
+                    l.source.format = new ol.format.MVT(l.source.formatOptions);
+                    break;
+                case "VectorIGC":
+                    l.source.format = new ol.format.IGC(l.source.formatOptions);
+                    break;
+                case "VectorPolyline":
+                    l.source.format = new ol.format.Polyline(l.source.formatOptions);
+                    break;
+                case "VectorWKT":
+                    l.source.format = new ol.format.WKT(l.source.formatOptions);
+                    break;
+                case "VectorWKB":
+                    l.source.format = new ol.format.WKB(l.source.formatOptions);
+                    break;
+                case "VectorGML2":
+                    l.source.format = new ol.format.GML2(l.source.formatOptions);
+                    break;
+                case "VectorGML3":
+                    l.source.format = new ol.format.GML3(l.source.formatOptions);
+                    break;
+                case "VectorGPX":
+                    l.source.format = new ol.format.GPX(l.source.formatOptions);
+                    break;
+                case "VectorOSMXML":
+                    l.source.format = new ol.format.OSMXML(s);
+                    break;
+                case "VectorWFS":
+                    l.source.format = new ol.format.WFS(l.source.formatOptions);
+                    break;
+                case "ImageArcGISRest":
+                    source = new ol.source.ImageArcGISRest(l.source);
+                    break;
+                case "ImageCanvasSource":
+                    source = new ol.source.ImageCanvasSource(l.source);
+                    break;
+                case "ImageMapGuide":
+                    source = new ol.source.ImageMapGuide(l.source);
+                    break;
+                case "ImageStatic":
+                    if (l.extent && !l.source.imageExtent)
+                        l.source.imageExtent = l.extent;
+                    source = new ol.source.ImageStatic(l.source);
+                    break;
+                case "ImageWMS":
+                    source = new ol.source.ImageWMS(l.source);
+                    break;
+            }
+
+            var layer;
+            switch (l.layerType) {
+                case "Image":
+                    l.source = source;
+                    layer = new ol.layer.Image(l);
+                    break;
+
+                case "Vector":
+                case "VectorTile":
+                    var features;
+                    if (l.useStyleCallback) {
+                        l.style = function (feature, resolution) { return that.getShapeStyle(feature, l.id); }
+                    }
+                    else if (l.style) {
+                        var styleOptions = l.style;
+                        l.style = function (feature, resolution) { return that.mapStyleOptionsToStyle(styleOptions, feature); }
+                    }
+                    else if (l.flatStyle) {
+                        l.style = l.flatStyle;
+                    }
+                    if (l.source.data) {
+                        features = l.source.format.readFeatures(l.source.data,
+                            {
+                                featureProjection: this.Options.viewProjection ??
+                                    (ollayers.length > 0 ? ollayers[0].getSource().getProjection() :
+                                        (that.Map ? that.Map.getView().getProjection() : 'EPSG:3857')),
+                                dataProjection: l.source.projection ?? this.Options.coordinatesProjection
+                            });
+                    }
+                    l.source = l.layerType == "VectorTile"
+                        ? new ol.source.VectorTile(l.source)
+                        : new ol.source.Vector(l.source);
+
+                    if (l.syncFeatures) { // attach and sync
+                        l.source.on("addfeature", function (evt) { that.onFeatureAdded(evt.feature); });
+                        l.source.on("changefeature", function (evt) { that.onFeatureChanged(evt.feature); });
+                        l.source.on("removefeature", function (evt) { that.onFeatureRemoved(evt.feature); });
+                    }
+                    if (features) l.source.addFeatures(features);
+                    layer = l.layerType == "VectorTile" ? new ol.layer.VectorTile(l) : new ol.layer.Vector(l);
+                    break;
+
+                case "Heatmap":
+                    l.source = new ol.source.Vector(l.source);
+                    layer = new ol.layer.Heatmap(l);
+                    break;
+
+                case "Graticule":
+                    if (l.showLabels == undefined) l.showLabels = true;
+                    if (l.wrapX == undefined) l.wrapX = false;
+                    delete l.source; // remove source, graticule does not like it
+                    layer = new ol.layer.Graticule(l);
+                    break;
+
+                case "VectorImage":
+                    l.source = new ol.source.Vector(l.source);
+                    layer = new ol.layer.VectorImage(l);
+                    break;
+
+                case "WebGLTile":
+                    l.source = source;
+                    layer = new ol.layer.WebGLTile(l);
+                    break;
+
+                default: // tile
+                    l.source = source;
+                    layer = new ol.layer.Tile(l);
+                    break;
+            }
+
+            ollayers.push(layer);
+        } catch (exp) {
+            console.error("Could no add layer: " + exp);
         }
-        if (l.source && l.source.options) {
-            l.source = Object.assign(l.source, l.source.options); 
-            delete l.source.options;
-        }
-
-        l = MapOL.transformNullToUndefined(l);
-
-        if (l.extent && this.Options.coordinatesProjection) {
-            let projection = that.Options.viewProjection ?? (ollayers.length > 0 ? ollayers[0].getSource().getProjection() : "EPSG:3857");
-            l.extent = ol.proj.transformExtent(l.extent, l.source.projection ?? that.Options.coordinatesProjection, projection);
-        }
-
-        switch (sourceType) {
-            case "TileImage":
-                source = new ol.source.TileImage(l.source);
-                break;
-            case "BingMaps":
-                source = new ol.source.BingMaps(l.source);
-                break;
-            case "OGCMapTile":
-                source = new ol.source.OGCMapTile(l.source);
-                break;
-            case "TileArcGISRest":
-                source = new ol.source.TileArcGISRest(l.source);
-                break;
-            case "TileJSON":
-                source = new ol.source.TileJSON(l.source);
-                break;
-            case "TileWMS":
-                source = new ol.source.TileWMS(l.source);
-                break;
-            case "WMTS":
-                source = new ol.source.WMTS(l.source);
-                break;
-            case "Zoomify":
-                source = new ol.source.Zoomify(l.source);
-                break;
-            case "OSM":
-                source = new ol.source.OSM(l.source);
-                break;
-            case "XYZ":
-                source = new ol.source.XYZ(l.source);
-                break;
-            case "CartoDB":
-                source = new ol.source.CartoDB(l.source);
-                break;
-            case "Stamen":
-                source = new ol.source.Stamen(l.source);
-                break;
-            case "StadiaMaps":
-                source = new ol.source.StadiaMaps(l.source);
-                break;
-            case "TileDebug":
-                source = new ol.source.TileDebug(l.source);
-                break;
-            case "VectorKML":
-                l.source.format = new ol.format.KML(l.source.formatOptions);
-                break;
-            case "VectorEsriJson":
-                l.source.format = new ol.format.EsriJSON(l.source.formatOptions);
-                break;
-            case "VectorGeoJson": 
-                l.source.format = new ol.format.GeoJSON(l.source.formatOptions);
-                break;
-            case "VectorTopoJson":
-                l.source.format = new ol.format.TopoJson(l.source.formatOptions);
-                break;
-            case "VectorMVT":
-                l.source.format = new ol.format.MVT(l.source.formatOptions);
-                break;
-            case "VectorIGC":
-                l.source.format = new ol.format.IGC(l.source.formatOptions);
-                break;
-            case "VectorPolyline":
-                l.source.format = new ol.format.Polyline(l.source.formatOptions);
-                break;
-            case "VectorWKT":
-                l.source.format = new ol.format.WKT(l.source.formatOptions);
-                break;
-            case "VectorWKB":
-                l.source.format = new ol.format.WKB(l.source.formatOptions);
-                break;
-            case "VectorGML2":
-                l.source.format = new ol.format.GML2(l.source.formatOptions);
-                break;
-            case "VectorGML3":
-                l.source.format = new ol.format.GML3(l.source.formatOptions);
-                break;
-            case "VectorGPX":
-                l.source.format = new ol.format.GPX(l.source.formatOptions);
-                break;
-            case "VectorOSMXML":
-                l.source.format = new ol.format.OSMXML(s);
-                break;
-            case "VectorWFS":
-                l.source.format = new ol.format.WFS(l.source.formatOptions);
-                break;
-            case "ImageArcGISRest":
-                source = new ol.source.ImageArcGISRest(l.source);
-                break;
-            case "ImageCanvasSource":
-                source = new ol.source.ImageCanvasSource(l.source);
-                break;
-            case "ImageMapGuide":
-                source = new ol.source.ImageMapGuide(l.source);
-                break;
-            case "ImageStatic":
-                if (l.extent && !l.source.imageExtent)
-                    l.source.imageExtent = l.extent;
-                source = new ol.source.ImageStatic(l.source);
-                break;
-            case "ImageWMS":
-                source = new ol.source.ImageWMS(l.source);
-                break;
-        }
-
-        var layer;
-        switch (l.layerType) {
-            case "Image":
-                l.source = source;
-                layer = new ol.layer.Image(l);
-                break;
-
-            case "Vector":
-                if (l.source.data) {
-                    var features = l.source.format.readFeatures(l.source.data,
-                        {
-                            featureProjection: this.Options.viewProjection ?? ollayers.length > 0
-                                ? ollayers[0].getSource().getProjection()
-                                : 'EPSG:3857',
-                            dataProjection: l.source.projection ?? this.Options.coordinatesProjection
-                        });
-                    l.source.features = features;
-                }
-                l.source = new ol.source.Vector(l.source);
-                layer = new ol.layer.Vector(l);
-                break;
-
-            case "VectorTile":
-                if (l.source.data) {
-                    var features = l.source.format.readFeatures(l.source.data,
-                        {
-                            featureProjection: this.Options.viewProjection ?? ollayers.length > 0
-                                ? ollayers[0].getSource().getProjection()
-                                : 'EPSG:3857',
-                            dataProjection: l.source.projection ?? this.Options.coordinatesProjection
-                        });
-                    l.source.features = features;
-                }
-                l.source = new ol.source.VectorTile(l.source);
-                layer = new ol.layer.VectorTile(l);
-                break;
-
-            case "Heatmap":
-                l.source = new ol.source.Vector(l.source);
-                layer = new ol.layer.Heatmap(l);
-                break;
-
-            case "Graticule":
-                if (l.showLabels == undefined) l.showLabels = true;
-                if (l.wrapX == undefined) l.wrapX = false;
-                delete l.source; // remove source, graticule does not like it
-                layer = new ol.layer.Graticule(l);
-                break;
-
-            case "VectorImage":
-                l.source = new ol.source.Vector(l.source);
-                layer = new ol.layer.VectorImage(l);
-                break;
-
-            case "WebGLTile":
-                l.source = source;
-                layer = new ol.layer.WebGLTile(l);
-                break;
-
-            default: // tile
-                l.source = source;
-                layer = new ol.layer.Tile(l);
-                break;
-        }
-
-        ollayers.push(layer);
     });
 
     return ollayers;
@@ -480,30 +487,13 @@ MapOL.prototype.addLayer = function (layer) {
 };
 
 MapOL.prototype.updateLayer = function (layer) {
-    const ollayers = this.prepareLayers([layer]);
-    const olayer = this.findLayer(ollayers[0]);
+    const olayer = this.Map.getAllLayers().find((l) => l.get("id") == layer.id);
     if (olayer != undefined) {
         olayer.setVisible(layer.visibility);
         olayer.setOpacity(layer.opacity);
         olayer.setZIndex(layer.zindex);
         olayer.setExtent(layer.extent);
     }
-};
-
-MapOL.prototype.findLayer = function (layer) {
-    let foundLayer = undefined;
-    this.Map.getAllLayers().forEach((l) => {
-        try {
-            const source = l.getSource();
-            const layerSource = layer.getSource();
-            if (source.urls[0] == layerSource.urls[0] && source.getKey() == layerSource.getKey()) {
-                foundLayer = l;
-            }
-        }
-        catch (ex) {
-        }
-    });
-    return foundLayer;
 };
 
 MapOL.prototype.setMarkers = function (markers) {
@@ -526,37 +516,6 @@ MapOL.prototype.setShapes = function (shapes) {
             source.addFeature(feature);
         });
     }
-};
-
-MapOL.prototype.loadGeoJson = function (json, dataProjection, raiseEvents) {
-    var that = this;
-
-    if (this.GeoLayer) {
-        const source = this.GeoLayer.getSource();
-        source.clear();
-    }
-
-    if (!json) return;
-
-    const features = (new ol.format.GeoJSON()).readFeatures(json,
-        { featureProjection: this.Map.getView().getProjection(), dataProjection: dataProjection });
-
-    const geoSource = new ol.source.Vector({
-        features: features
-    });
-
-    if (this.GeoLayer) {
-        this.GeoLayer.setSource(geoSource);
-    } else {
-        this.GeoLayer = new ol.layer.Vector({
-            source: geoSource,
-            style: (feature) => that.getShapeStyle(feature) // needs to be sync
-        });
-
-        this.Map.addLayer(this.GeoLayer);
-    }
-
-    if (raiseEvents) features.forEach((f, i, arr) => { that.onFeatureAdded(f) });
 };
 
 MapOL.prototype.setZoom = function (zoom) {
@@ -774,8 +733,8 @@ MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes
             freehand: freehand
         });
         this.currentDraw.on("drawend",
-            function(evt) {
-                that.getShapeStyleAsync(evt.feature)
+            function (evt) {
+                that.getShapeStyleAsync(evt.feature, "geometries")
                     .then(style => evt.feature.setStyle(style));
             });
 
@@ -819,7 +778,7 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
     if (feature == null) return null;
 
     var geometry = feature.getGeometry();
-    var viewProjection = this.Map.getView().getProjection();
+    var viewProjection = this.Map ? this.Map.getView().getProjection() : (this.Options.viewProjection ?? "EPSG:3857");
     var coordinates = null;
 
     if (geometry != null && !Array.isArray(geometry)) {
@@ -840,6 +799,7 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
     }
 
     var style = feature.getStyle();
+    if (typeof(style) == "function") style = style(feature, this.Map.getView().getResolution());
     var stroke = style && !Array.isArray(style) ? style.getStroke() : null;
     var fill = style && !Array.isArray(style) ? style.getFill() : null;
     var text = style && !Array.isArray(style) ? style.getText() : null;
@@ -1024,7 +984,12 @@ MapOL.prototype.updateShape = function (shape) {
         feature = this.Markers.getSource().getFeatureById(shape.id);
     } else {
         feature = this.Geometries.getSource().getFeatureById(shape.id);
-        if (!feature && this.GeoLayer) feature = this.GeoLayer.getSource().getFeatureById(shape.id);
+        if (!feature) {
+            this.Map.getAllLayers().forEach((layer) => {
+                var source = layer.getSource();
+                if (!feature && source.getFeatureById != undefined) feature = layer.getSource().getFeatureById(shape.id);
+            });
+        }
     }
 
     if (feature) {
@@ -1221,14 +1186,14 @@ MapOL.prototype.customImageStyle = function (marker) {
 };
 
 // Shape Style
-MapOL.prototype.getShapeStyleAsync = async function(feature) {
+MapOL.prototype.getShapeStyleAsync = async function (feature, layer_id) {
     const shape = this.mapFeatureToShape(feature);
-    var style = await this.Instance.invokeMethodAsync("OnGetShapeStyleAsync", shape);
+    var style = await this.Instance.invokeMethodAsync("OnGetShapeStyleAsync", shape, layer_id);
     return this.mapStyleOptionsToStyle(style, feature);
 }
-MapOL.prototype.getShapeStyle = function(feature) {
+MapOL.prototype.getShapeStyle = function (feature, layer_id) {
     const shape = this.mapFeatureToShape(feature);
-    var style = this.Instance.invokeMethod("OnGetShapeStyle", shape);
+    var style = this.Instance.invokeMethod("OnGetShapeStyle", shape, layer_id);
     return this.mapStyleOptionsToStyle(style, feature);
 }
 

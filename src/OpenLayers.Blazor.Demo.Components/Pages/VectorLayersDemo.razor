@@ -14,7 +14,7 @@
 <OpenStreetMap @ref="_map" Style="height:800px" class="card">
     <Layers>
         <Layer LayerType="LayerType.VectorImage" SourceType="SourceType.VectorGeoJson" Url="https://openlayers.org/data/vector/ecoregions.json" Opacity=".5" Options="@_vectorImageOptions" ></Layer>
-        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorWKT" Data="@_wkt" Style="@_wktStyle" />
+        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorWKT" Data="@_wkt" FlatStyle="@_wktStyle" />
         <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorKML" Url="https://openlayers.org/en/latest/examples/data/kml/2012-02-10.kml" FormatOptions="@_kmlOptions"></Layer>
         <Layer LayerType="LayerType.Heatmap" SourceType="SourceType.VectorKML" 
                Url="https://openlayers.org/en/latest/examples/data/kml/2012_Earthquakes_Mag5.kml" 

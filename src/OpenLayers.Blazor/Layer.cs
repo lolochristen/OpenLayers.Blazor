@@ -11,6 +11,16 @@ public class Layer : ComponentBase
     [CascadingParameter] public Map? ParentMap { get; set; }
 
     /// <summary>
+    /// Gets or sets the identifier for the layer.
+    /// </summary>
+    [Parameter]
+    public string Id
+    {
+        get => _internalLayer.Id;
+        set => _internalLayer.Id = value;
+    }
+
+    /// <summary>
     /// Gets or sets the opacity of the layer. value must be between 0 and 1.
     /// </summary>
     [Parameter]
@@ -247,7 +257,14 @@ public class Layer : ComponentBase
     /// Gets or set flat styles for vector layers. See https://openlayers.org/en/latest/apidoc/module-ol_style_flat.html#~FlatStyleLike
     /// </summary>
     [Parameter]
-    public Dictionary<string, object>? Style
+    public Dictionary<string, object>? FlatStyle
+    {
+        get => _internalLayer.FlatStyle;
+        set => _internalLayer.FlatStyle = value;
+    }
+
+    [Parameter]
+    public StyleOptions? Style
     {
         get => _internalLayer.Style;
         set => _internalLayer.Style = value;
@@ -298,6 +315,16 @@ public class Layer : ComponentBase
     }
 
     /// <summary>
+    /// Gets or sets if the layer (vector) should synchronize features collections
+    /// </summary>
+    [Parameter]
+    public bool SyncFeatures
+    {
+        get => _internalLayer.SyncFeatures;
+        set => _internalLayer.SyncFeatures = value;
+    }
+
+    /// <summary>
     /// Gets and set additional options for the layer
     /// </summary>
     [Parameter]
@@ -305,6 +332,20 @@ public class Layer : ComponentBase
     {
         get => _internalLayer.Source.Options;
         set => _internalLayer.Source.Options = value;
+    }
+
+    private Func<Shape, StyleOptions?> _styleCallback;
+
+    [Parameter]
+    public Func<Shape, StyleOptions?> StyleCallback
+    {
+        get => _styleCallback;
+        set
+        {
+            _styleCallback = value;
+            if (_styleCallback != null)
+                _internalLayer.UseStyleCallback = true;
+        }
     }
 
     protected override void OnInitialized()

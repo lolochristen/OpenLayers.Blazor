@@ -4,6 +4,7 @@ namespace OpenLayers.Blazor.Internal;
 
 public class Layer
 {
+    public string Id { get; internal set; } = Guid.NewGuid().ToString();
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public LayerType LayerType { get; set; }
     public string? ClassName { get; set; }
@@ -20,5 +21,8 @@ public class Layer
     public bool UseInterimTilesOnError { get; set; } = true;
     public Dictionary<string, object>? Properties { get; set; } = new();
     public dynamic? Options { get; set; }
-    public Dictionary<string, object>? Style { get; set; }
+    public Dictionary<string, object>? FlatStyle { get; set; }
+    public StyleOptions? Style { get; set; }
+    public bool SyncFeatures { get; set; }
+    public bool UseStyleCallback { get; set; }
 }

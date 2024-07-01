@@ -566,9 +566,22 @@ public partial class Map : IAsyncDisposable
     /// <param name="json">GeoJson Data</param>
     /// <param name="dataProjection">Data projection of GeoJson</param>
     /// <param name="raiseEvents">Raise events for new created features and add it to list of shapes</param>
-    public ValueTask LoadGeoJson(JsonElement json, string? dataProjection = null, bool? raiseEvents = true)
+    /// <param name="styles">Flat styles collection</param>
+    [Obsolete("Use LayerList.Add(new Layer() { LayerType=LayerType.Vector, SourceType=SourceType.VectorGeoJson, Data=data } instead.")]
+    public ValueTask<Layer> LoadGeoJson(JsonElement json, string? dataProjection = null, bool raiseEvents = true, Dictionary<string, object>? styles = null)
     {
-        return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json, dataProjection, raiseEvents) ?? ValueTask.CompletedTask;
+        var layer = new Layer()
+        {
+            LayerType = LayerType.Vector,
+            SourceType = SourceType.VectorGeoJson,
+            SyncFeatures = raiseEvents,
+            Projection = dataProjection,
+            Data = json,
+            FlatStyle = styles
+        };
+        LayersList.Add(layer);
+        return ValueTask.FromResult(layer);
+        //return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json, dataProjection, raiseEvents) ?? ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -647,19 +660,22 @@ public partial class Map : IAsyncDisposable
     }
 
     [JSInvokable]
-    public StyleOptions OnGetShapeStyle(Internal.Shape shape)
+    public StyleOptions OnGetShapeStyle(Internal.Shape shape, string layer_id)
     {
 #if DEBUG
         Console.WriteLine($"OnGetShapeStyle: {JsonSerializer.Serialize(shape)}");
 #endif
 
-        return ShapeStyleCallback(new Shape(shape));
+        var style = LayersList.FirstOrDefault(p => p.Id == layer_id)?.StyleCallback?.Invoke(new Shape(shape));
+        if (style == null)
+            style = ShapeStyleCallback(new Shape(shape));
+        return style;
     }
 
     [JSInvokable]
-    public Task<StyleOptions> OnGetShapeStyleAsync(Internal.Shape shape)
+    public Task<StyleOptions> OnGetShapeStyleAsync(Internal.Shape shape, string layer_id)
     {
-        return Task.FromResult(OnGetShapeStyle(shape));
+        return Task.FromResult(OnGetShapeStyle(shape, layer_id));
     }
 
     /// <summary>

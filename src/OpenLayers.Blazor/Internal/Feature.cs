@@ -13,7 +13,7 @@ public class Feature : IEquatable<Feature>
         Coordinates = new Coordinates();
     }
 
-    public object Id { get; set; }
+    public string Id { get; set; }
 
     [JsonIgnore]
     public string? Type

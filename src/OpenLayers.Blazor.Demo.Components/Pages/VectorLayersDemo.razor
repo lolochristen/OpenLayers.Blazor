@@ -21,6 +21,11 @@
                FormatOptions="@((dynamic) new { extractStyles = false})" 
                Options="@((dynamic) new { blur = 15, radius = 5, weight = ".3" })"></Layer>
         <Layer LayerType="LayerType.Image" SourceType="SourceType.ImageStatic" Url="https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Logo_Arosa.svg/480px-Logo_Arosa.svg.png" CrossOrigin="anonymous" Extent="new double[] {9.237235, 46.533206, 11.703873, 46.846104}"></Layer>
+        <Layer LayerType="LayerType.Vector" SourceType="SourceType.Vector">
+            <Shapes>
+                <Circle Center="new(9.674681, 46.778543)" Radius="10000" BorderColor="red" BackgroundColor="transparent" BorderSize="5"></Circle>
+            </Shapes>
+        </Layer>
     </Layers>
 </OpenStreetMap>
 
@@ -37,4 +42,10 @@
         { "fill-color", "rgba(255,80,200,0.4)" },
         { "stroke-color", "#3399CC" }
     };
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            _map.Zoom = 3;
+    }
 }

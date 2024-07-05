@@ -76,12 +76,30 @@ public partial class Map : IAsyncDisposable
     /// <summary>
     ///     Collection of attached markers
     /// </summary>
-    public ObservableCollection<Marker> MarkersList { get; } = new();
+    public ObservableCollection<Shape> MarkersList
+    {
+        get
+        {
+            if (MarkersLayer != null)
+                return MarkersLayer.ShapesList;
+
+            return GetOrCreateMarkersLayer().ShapesList;
+        }
+    }
 
     /// <summary>
     ///     Collection of attached shapes
     /// </summary>
-    public ObservableCollection<Shape> ShapesList { get; } = new();
+    public ObservableCollection<Shape> ShapesList
+    {
+        get
+        {
+            if (ShapesLayer != null)
+                return ShapesLayer.ShapesList;
+
+            return GetOrCreateShapesLayer().ShapesList;
+        }
+    }
 
     /// <summary>
     ///     Event when a feature (shapes/markers) is called
@@ -299,14 +317,17 @@ public partial class Map : IAsyncDisposable
     /// </summary>
     [Parameter] public bool ZoomToExtentControl { get => Options.ZoomToExtentControl; set => Options.ZoomToExtentControl = value; }
 
+
+    public Layer? ShapesLayer { get; set; }
+
+    public Layer? MarkersLayer { get; set; }
+
     /// <summary>
     ///     Disposing resources.
     /// </summary>
     /// <returns>ValueTask</returns>
     public async ValueTask DisposeAsync()
     {
-        MarkersList.CollectionChanged -= MarkersOnCollectionChanged;
-        ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
         LayersList.CollectionChanged -= LayersOnCollectionChanged;
 
         if (_module != null)
@@ -375,15 +396,25 @@ public partial class Map : IAsyncDisposable
             _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js");
             Instance ??= DotNetObjectReference.Create(this);
 
+            if (ShapesList.Count > 0)
+                GetOrCreateShapesLayer();
+
+            if (MarkersList.Count > 0)
+                GetOrCreateMarkersLayer();
+
             if (_module != null)
                 await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom, Rotation, InteractionsEnabled,
-                    MarkersList.Select(p => p.InternalFeature).ToArray(),
-                    ShapesList.Select(p => p.InternalFeature).ToArray(),
                     LayersList.Select(p => p.InternalLayer).ToArray(),
                     Instance);
 
-            MarkersList.CollectionChanged += MarkersOnCollectionChanged;
-            ShapesList.CollectionChanged += ShapesOnCollectionChanged;
+            foreach (var layer in LayersList)
+            {
+                if (layer.ShapesList.Count > 0)
+                {
+                    await SetShapesInternal(layer, layer.ShapesList);
+                }
+            }
+
             LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
     }
@@ -409,7 +440,7 @@ public partial class Map : IAsyncDisposable
 #if DEBUG
         Console.WriteLine($"OnInternalMarkerClick: {JsonSerializer.Serialize(marker)}");
 #endif
-        var m = MarkersList.FirstOrDefault(p => string.Equals(p.InternalFeature.Id.ToString(), marker.Id.ToString(), StringComparison.OrdinalIgnoreCase));
+        var m = MarkersList.OfType<Marker>().FirstOrDefault(p => string.Equals(p.InternalFeature.Id.ToString(), marker.Id.ToString(), StringComparison.OrdinalIgnoreCase));
 
         if (m != null)
         {
@@ -469,32 +500,48 @@ public partial class Map : IAsyncDisposable
     }
 
     [JSInvokable]
-    public async Task OnInternalShapeAdded(Internal.Shape shape)
+    public async Task OnInternalShapeAdded(string layerId, Internal.Shape shape)
     {
 #if DEBUG
         Console.WriteLine($"OnInternalShapeAdded: {JsonSerializer.Serialize(shape)}");
 #endif
-        if (ShapesList.All(p => p.Id != shape.Id.ToString()))
+        var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
+        if (layer == null)
         {
-            var newShape = new Shape(shape);
-            ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
-            ShapesList.Add(newShape);
-            ShapesList.CollectionChanged += ShapesOnCollectionChanged;
+#if DEBUG
+            Console.WriteLine($"Layer not found: {layerId}");
+#endif
+            return;
+        }
+
+        if (layer.ShapesList.All(p => p.Id != shape.Id))
+        {
+            var newShape = await layer.OnInternalShapeAdded(shape);
             await OnShapeAdded.InvokeAsync(newShape);
         }
     }
 
     [JSInvokable]
-    public async Task OnInternalShapeChanged(Internal.Shape shape)
+    public async Task OnInternalShapeChanged(string layerId, Internal.Shape shape)
     {
 #if DEBUG
         Console.WriteLine($"OnInternalShapeChanged: {JsonSerializer.Serialize(shape)}");
 #endif
-        var existingShape = ShapesList.FirstOrDefault(p => p.Id == shape.Id.ToString());
+
+        var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
+        if (layer == null)
+        {
+#if DEBUG
+            Console.WriteLine($"Layer not found: {layerId}");
+#endif
+            return;
+        }
+
+        var existingShape = layer.ShapesList.FirstOrDefault(p => p.Id == shape.Id);
 
         if (existingShape == null)
         {
-            await OnInternalShapeAdded(shape);
+            await OnInternalShapeAdded(layerId, shape);
             return;
         }
 
@@ -567,8 +614,8 @@ public partial class Map : IAsyncDisposable
     /// <param name="dataProjection">Data projection of GeoJson</param>
     /// <param name="raiseEvents">Raise events for new created features and add it to list of shapes</param>
     /// <param name="styles">Flat styles collection</param>
-    [Obsolete("Use LayerList.Add(new Layer() { LayerType=LayerType.Vector, SourceType=SourceType.VectorGeoJson, Data=data } instead.")]
-    public ValueTask<Layer> LoadGeoJson(JsonElement json, string? dataProjection = null, bool raiseEvents = true, Dictionary<string, object>? styles = null)
+    [Obsolete("Use map.AddLayer or LayerList.Add(new Layer() { LayerType=LayerType.Vector, SourceType=SourceType.VectorGeoJson, Data=data } instead.")]
+    public async ValueTask<Layer> LoadGeoJson(JsonElement json, string? dataProjection = null, bool raiseEvents = true, Dictionary<string, object>? styles = null)
     {
         var layer = new Layer()
         {
@@ -579,9 +626,8 @@ public partial class Map : IAsyncDisposable
             Data = json,
             FlatStyle = styles
         };
-        LayersList.Add(layer);
-        return ValueTask.FromResult(layer);
-        //return _module?.InvokeVoidAsync("MapOLLoadGeoJson", _mapId, json, dataProjection, raiseEvents) ?? ValueTask.CompletedTask;
+        await AddLayer(layer);
+        return layer;
     }
 
     /// <summary>
@@ -602,25 +648,6 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
-    ///     Set given markers to underlying map component
-    /// </summary>
-    /// <param name="markers">collection of markers</param>
-    public ValueTask SetMarkers(IEnumerable<Marker> markers)
-    {
-        return _module?.InvokeVoidAsync("MapOLMarkers", _mapId, markers.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
-    }
-
-    /// <summary>
-    ///     Set given shapes to underlying map component
-    /// </summary>
-    /// <param name="shapes">collection of shapes</param>
-    /// <returns></returns>
-    public ValueTask SetShapes(IEnumerable<Shape> shapes)
-    {
-        return _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, shapes.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
-    }
-
-    /// <summary>
     ///     Set all layers to underlying map component
     /// </summary>
     /// <param name="layers">collection of layers</param>
@@ -636,6 +663,9 @@ public partial class Map : IAsyncDisposable
     /// <returns></returns>
     public ValueTask UpdateLayer(Layer layer)
     {
+#if DEBUG
+        Console.WriteLine($"UpdateLayer {JsonSerializer.Serialize(layer.InternalLayer)}");
+#endif
         return _module?.InvokeVoidAsync("MapOLUpdateLayer", _mapId, layer.InternalLayer) ?? ValueTask.CompletedTask;
     }
 
@@ -691,8 +721,11 @@ public partial class Map : IAsyncDisposable
     {
         try
         {
+            if (ShapesLayer == null)
+                GetOrCreateShapesLayer();
+
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, newShapes, editShapes, shapeSnap, shapeType, freehand);
+                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, ShapesLayer.Id, newShapes, editShapes, shapeSnap, shapeType, freehand);
         }
         catch (Exception exp)
         {
@@ -719,7 +752,10 @@ public partial class Map : IAsyncDisposable
 #if DEBUG
         Console.WriteLine($"UpdateShape: {JsonSerializer.Serialize(shape.InternalFeature)}");
 #endif
-        return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.InternalFeature) ?? ValueTask.CompletedTask;
+        if (shape.Layer == null)
+            throw new InvalidOperationException("Shape must be assigned to a layer");
+                
+        return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.Layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -778,8 +814,8 @@ public partial class Map : IAsyncDisposable
             return;
 
         if (e.NewItems != null)
-            foreach (var newLayer in e.NewItems.OfType<Layer>())
-                newLayer.ParentMap = this;
+            foreach (Layer newLayer in e.NewItems)
+                newLayer.Initialize(this);
 
         Task.Run(async () =>
         {
@@ -790,64 +826,112 @@ public partial class Map : IAsyncDisposable
             else
             {
                 if (e.OldItems != null)
-                    foreach (var oldLayer in e.OldItems.OfType<Layer>())
-                        await _module.InvokeVoidAsync("MapOLRemoveLayer", _mapId, oldLayer.InternalLayer);
+                    foreach (Layer oldLayer in e.OldItems)
+                        await _module.InvokeVoidAsync("MapOLRemoveLayer", _mapId, oldLayer.Id);
 
                 if (e.NewItems != null)
-                    foreach (var newLayer in e.NewItems.OfType<Layer>())
+                    foreach (Layer newLayer in e.NewItems)
                         await _module.InvokeVoidAsync("MapOLAddLayer", _mapId, newLayer.InternalLayer);
             }
         });
     }
 
-    private void ShapesOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    internal ValueTask SetShapesInternal(Layer layer, IEnumerable<Shape>? shapes) => _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, layer.Id, shapes?.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
+
+    internal ValueTask RemoveShapeInternal(Layer layer, Shape shape) => _module?.InvokeVoidAsync("MapOLRemoveShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+
+    internal ValueTask AddShapeInternal(Layer layer, Shape shape) => _module?.InvokeVoidAsync("MapOLAddShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+
+    internal Layer GetOrCreateShapesLayer()
+    {
+        if (ShapesLayer != null)
+            return ShapesLayer;
+
+        var layer = LayersList.FirstOrDefault(p => p.Id == "shapes");
+        if (layer == null)
+        {
+            layer = new Layer()
+            {
+                LayerType = LayerType.Vector,
+                SourceType = SourceType.Vector,
+                ZIndex = 998,
+                Id = "shapes",
+            };
+            LayersList.Add(layer);
+            if (layer.Map == null)
+                layer.Initialize(this);
+            ShapesLayer = layer;
+        }
+        return layer;
+    }
+
+    internal Layer GetOrCreateMarkersLayer()
+    {
+        if (MarkersLayer != null)
+            return MarkersLayer;
+
+        var layer = LayersList.FirstOrDefault(p => p.Id == "markers");
+        if (layer == null)
+        {
+            layer = new Layer()
+            {
+                LayerType = LayerType.Vector,
+                SourceType = SourceType.Vector,
+                ZIndex = 999,
+                Id = "markers",
+            };
+            LayersList.Add(layer);
+            if (layer.Map == null)
+                layer.Initialize(this);
+            MarkersLayer = layer;
+        }
+        return layer;
+    }
+
+    /// <summary>
+    /// Explicitly adds a layer to the map.
+    /// </summary>
+    /// <param name="layer">Layer to add</param>
+    /// <returns></returns>
+    public async Task AddLayer(Layer layer)
     {
         if (_module == null)
             return;
 
-        if (e.NewItems != null)
-            foreach (var newShape in e.NewItems.OfType<Shape>())
-                newShape.ParentMap = this;
-
-        if (e.Action == NotifyCollectionChangedAction.Reset)
+        try
         {
-            _ = _module.InvokeVoidAsync("MapOLSetShapes", _mapId, null);
+            LayersList.CollectionChanged -= LayersOnCollectionChanged;
+            await _module.InvokeVoidAsync("MapOLAddLayer", _mapId, layer.InternalLayer);
+            if (layer.Map == null)
+                layer.Initialize(this);
+            LayersList.Add(layer);
         }
-        else
+        finally
         {
-            if (e.OldItems != null)
-                foreach (var oldShape in e.OldItems.OfType<Shape>())
-                    _ = _module.InvokeVoidAsync("MapOLRemoveShape", _mapId, oldShape.InternalFeature);
-
-            if (e.NewItems != null)
-                foreach (var newShape in e.NewItems.OfType<Shape>())
-                    _ = _module.InvokeVoidAsync("MapOLAddShape", _mapId, newShape.InternalFeature);
+            LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
     }
 
-    private void MarkersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    /// <summary>
+    /// Explicitly removes a layer from the map
+    /// </summary>
+    /// <param name="layer"></param>
+    /// <returns></returns>
+    public async Task RemoveLayer(Layer layer)
     {
         if (_module == null)
             return;
 
-        if (e.NewItems != null)
-            foreach (var newShape in e.NewItems.OfType<Shape>())
-                newShape.ParentMap = this;
-
-        // when execute the following as Task, the order of execute of InvoiceAsync cannot be guaranteed
-        if (e.Action == NotifyCollectionChangedAction.Reset)
+        try
         {
-            _ = _module.InvokeVoidAsync("MapOLMarkers", _mapId, null);
+            LayersList.CollectionChanged -= LayersOnCollectionChanged;
+            await _module.InvokeVoidAsync("MapOLRemoveLayer", _mapId, layer.Id);
+            layer.Map = null;
+            LayersList.Remove(layer);
         }
-        else
+        finally
         {
-            if (e.OldItems != null)
-                foreach (var oldShape in e.OldItems.OfType<Shape>())
-                    _ = _module.InvokeVoidAsync("MapOLRemoveShape", _mapId, oldShape.InternalFeature);
-
-            if (e.NewItems != null)
-                foreach (var newShape in e.NewItems.OfType<Shape>())
-                    _ = _module.InvokeVoidAsync("MapOLAddShape", _mapId, newShape.InternalFeature);
+            LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
     }
 }

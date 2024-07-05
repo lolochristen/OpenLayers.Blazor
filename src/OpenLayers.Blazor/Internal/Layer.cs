@@ -5,6 +5,7 @@ namespace OpenLayers.Blazor.Internal;
 public class Layer
 {
     public string Id { get; internal set; } = Guid.NewGuid().ToString();
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public LayerType LayerType { get; set; }
     public string? ClassName { get; set; }

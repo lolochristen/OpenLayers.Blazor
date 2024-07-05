@@ -1,8 +1,6 @@
 ﻿var _MapOL = new Array();
-var _MapOL = new Array();
-
-export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance) {
-    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance);
+export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
+    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance);
 }
 
 export function MapOLDispose(mapId) {
@@ -29,12 +27,8 @@ export function MapOLZoomToExtent(mapId, extentType, padding) {
     _MapOL[mapId].setZoomToExtent(extentType, padding);
 }
 
-export function MapOLMarkers(mapId, markers) {
-    _MapOL[mapId].setMarkers(markers);
-}
-
-export function MapOLSetShapes(mapId, shapes) {
-    _MapOL[mapId].setShapes(shapes);
+export function MapOLSetShapes(mapId, layerId, shapes) {
+    _MapOL[mapId].setShapes(layerId, shapes);
 }
 
 export function MapOLCenterToCurrentGeoLocation(mapId) {
@@ -49,8 +43,8 @@ export function MapOLSetLayers(mapId, layers) {
     _MapOL[mapId].setLayers(layers);
 }
 
-export function MapOLRemoveLayer(mapId, layer) {
-    _MapOL[mapId].removeLayer(layer);
+export function MapOLRemoveLayer(mapId, layerId) {
+    _MapOL[mapId].removeLayer(layerId);
 }
 
 export function MapOLAddLayer(mapId, layer) {
@@ -65,24 +59,24 @@ export function MapOLSetVisibleExtent(mapId, extent) {
     _MapOL[mapId].setVisibleExtent(extent);
 }
 
-export function MapOLSetDrawingSettings(mapId, enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand) {
-    _MapOL[mapId].setDrawingSettings(enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand);
+export function MapOLSetDrawingSettings(mapId, drawingLayerId, enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand) {
+    _MapOL[mapId].setDrawingSettings(drawingLayerId, enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand);
 }
 
 export function MapOLUndoDrawing(mapId) {
     _MapOL[mapId].undoDrawing();
 }
 
-export function MapOLUpdateShape(mapId, shape) {
-    _MapOL[mapId].updateShape(shape);
+export function MapOLUpdateShape(mapId, layerId, shape) {
+    _MapOL[mapId].updateShape(layerId, shape);
 }
 
-export function MapOLRemoveShape(mapId, shape) {
-    _MapOL[mapId].removeShape(shape);
+export function MapOLRemoveShape(mapId, layerId, shape) {
+    _MapOL[mapId].removeShape(layerId, shape);
 }
 
-export function MapOLAddShape(mapId, shape) {
-    _MapOL[mapId].addShape(shape);
+export function MapOLAddShape(mapId, layerId, shape) {
+    _MapOL[mapId].addShape(layerId, shape);
 }
 
 export function MapOLGetCoordinates(mapId, shapeId) {
@@ -93,10 +87,8 @@ export function MapOLSetInteractions(mapId, active) {
     _MapOL[mapId].setInteractions(active);
 }
 
-
 // --- MapOL ----------------------------------------------------------------------------//
-
-function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, markers, shapes, layers, instance) {
+function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
     this.Instance = instance;
     this.Options = options;
 
@@ -193,25 +185,6 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, ma
     this.addControls();
 
     var that = this;
-    var geoSource = new ol.source.Vector();
-    geoSource.on("removefeature", function (evt) { that.onFeatureRemoved(evt.feature); });
-    geoSource.on("addfeature", function (evt) { that.onFeatureAdded(evt.feature); });
-    geoSource.on("changefeature", function (evt) { that.onFeatureChanged(evt.feature); });
-
-
-    this.Geometries = new ol.layer.Vector({
-        source: geoSource,
-        zIndex: 999
-    });
-
-    this.Map.addLayer(this.Geometries);
-
-    this.Markers = new ol.layer.Vector({
-        source: new ol.source.Vector(),
-        zIndex: 999
-    });
-
-    this.Map.addLayer(this.Markers);
 
     var popupElement = document.getElementById(popupId);
 
@@ -232,9 +205,6 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, ma
     this.Map.getView().on("change:rotation", function (evt) { that.onMapRotationChanged(); });
 
     this.setInteractions(interactions);
-
-    this.setMarkers(markers);
-    this.setShapes(shapes);
 
     this.onMapCenterChanged();
 }
@@ -311,6 +281,7 @@ MapOL.prototype.prepareLayers = function (layers) {
                 case "TileDebug":
                     source = new ol.source.TileDebug(l.source);
                     break;
+
                 case "VectorKML":
                     l.source.format = new ol.format.KML(l.source.formatOptions);
                     break;
@@ -406,9 +377,9 @@ MapOL.prototype.prepareLayers = function (layers) {
                         : new ol.source.Vector(l.source);
 
                     if (l.syncFeatures) { // attach and sync
-                        l.source.on("addfeature", function (evt) { that.onFeatureAdded(evt.feature); });
-                        l.source.on("changefeature", function (evt) { that.onFeatureChanged(evt.feature); });
-                        l.source.on("removefeature", function (evt) { that.onFeatureRemoved(evt.feature); });
+                        l.source.on("addfeature", function (evt) { that.onFeatureAdded(l.id, evt.feature); });
+                        l.source.on("changefeature", function (evt) { that.onFeatureChanged(l.id, evt.feature); });
+                        l.source.on("removefeature", function (evt) { that.onFeatureRemoved(l.id, evt.feature); });
                     }
                     if (features) l.source.addFeatures(features);
                     layer = l.layerType == "VectorTile" ? new ol.layer.VectorTile(l) : new ol.layer.Vector(l);
@@ -451,20 +422,16 @@ MapOL.prototype.prepareLayers = function (layers) {
     return ollayers;
 };
 
+MapOL.prototype.getLayer = function(layerId) {
+    return this.Map.getAllLayers().find((l) => l.get("id") == layerId);
+}
+
 MapOL.prototype.setLayers = function (layers) {
     this.Map.setLayers(this.prepareLayers(layers));
 };
 
-MapOL.prototype.removeLayer = function (layer) {
-    this.Map.getAllLayers().forEach((l) => {
-        try {
-            const source = l.getSource();
-            if (source.urls[0] == layer.source.url) {
-                this.Map.removeLayer(l);
-            }
-        } catch (e) {
-        }
-    });
+MapOL.prototype.removeLayer = function (layerId) {
+    this.Map.removeLayer(this.getLayer(layerId));
 };
 
 MapOL.prototype.addLayer = function (layer) {
@@ -482,23 +449,20 @@ MapOL.prototype.updateLayer = function (layer) {
     }
 };
 
-MapOL.prototype.setMarkers = function (markers) {
-    var source = this.Markers.getSource();
-    source.clear();
-    if (markers) {
-        markers.forEach((marker) => {
-            var feature = this.mapShapeToFeature(marker);
-            source.addFeature(feature);
-        });
-    }
-};
+MapOL.prototype.getShapesLayer = function() {
+    return this.getLayer("shapes");
+}
 
-MapOL.prototype.setShapes = function (shapes) {
-    var source = this.Geometries.getSource();
+MapOL.prototype.getMarkersLayer = function() {
+    return this.getLayer("markers");
+}
+
+MapOL.prototype.setShapes = function (layerId, shapes) {
+    var source = this.getLayer(layerId).getSource();
     source.clear();
     if (shapes) {
         shapes.forEach((shape) => {
-            var feature = this.mapShapeToFeature(shape);
+            var feature = this.mapShapeToFeature(shape, source);
             source.addFeature(feature);
         });
     }
@@ -513,13 +477,13 @@ MapOL.prototype.setZoomToExtent = function (extentType, padding) {
         padding = undefined;
     switch (extentType) {
         case "Markers":
-            var extent = this.Markers.getSource().getExtent();
+            var extent = this.getMarkersLayer().getSource().getExtent();
             if (extent[0] === Infinity) return;
             this.Map.getView().fit(extent, { size: this.Map.getSize(), padding:padding });
             break;
 
         case "Geometries":
-            var extent = this.Geometries.getSource().getExtent();
+            var extent = this.getShapesLayer().getSource().getExtent();
             if (extent[0] === Infinity) return;
             this.Map.getView().fit(extent, { size: this.Map.getSize(), padding:padding });
             break;
@@ -725,11 +689,11 @@ MapOL.prototype.setVisibleExtent = function (extent) {
 MapOL.prototype.currentDraw = null;
 MapOL.prototype.currentSnap = null;
 MapOL.prototype.currentModify = null;
-MapOL.prototype.setDrawingSettings = function (enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand) {
+MapOL.prototype.setDrawingSettings = function (drawingLayerId, enableNewShapes, enableEditShapes, enableShapeSnap, geometryType, freehand) {
     var that = this;
     this.removeDrawingInteractions();
 
-    const source = this.Geometries.getSource();
+    const source = this.getLayer(drawingLayerId).getSource();
 
     if (enableEditShapes) {
         if (this.currentModify == null) {
@@ -780,9 +744,9 @@ MapOL.prototype.undoDrawing = function () {
     }
 };
 
-MapOL.prototype.onFeatureAdded = function (feature) {
+MapOL.prototype.onFeatureAdded = function (layerId, feature) {
     const shape = this.mapFeatureToShape(feature);
-    this.Instance.invokeMethodAsync("OnInternalShapeAdded", shape);
+    this.Instance.invokeMethodAsync("OnInternalShapeAdded", layerId, shape);
 };
 
 MapOL.prototype.mapFeatureToShape = function (feature) {
@@ -856,12 +820,13 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
     return shape;
 };
 
-MapOL.prototype.mapShapeToFeature = function (shape) {
+MapOL.prototype.mapShapeToFeature = function (shape, source = null) {
 
     var geometry;
     const viewProjection = this.Map.getView().getProjection();
+    const sourceProjection = source ? source.getProjection() : null;
     if (shape.coordinates) {
-        var coordinates = MapOL.transformCoordinates(shape.coordinates, this.Options.coordinatesProjection, viewProjection);
+        var coordinates = MapOL.transformCoordinates(shape.coordinates, sourceProjection ?? this.Options.coordinatesProjection, viewProjection);
         switch (shape.geometryType) {
             case "Point":
                 geometry = new ol.geom.Point(coordinates);
@@ -954,7 +919,7 @@ MapOL.prototype.getDefaultStyle = function (shape) {
                     width: shape.borderSize
                 })
             }),
-            zIndex: Infinity
+            zIndex: shape.zIndex ?? Infinity
         });
     } else {
         return new ol.style.Style({
@@ -973,36 +938,25 @@ MapOL.prototype.getDefaultStyle = function (shape) {
                     rotation: 0
                 })
                 : null,
+            zIndex: shape.zIndex ?? undefined
         });
     }
 };
 
-MapOL.prototype.onFeatureRemoved = function (feature) {
-
+MapOL.prototype.onFeatureRemoved = function (layerId, feature) {
+    const shape = this.mapFeatureToShape(feature);
+    this.Instance.invokeMethodAsync("OnInternalShapeRemoved", layerId, shape);
 };
 
-MapOL.prototype.onFeatureChanged = function (feature) {
-
-    if (feature.getProperties().type != "Marker") {
-        const shape = this.mapFeatureToShape(feature);
-        this.Instance.invokeMethodAsync("OnInternalShapeChanged", shape);
-    }
+MapOL.prototype.onFeatureChanged = function (layerId, feature) {
+    const shape = this.mapFeatureToShape(feature);
+    this.Instance.invokeMethodAsync("OnInternalShapeChanged", layerId, shape);
 };
 
-MapOL.prototype.updateShape = function (shape) {
+MapOL.prototype.updateShape = function (layerId, shape) {
 
-    var feature;
-    if (shape.properties.type == "Marker") {
-        feature = this.Markers.getSource().getFeatureById(shape.id);
-    } else {
-        feature = this.Geometries.getSource().getFeatureById(shape.id);
-        if (!feature) {
-            this.Map.getAllLayers().forEach((layer) => {
-                var source = layer.getSource();
-                if (!feature && source.getFeatureById != undefined) feature = layer.getSource().getFeatureById(shape.id);
-            });
-        }
-    }
+    const layer = this.getLayer(layerId);
+    const feature = layer.getSource().getFeatureById(shape.id);
 
     if (feature) {
         const newFeature = this.mapShapeToFeature(shape);
@@ -1013,30 +967,24 @@ MapOL.prototype.updateShape = function (shape) {
     }
 };
 
-MapOL.prototype.removeShape = function (shape) {
-    var source;
-    if (shape.properties.type == "Marker")
-        source = this.Markers.getSource();
-    else
-        source = this.Geometries.getSource();
+MapOL.prototype.removeShape = function (layerId, shape) {
+    var layer = this.Map.getAllLayers().find((l) => l.get("id") == layerId);
+    var source = layer.getSource();
     var feature = source.getFeatureById(shape.id);
     if (feature) {
         source.removeFeature(feature);
     }
 };
 
-MapOL.prototype.addShape = function (shape) {
-    var source;
-    if (shape.properties.type == "Marker")
-        source = this.Markers.getSource();
-    else
-        source = this.Geometries.getSource();
-    var feature = this.mapShapeToFeature(shape);
+MapOL.prototype.addShape = function (layerId, shape) {
+    var layer = this.Map.getAllLayers().find((l) => l.get("id") == layerId);
+    var source = layer.getSource();
+    var feature = this.mapShapeToFeature(shape, source);
     source.addFeature(feature);
 };
 
 MapOL.prototype.getCoordinates = function(featureId) {
-    var feature = this.Geometries.getSource().getFeatureById(featureId);
+    var feature = this.getShapesLayer().getSource().getFeatureById(featureId);
     if (feature) {
         var coord = feature.getGeometry().getCoordinates();
         if (!coord)

@@ -47,7 +47,12 @@ public class Shape : Feature, IDisposable
     /// <summary>
     /// Gets or sets the attached parent map.
     /// </summary>
-    [CascadingParameter] public Map? ParentMap { get; set; }
+    [CascadingParameter] public Map? Map { get; set; }
+
+    /// <summary>
+    /// Gets or sets the attached parent layer.
+    /// </summary>
+    [CascadingParameter] public Layer? Layer { get; set; }
 
     /// <summary>
     /// Gets or sets the type of shape.
@@ -187,26 +192,44 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.Content = value;
     }
 
+    [Parameter]
+    public int? ZIndex
+    {
+        get => InternalFeature.ZIndex;
+        set => InternalFeature.ZIndex = value;
+    }
+
     public void Dispose()
     {
-        if (this is Marker)
-            ParentMap?.MarkersList.Remove((Marker)this);
-        else
-            ParentMap?.ShapesList.Remove(this);
+        Layer?.ShapesList.Remove(this);
     }
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
-        if (this is Marker)
-            ParentMap?.MarkersList.Add((Marker)this);
+        if (Map != null && Layer == null) // just added to map/features
+        {
+            if (this is Marker)
+            {
+                Layer = Map.GetOrCreateMarkersLayer();
+                Map.MarkersList.Add((Marker)this);
+            }
+            else
+            {
+                Layer = Map.GetOrCreateShapesLayer();
+                Map.ShapesList.Add(this);
+            }
+        }
         else
-            ParentMap?.ShapesList.Add(this);
+        {
+            Layer?.ShapesList.Add(this);
+        }
+
+        base.OnInitialized();
     }
 
     public async Task UpdateShape()
     {
-        if (ParentMap != null)
-            await ParentMap.UpdateShape(this);
+        if (Map != null && Layer != null)
+            await Map.UpdateShape(this);
     }
 }

@@ -12,6 +12,7 @@
         <button class="btn btn-primary" @onclick="AddShapes">Add some shapes</button>
         <button class="btn btn-primary" @onclick="RemoveShape">Remove the last</button>
         <button class="btn btn-primary" @onclick="ZoomToShapes">Zoom to Shapes</button>
+        <button class="btn btn-primary" @onclick="MovePoint">Move</button>
         <p>
             <code>@_featureInfo</code>
         </p>
@@ -22,7 +23,7 @@
     <Features>
         <Line Points="new []{new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650)}" BorderColor="cyan" BorderSize="4"></Line>
         <Circle Center="new Coordinate(2770557.824138796, 1197279.0774135895)" Radius="5000" BackgroundColor="#2222AA66"></Circle>
-        <Point Coordinate="new Coordinate(2604200, 1197650)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
+        <Point Coordinate="@_pos" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="5"></Point>
         <Polygon Points="new []{new Coordinate(2604900, 1207650), new Coordinate(2634200, 1177650), new Coordinate(2621200, 1177950)}" BorderColor="green" BorderSize="4" BackgroundColor="#2222AA66"></Polygon>
     </Features>
 </SwissMap>
@@ -32,6 +33,7 @@
 @code {
     private SwissMap _map = null!;
     private string _featureInfo;
+    private Coordinate _pos = new (2604200, 1197650);
 
     private void OnFeatureClicked(Feature feature)
     {
@@ -56,6 +58,11 @@
                     BorderSize = 4
                 });
         }
+    }
+
+    private void MovePoint()
+    {
+        _pos.X += 1000;
     }
 
     private async Task RemoveShape()

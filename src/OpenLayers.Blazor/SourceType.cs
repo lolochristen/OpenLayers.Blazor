@@ -16,6 +16,7 @@ public enum SourceType
     Stamen,
     TileDebug,
     StadiaMaps,
+    Vector,
     VectorKML,
     VectorEsriJson,
     VectorGeoJson,

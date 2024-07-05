@@ -90,7 +90,7 @@
 
             foreach (var ac in _flightData.Flights)
             {
-                var marker = _map.MarkersList.FirstOrDefault(p => p.Id == ac.Id);
+                var marker = _map.MarkersList.OfType<Marker>().FirstOrDefault(p => p.Id == ac.Id);
 
                 if (marker == null)
                 {

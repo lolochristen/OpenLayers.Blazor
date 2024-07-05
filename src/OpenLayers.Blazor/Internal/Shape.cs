@@ -59,6 +59,8 @@ public class Shape : Feature, IEquatable<Shape>
 
     public double? Scale { get; set; } = 1;
 
+    public int? ZIndex { get; set; }
+
     public bool Equals(Shape? other)
     {
         if (ReferenceEquals(null, other)) return false;
@@ -68,7 +70,7 @@ public class Shape : Feature, IEquatable<Shape>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(base.GetHashCode(), TextScale, Color, BorderColor, BorderSize, BackgroundColor, Radius, Scale);
+        return HashCode.Combine(base.GetHashCode(), HashCode.Combine(TextScale, Color, BorderColor, BorderSize, BackgroundColor, Radius, Scale), HashCode.Combine(ZIndex));
     }
 
     public override bool Equals(object? obj)

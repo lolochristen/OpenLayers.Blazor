@@ -1,14 +1,27 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using Microsoft.AspNetCore.Components;
 
 namespace OpenLayers.Blazor;
 
-public class Layer : ComponentBase
+public partial class Layer : ComponentBase
 {
     internal Internal.Layer _internalLayer = new() { LayerType = LayerType.Tile };
 
     internal Internal.Layer InternalLayer => _internalLayer;
 
-    [CascadingParameter] public Map? ParentMap { get; set; }
+    [CascadingParameter] public Map? Map { get; set; }
+
+    /// <summary>
+    ///     Add shapes to the layer
+    /// </summary>
+    /// <example>
+    ///     <Shapes>
+    ///         <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+    ///     </Shapes>
+    /// </example>
+    [Parameter]
+    public RenderFragment? Shapes { get; set; }    
 
     /// <summary>
     /// Gets or sets the identifier for the layer.
@@ -348,10 +361,63 @@ public class Layer : ComponentBase
         }
     }
 
+    [Parameter] public EventCallback<Shape> OnShapeAdded { get; set; }
+
+    [Parameter] public EventCallback<Shape> OnShapeChanged { get; set; }
+
+
+    public ObservableCollection<Shape> ShapesList { get; } = new();
+
+    public void Initialize(Map map)
+    {
+        if (Map != map)
+            Map = map;
+
+        if (!Map.LayersList.Contains(this))
+            Map.LayersList.Add(this);
+
+        ShapesList.CollectionChanged += ShapesOnCollectionChanged;
+    }
+
+    private void ShapesOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (Shape newShape in e.NewItems)
+            {
+                newShape.Layer = this;
+                newShape.Map = Map;
+            }
+        }
+
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            _ = Map.SetShapesInternal(this, null);
+        }
+        else
+        {
+            if (e.OldItems != null)
+                foreach (Shape oldShape in e.OldItems)
+                {
+                    _ = Map.RemoveShapeInternal(this, oldShape);
+                    oldShape.Layer = null;
+                    oldShape.Map = null;
+                }
+
+            if (e.NewItems != null)
+                foreach (Shape newShape in e.NewItems)
+                {
+                    newShape.Layer = this;
+                    newShape.Map = Map;
+                    _ = Map.AddShapeInternal(this, newShape);
+                }
+        }
+    }
+
     protected override void OnInitialized()
     {
-        if (ParentMap != null)
-            ParentMap.LayersList.Add(this);
+        if (Map != null)
+            Initialize(Map);
 
         base.OnInitialized();
     }
@@ -363,7 +429,23 @@ public class Layer : ComponentBase
 
     public async Task UpdateLayer()
     {
-        if (ParentMap != null)
-            await ParentMap.UpdateLayer(this);
+        if (Map != null)
+            await Map.UpdateLayer(this);
+    }
+
+    public async Task<Shape> OnInternalShapeAdded(Internal.Shape shape)
+    {
+        var newShape = new Shape(shape)
+        {
+            Layer = this,
+            Map = Map
+        };
+
+        ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
+        ShapesList.Add(newShape);
+        ShapesList.CollectionChanged += ShapesOnCollectionChanged;
+
+        await OnShapeAdded.InvokeAsync(newShape);
+        return newShape;
     }
 }

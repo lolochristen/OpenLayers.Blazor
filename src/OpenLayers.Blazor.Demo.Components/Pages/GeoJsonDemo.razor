@@ -27,6 +27,7 @@
         <Layer LayerType="LayerType.Vector"
                SourceType="SourceType.VectorGeoJson"
                Url="@_url"
+               Id = "geojson"
                Projection="EPSG:4326"
                Style="@(new StyleOptions() { Stroke = new StyleOptions.StrokeOptions { Color = "red", Width = 3 }})"
                SyncFeatures/>
@@ -45,21 +46,24 @@
 
     private async Task LoadGeoJson(MouseEventArgs obj)
     {
+        var layer = _map.LayersList.FirstOrDefault(p => p.Id == "geo2");
+        if (layer != null)
+            _map.LayersList.Remove(layer);
+            
         _loading = true;
 
-        // load from data
-        var data = await HttpClient.GetStringAsync(_url);
-        var layer = new Layer()
-            {
-                LayerType = LayerType.Vector,
-                SourceType = SourceType.VectorGeoJson,
-                SyncFeatures = true,
-                Projection = "EPSG:4326",
-                Data = data,
-                StyleCallback = GetShapeStyle,
-                //FlatStyle = new() { { "stroke-width", 3 }, { "stroke-color", "yellow" } }
-            };
-        _map.LayersList.Add(layer);
+        var data = await HttpClient.GetStringAsync(_url); // Load GeoJson from URL
+
+        await _map.AddLayer(new Layer()
+        {
+            Id = "geo2",
+            LayerType = LayerType.Vector,
+            SourceType = SourceType.VectorGeoJson,
+            SyncFeatures = true,
+            Projection = "EPSG:4326",
+            Data = data,
+            StyleCallback = GetShapeStyle,
+        });
 
         _loading = false;
     }
@@ -83,7 +87,7 @@
 
     private async Task Reformat()
     {
-        foreach (var shape in _map.ShapesList)
+        foreach (var shape in _map.LayersList.First(p => p.Id == "geojson").ShapesList)
         {
             shape.BorderSize = 5;
             shape.BorderColor = "green";

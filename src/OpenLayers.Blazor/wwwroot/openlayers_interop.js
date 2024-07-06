@@ -28,8 +28,8 @@ export function MapOLLoadGeoJson(mapId, json, dataProjection, raiseEvents) {
     _MapOL[mapId].loadGeoJson(json, dataProjection, raiseEvents);
 }
 
-export function MapOLZoomToExtent(mapId, extent) {
-    _MapOL[mapId].setZoomToExtent(extent);
+export function MapOLZoomToExtent(mapId, extentType, padding) {
+    _MapOL[mapId].setZoomToExtent(extentType, padding);
 }
 
 export function MapOLMarkers(mapId, markers) {
@@ -498,18 +498,20 @@ MapOL.prototype.setZoom = function (zoom) {
     this.Map.getView().setZoom(zoom);
 };
 
-MapOL.prototype.setZoomToExtent = function (extent) {
-    switch (extent) {
+MapOL.prototype.setZoomToExtent = function (extentType, padding) {
+    if (padding == null)
+        padding = undefined;
+    switch (extentType) {
         case "Markers":
             var extent = this.Markers.getSource().getExtent();
             if (extent[0] === Infinity) return;
-            this.Map.getView().fit(extent, this.Map.getSize());
+            this.Map.getView().fit(extent, { size: this.Map.getSize(), padding:padding });
             break;
 
         case "Geometries":
             var extent = this.Geometries.getSource().getExtent();
             if (extent[0] === Infinity) return;
-            this.Map.getView().fit(extent, this.Map.getSize());
+            this.Map.getView().fit(extent, { size: this.Map.getSize(), padding:padding });
             break;
     }
 };
@@ -678,7 +680,9 @@ MapOL.prototype.disableVisibleExtentChranged = false;
 
 MapOL.prototype.setVisibleExtent = function (extent) {
     this.disableVisibleExtentChanged = true;
-    this.Map.getView().fit(new Array(extent.x1, extent.y1, extent.x2, extent.y2), this.Map.getSize());
+    var viewProjection = this.Map.getView().getProjection();
+    const te = ol.proj.transformExtent(new Array(extent.x1, extent.y1, extent.x2, extent.y2), this.Options.coordinatesProjection, viewProjection);
+    this.Map.getView().fit(te, this.Map.getSize());
     this.disableVisibleExtentChanged = false;
 };
 

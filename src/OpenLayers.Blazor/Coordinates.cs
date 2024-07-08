@@ -7,7 +7,7 @@ namespace OpenLayers.Blazor;
 ///     Represents a list of coordinates
 /// </summary>
 [JsonConverter(typeof(CoordinatesConverter))]
-public class Coordinates : IEnumerable<IList<Coordinate>>
+public class Coordinates : IEnumerable<IList<Coordinate>>, IEquatable<Coordinates>
 {
     public Coordinates()
     {
@@ -109,8 +109,32 @@ public class Coordinates : IEnumerable<IList<Coordinate>>
         return new Coordinates(c);
     }
 
+    public static bool operator ==(Coordinates c1, Coordinates? c2) => c1.Equals(c2);
+
+    public static bool operator !=(Coordinates c1, Coordinates? c2) => !c1.Equals(c2);
+
     public override string ToString()
     {
         return $"{nameof(Coordinates)}:{Type}[{(Type == CoordinatesType.List ? Default.Count : Values.Count)}]";
+    }
+
+    public bool Equals(Coordinates? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Type == other.Type && Values.SequenceEqual(other.Values, new CoordinatesEqualityComparer());
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((Coordinates)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine((int)Type, Values);
     }
 }

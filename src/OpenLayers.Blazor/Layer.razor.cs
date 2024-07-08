@@ -8,6 +8,10 @@ public partial class Layer : ComponentBase
 {
     internal Internal.Layer _internalLayer = new() { LayerType = LayerType.Tile };
 
+    private Func<Shape, StyleOptions?> _styleCallback;
+
+    private bool _updateableParametersChanged = false;
+
     internal Internal.Layer InternalLayer => _internalLayer;
 
     [CascadingParameter] public Map? Map { get; set; }
@@ -21,10 +25,10 @@ public partial class Layer : ComponentBase
     ///     </Shapes>
     /// </example>
     [Parameter]
-    public RenderFragment? Shapes { get; set; }    
+    public RenderFragment? Shapes { get; set; }
 
     /// <summary>
-    /// Gets or sets the identifier for the layer.
+    ///     Gets or sets the identifier for the layer.
     /// </summary>
     [Parameter]
     public string Id
@@ -34,7 +38,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets the opacity of the layer. value must be between 0 and 1.
+    ///     Gets or sets the opacity of the layer. value must be between 0 and 1.
     /// </summary>
     [Parameter]
     public double Opacity
@@ -44,7 +48,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets the visibility of the layer.
+    ///     Gets or sets the visibility of the layer.
     /// </summary>
     [Parameter]
     public bool Visibility
@@ -54,7 +58,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets the extent of layer defined
+    ///     Gets or sets the extent of layer defined
     /// </summary>
     [Parameter]
     public Extent? Extent
@@ -105,6 +109,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.ClassName = value;
     }
 
+    /// <summary>
+    ///     Gets or set the url of the source for the layer.
+    /// </summary>
     [Parameter]
     public string? Url
     {
@@ -112,6 +119,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Url = value;
     }
 
+    /// <summary>
+    ///     Gets or set urls of the source for the layer.
+    /// </summary>
     [Parameter]
     public string[]? Urls
     {
@@ -119,7 +129,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Urls = value;
     }
 
-    
+    /// <summary>
+    ///     Gets or set the type of the layer.
+    /// </summary>
     [Parameter]
     public LayerType LayerType
     {
@@ -127,6 +139,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.LayerType = value;
     }
 
+    /// <summary>
+    ///     Gets or set the source type of the layer.
+    /// </summary>
     [Parameter]
     public SourceType SourceType
     {
@@ -140,7 +155,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets the attributions of the map layer.
+    ///     Gets or sets the attributions of the map layer.
     /// </summary>
     [Parameter]
     public string? Attributions
@@ -220,7 +235,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets to tile image format such as image/png.
+    ///     Gets or sets to tile image format such as image/png.
     /// </summary>
     [Parameter]
     public string? Format
@@ -237,7 +252,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets ot sets the server type for the source of tile layers
+    ///     Gets ot sets the server type for the source of tile layers
     /// </summary>
     [Parameter]
     public string? ServerType
@@ -247,7 +262,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets the layers the layer parameter for the source tile layers
+    ///     Gets or sets the layers the layer parameter for the source tile layers
     /// </summary>
     [Parameter]
     public string? Layers
@@ -257,7 +272,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or set styles parameter for tile layers.
+    ///     Gets or set styles parameter for tile layers.
     /// </summary>
     [Parameter]
     public string? Styles
@@ -267,7 +282,8 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or set flat styles for vector layers. See https://openlayers.org/en/latest/apidoc/module-ol_style_flat.html#~FlatStyleLike
+    ///     Gets or set flat styles for vector layers. See
+    ///     https://openlayers.org/en/latest/apidoc/module-ol_style_flat.html#~FlatStyleLike
     /// </summary>
     [Parameter]
     public Dictionary<string, object>? FlatStyle
@@ -276,6 +292,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.FlatStyle = value;
     }
 
+    /// <summary>
+    ///     Gets or set a default style for the given layer
+    /// </summary>
     [Parameter]
     public StyleOptions? Style
     {
@@ -284,7 +303,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets the title of tile layers.
+    ///     Gets or sets the title of tile layers.
     /// </summary>
     [Parameter]
     public string? Title
@@ -293,6 +312,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Properties["TITLE"] = value;
     }
 
+    /// <summary>
+    ///     Gets or sets a dynamic object for format options ol/format/*.
+    /// </summary>
     [Parameter]
     public dynamic? FormatOptions
     {
@@ -301,7 +323,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets direct data for vector layers
+    ///     Gets or sets direct data for vector layers
     /// </summary>
     [Parameter]
     public dynamic? Data
@@ -318,7 +340,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets and set additional options for the layer
+    ///     Gets and set additional options for the layer
     /// </summary>
     [Parameter]
     public dynamic? Options
@@ -328,17 +350,17 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Gets or sets if the layer (vector) should synchronize features collections
+    ///     Gets or sets if the layer (vector) should synchronize features collections
     /// </summary>
     [Parameter]
-    public bool SyncFeatures
+    public bool RaiseShapeEvents
     {
-        get => _internalLayer.SyncFeatures;
-        set => _internalLayer.SyncFeatures = value;
+        get => _internalLayer.RaiseShapeEvents;
+        set => _internalLayer.RaiseShapeEvents = value;
     }
 
     /// <summary>
-    /// Gets and set additional options for the layer
+    ///     Gets and set additional options for the layer
     /// </summary>
     [Parameter]
     public dynamic? SourceOptions
@@ -347,8 +369,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Options = value;
     }
 
-    private Func<Shape, StyleOptions?> _styleCallback;
-
+    /// <summary>
+    ///     Gets or sets a callback to set styles as <see cref="StyleOptions" /> for the given shape.
+    /// </summary>
     [Parameter]
     public Func<Shape, StyleOptions?> StyleCallback
     {
@@ -361,14 +384,27 @@ public partial class Layer : ComponentBase
         }
     }
 
-    [Parameter] public EventCallback<Shape> OnShapeAdded { get; set; }
+    /// <summary>
+    ///     Gets or sets the event callback when a shape is added to the layer.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Shape> OnShapeAdded { get; set; }
 
-    [Parameter] public EventCallback<Shape> OnShapeChanged { get; set; }
+    /// <summary>
+    ///     Gets or sets the event callback when a shape is changed on the layer.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Shape> OnShapeChanged { get; set; }
 
+    /// <summary>
+    ///     Gets or sets the event callback when a shape is removed from the layer.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Shape> OnShapeRemoved { get; set; }
 
     public ObservableCollection<Shape> ShapesList { get; } = new();
 
-    public void Initialize(Map map)
+    internal void Initialize(Map map)
     {
         if (Map != map)
             Map = map;
@@ -382,13 +418,11 @@ public partial class Layer : ComponentBase
     private void ShapesOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.NewItems != null)
-        {
             foreach (Shape newShape in e.NewItems)
             {
                 newShape.Layer = this;
                 newShape.Map = Map;
             }
-        }
 
         if (e.Action == NotifyCollectionChangedAction.Reset)
         {
@@ -422,11 +456,36 @@ public partial class Layer : ComponentBase
         base.OnInitialized();
     }
 
-    protected override Task OnParametersSetAsync()
+    public override Task SetParametersAsync(ParameterView parameters)
     {
-        return UpdateLayer();
+        if (parameters.TryGetValue(nameof(Visibility), out bool visibility) && visibility != Visibility)
+            _updateableParametersChanged = true;
+
+        if (parameters.TryGetValue(nameof(Opacity), out double opacity) && opacity != Opacity)
+            _updateableParametersChanged = true;
+
+        if (parameters.TryGetValue(nameof(ZIndex), out int zindex) && zindex != ZIndex)
+            _updateableParametersChanged = true;
+
+        if (parameters.TryGetValue(nameof(Extent), out Extent extent) && extent != Extent)
+            _updateableParametersChanged = true;
+
+        return base.SetParametersAsync(parameters);
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_updateableParametersChanged)
+        {
+            await UpdateLayer();
+            _updateableParametersChanged = false;
+        }
+    }
+
+    /// <summary>
+    ///     Updates the layer on the map.
+    /// </summary>
+    /// <returns>Task</returns>
     public async Task UpdateLayer()
     {
         if (Map != null)
@@ -447,5 +506,23 @@ public partial class Layer : ComponentBase
 
         await OnShapeAdded.InvokeAsync(newShape);
         return newShape;
+    }
+
+    public async Task OnInternalShapeRemoved(Shape shape)
+    {
+        if (!ShapesList.Contains(shape))
+            return;
+
+        ShapesList.CollectionChanged -= ShapesOnCollectionChanged;
+        ShapesList.Remove(shape);
+        ShapesList.CollectionChanged += ShapesOnCollectionChanged;
+
+        await OnShapeRemoved.InvokeAsync(shape);
+    }
+
+    public async Task OnInternalShapeChanged(Shape shape)
+    {
+        await OnShapeChanged.InvokeAsync(shape);
+        await shape.OnChanged.InvokeAsync(shape);
     }
 }

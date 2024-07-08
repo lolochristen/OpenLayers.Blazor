@@ -376,7 +376,7 @@ MapOL.prototype.prepareLayers = function (layers) {
                         ? new ol.source.VectorTile(l.source)
                         : new ol.source.Vector(l.source);
 
-                    if (l.syncFeatures) { // attach and sync
+                    if (l.raiseShapeEvents) { // attach and sync
                         l.source.on("addfeature", function (evt) { that.onFeatureAdded(l.id, evt.feature); });
                         l.source.on("changefeature", function (evt) { that.onFeatureChanged(l.id, evt.feature); });
                         l.source.on("removefeature", function (evt) { that.onFeatureRemoved(l.id, evt.feature); });
@@ -565,19 +565,23 @@ MapOL.prototype.onMapClick = function (evt, popup, element) {
     var invokeMethod = true;
 
     this.Map.forEachFeatureAtPixel(evt.pixel,
-        function (feature) {
+        function (feature, layer) {
+
+            if (!layer)
+                return; // no layer = drawing
 
             const shape = that.mapFeatureToShape(feature);
+            const layerId = layer.get("id");
 
             if (shape) {
-                that.Instance.invokeMethodAsync("OnInternalFeatureClick", shape); // ?
+                that.Instance.invokeMethodAsync("OnInternalFeatureClick", shape, layerId);
 
                 if (shape.properties.type == "Marker") {
                     invokeMethod = false;
-                    that.Instance.invokeMethodAsync("OnInternalMarkerClick", shape);
+                    that.Instance.invokeMethodAsync("OnInternalMarkerClick", shape, layerId);
                 } else {
                     invokeMethod = false;
-                    that.Instance.invokeMethodAsync("OnInternalShapeClick", shape);
+                    that.Instance.invokeMethodAsync("OnInternalShapeClick", shape, layerId);
                 }
             }
 
@@ -712,6 +716,7 @@ MapOL.prototype.setDrawingSettings = function (drawingLayerId, enableNewShapes, 
             function (evt) {
                 that.getShapeStyleAsync(evt.feature, "geometries")
                     .then(style => evt.feature.setStyle(style));
+                that.onFeatureAdded(drawingLayerId, evt.feature);
             });
 
         this.Map.addInteraction(this.currentDraw);
@@ -803,7 +808,8 @@ MapOL.prototype.mapFeatureToShape = function (feature) {
         borderSize: stroke ? stroke.getWidth() : null,
         backgroundColor: fill ? fill.getColor() : null,
         color: text && text.getStroke() ? text.getStroke().getColor() : null,
-        textScale: text ? text.getScale() : null
+        textScale: text ? text.getScale() : null,
+        zIndex : style && !Array.isArray(style) ? style.getZIndex() : null
     };
 
     if (geometry.getType() == "Circle") {

@@ -1,4 +1,6 @@
 ﻿@page "/events"
+@using OpenLayers.Blazor.Internal
+@using Layer = OpenLayers.Blazor.Layer
 
 <div class="card mt-2 mb-2">
     <div class="card-header">
@@ -23,16 +25,31 @@ Pointer: @_pointer
     </div>
 </div>
 
-<OpenStreetMap @ref="_map" Style="height: 500px" Class="card mb-2" 
-               CenterChanged="OnCenterChanged" 
-               OnRenderComplete="OnRenderComplete" 
-               OnClick="OnClick" 
-               VisibleExtentChanged="VisibleExtentChanged" 
-               OnPointerMove="OnPointerMove" 
-               ZoomChanged="ZoomChanged"></OpenStreetMap>
+@* OnRenderComplete="@(() => AddMessage($"OnRenderComplete"))" *@
+
+<OpenStreetMap @ref="_map" Style="height: 500px" Class="card mb-2"
+               EnableEditShapes
+               CenterChanged="@((o) => AddMessage($"CenterChanged {o}"))"
+               OnClick="@((o) => AddMessage($"OnClick {o}"))"
+               VisibleExtentChanged="@((o) => AddMessage($"VisibleExtentChanged {o}"))"
+               OnPointerMove="@((o) => _pointer = o)"
+               ZoomChanged="@((o) => AddMessage($"ZoomChanged {o}"))"
+               OnShapeClick="@((o) => AddMessage($"OnShapeClick {o}"))"
+               OnFeatureClick="@((o) => AddMessage($"OnFeatureClick {o}"))"
+               OnMarkerClick="@((o) => AddMessage($"OnMarkerClicked {o}"))"
+               OnShapeAdded="@((o) => AddMessage($"OnShapeAdded {o}"))">
+    <Layers>
+        <Layer @ref="_layer" LayerType="LayerType.Vector" SourceType="SourceType.Vector">
+            <Shapes>
+                <Circle Center="new(9.674681, 46.778543)" Radius="100000" BorderColor="red" BackgroundColor="#77777777" BorderSize="5" OnChanged="@((o) => AddMessage($"Shape.OnChanged {o}"))"></Circle>
+            </Shapes>
+        </Layer>
+    </Layers>
+</OpenStreetMap>
 
 @code {
     private OpenStreetMap? _map;
+    private Layer? _layer;
     private Coordinate? _pointer;
     private readonly List<string> _msg = [];
 
@@ -45,43 +62,16 @@ Pointer: @_pointer
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
+        {
+            _map.ShapesLayer = _layer;
             AddMessage($"Page.OnAfterRender firstRender: {firstRender}");
-        base.OnAfterRender(firstRender);
-    }
+        }
 
-    private void OnCenterChanged(Coordinate c)
-    {
-        AddMessage($"CenterChanged {c}");
+        base.OnAfterRender(firstRender);
     }
 
     private void AddMessage(string msg)
     {
         _msg.Insert(0, msg);
     }
-
-    private void OnRenderComplete()
-    {
-        AddMessage("RenderComplete");
-    }
-
-    private void OnClick(Coordinate c)
-    {
-        AddMessage($"OnClick {c}");
-    }
-
-    private void VisibleExtentChanged(Extent e)
-    {
-        AddMessage($"VisibleExtentChanged {e}");
-    }
-
-    private void OnPointerMove(Coordinate c)
-    {
-        _pointer = c;
-    }
-
-    private void ZoomChanged(double z)
-    {
-        AddMessage($"ZoomChanged {z}");
-    }
-
 }

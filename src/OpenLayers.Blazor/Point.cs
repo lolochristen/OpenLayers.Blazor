@@ -21,4 +21,12 @@ public class Point : Shape
         get => InternalFeature.Point;
         set => InternalFeature.Point = value?.Value;
     }
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue(nameof(Coordinate), out Coordinate? coordinate) && coordinate != Coordinate)
+            _updateableParametersChanged = true;
+
+        return base.SetParametersAsync(parameters);
+    }
 }

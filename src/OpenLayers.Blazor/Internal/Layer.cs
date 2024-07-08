@@ -24,6 +24,6 @@ public class Layer
     public dynamic? Options { get; set; }
     public Dictionary<string, object>? FlatStyle { get; set; }
     public StyleOptions? Style { get; set; }
-    public bool SyncFeatures { get; set; }
+    public bool RaiseShapeEvents { get; set; }
     public bool UseStyleCallback { get; set; }
 }

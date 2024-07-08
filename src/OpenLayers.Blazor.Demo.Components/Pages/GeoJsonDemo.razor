@@ -30,7 +30,7 @@
                Id = "geojson"
                Projection="EPSG:4326"
                Style="@(new StyleOptions() { Stroke = new StyleOptions.StrokeOptions { Color = "red", Width = 3 }})"
-               SyncFeatures/>
+               RaiseShapeEvents/>
     </Layers>
 </SwissMap>
 
@@ -59,7 +59,7 @@
             Id = "geo2",
             LayerType = LayerType.Vector,
             SourceType = SourceType.VectorGeoJson,
-            SyncFeatures = true,
+            RaiseShapeEvents = true,
             Projection = "EPSG:4326",
             Data = data,
             StyleCallback = GetShapeStyle,

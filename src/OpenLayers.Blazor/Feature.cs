@@ -69,4 +69,7 @@ public class Feature : ComponentBase
         get => InternalFeature.Coordinates;
         set => InternalFeature.Coordinates = value;
     }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
 }

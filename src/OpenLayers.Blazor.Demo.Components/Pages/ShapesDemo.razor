@@ -62,7 +62,7 @@
 
     private void MovePoint()
     {
-        _pos.X += 1000;
+        _pos = new Coordinate(_pos.X + 1000, _pos.Y); // set new coordinate to trigger refresh
     }
 
     private async Task RemoveShape()

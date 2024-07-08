@@ -253,8 +253,11 @@ public class Coordinate : IEquatable<Coordinate>
     /// <inheritdoc />
     public bool Equals(Coordinate? other)
     {
+        double precision = 0.0000001;
+
         if (other is null)
             return false;
-        return _value[0].Equals(other._value[0]) && _value[1].Equals(other._value[1]);
+
+        return (Math.Abs(_value[0] - other._value[0]) < precision) && (Math.Abs(_value[1] - other._value[1]) < precision);
     }
 }

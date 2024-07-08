@@ -227,6 +227,52 @@ public class Shape : Feature, IDisposable
         base.OnInitialized();
     }
 
+    internal bool _updateableParametersChanged = false; 
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue(nameof(Color), out string? color) && color != Color)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(BackgroundColor), out string? bg) && bg != BackgroundColor)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(ZIndex), out int? zindex) && zindex != ZIndex)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(BorderColor), out string? bc) && bc != BorderColor)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(BorderSize), out int? bs) && bs != BorderSize)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(Label), out string? label) && label != Label)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(Content), out string? content) && bc != Content)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(Radius), out double? radius) && radius != Radius)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(Scale), out double? scale) && scale != Scale)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(Popup), out bool popup) && popup != Popup)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(TextScale), out double? ts) && ts != TextScale)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(Title), out string? title) && title != Title)
+            _updateableParametersChanged = true;
+        if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c != Coordinates)
+        {
+            Console.WriteLine($"Coordinates changed {c} {Coordinates}");
+            _updateableParametersChanged = true;
+        }
+
+        return base.SetParametersAsync(parameters);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_updateableParametersChanged)
+        {
+            await UpdateShape();
+            _updateableParametersChanged = false;
+        }
+    }
+
     public async Task UpdateShape()
     {
         if (Map != null && Layer != null)

@@ -99,6 +99,10 @@ export function MapOLSetInteractions(mapId, active) {
     _MapOL[mapId].setInteractions(active);
 }
 
+export function MapOLSetSelectionSettings(mapId, layerId, selectionEnabled, selectionStyle, multiSelect) {
+    _MapOL[mapId].setSelectionSettings(layerId, selectionEnabled, selectionStyle, multiSelect);
+}
+
 // --- MapOL ----------------------------------------------------------------------------//
 function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
     this.Instance = instance;
@@ -217,6 +221,8 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
     this.Map.getView().on("change:rotation", function(evt) { that.onMapRotationChanged(); });
 
     this.setInteractions(interactions);
+
+    this.setSelectionSettings(true);
 
     this.onMapCenterChanged();
 }
@@ -769,6 +775,69 @@ MapOL.prototype.undoDrawing = function() {
         this.currentDraw.removeLastPoint();
     }
 };
+
+MapOL.prototype.currentSelection = null;
+MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style, multiSelect) {
+
+    var that = this;
+    var defaultSelectionStyle = new ol.style.Style({
+        fill: new ol.style.Fill({
+            color: '#eeeeee',
+        }),
+        stroke: new ol.style.Stroke({
+            color: 'rgba(255, 255, 255, 0.7)',
+            width: 2,
+        }),
+    });
+
+    if (enableSelection) {
+        this.currentSelection = new ol.interaction.Select({
+            condition: ol.events.condition.click,
+            style: function(feature) {
+                if (style) {
+                    return that.mapStyleOptionsToStyle(style, feature);
+                } else {
+                    const color = feature.get('COLOR') || '#eeeeee';
+                    defaultSelectionStyle.getFill().setColor(color);
+                    return defaultSelectionStyle;
+                }
+            },
+            layers: layerId ? [this.getLayer(layerId)] : undefined,
+            multi: multiSelect
+        });
+        this.currentSelection.on("select",
+            function(e) {
+                var selected = new Array();
+                if (e.selected) e.selected.forEach((f) => selected.push(that.mapFeatureToShape(f)));
+                var unselected = new Array();
+                if (e.unselected) e.unselected.forEach((f) => unselected.push(that.mapFeatureToShape(f)));
+                that.Instance.invokeMethodAsync("OnInternalSelectionChanged", layerId, selected, unselected);
+            });
+
+        this.Map.addInteraction(this.currentSelection);
+    } else {
+        if (this.currentSelection) {
+            this.Map.removeInteraction(this.currentSelection);
+            this.currentSelection = null;
+        }
+    }
+}
+
+//const selected = new ol.style.Style({
+//    fill: new ol.style.Fill({
+//        color: '#eeeeee',
+//    }),
+//    stroke: new ol.style.Stroke({
+//        color: 'rgba(255, 255, 255, 0.7)',
+//        width: 2,
+//    }),
+//});
+
+//function selectStyle(feature) {
+//    const color = feature.get('COLOR') || '#eeeeee';
+//    selected.getFill().setColor(color);
+//    return selected;
+//}
 
 MapOL.prototype.onFeatureAdded = function(layerId, feature) {
     const shape = this.mapFeatureToShape(feature);

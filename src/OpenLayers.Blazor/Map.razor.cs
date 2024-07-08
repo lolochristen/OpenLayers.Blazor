@@ -470,8 +470,12 @@ public partial class Map : IAsyncDisposable
                     Instance);
 
             foreach (var layer in LayersList)
+            {
                 if (layer.ShapesList.Count > 0)
                     await SetShapesInternal(layer, layer.ShapesList);
+                if (layer.SelectionEnabled)
+                    await SetSelectionSettings(layer, layer.SelectionEnabled, layer.SelectionStyle, layer.MultiSelect);
+            }
 
             LayersList.CollectionChanged += LayersOnCollectionChanged;
 
@@ -667,6 +671,38 @@ public partial class Map : IAsyncDisposable
             await layer.OnInternalShapeRemoved(existingShape);
             await OnShapeRemoved.InvokeAsync(existingShape);
         }
+    }
+
+    [JSInvokable]
+    public async Task OnInternalSelectionChanged(string layerId, Internal.Shape[] selected, Internal.Shape[] unselected)
+    {
+#if DEBUG
+        Console.WriteLine($"OnInternalSelectionChanged");
+#endif
+
+        var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
+        if (layer == null)
+        {
+#if DEBUG
+            Console.WriteLine($"Layer not found: {layerId}");
+#endif
+            return;
+        }
+
+        var selectedShapes = selected.Select(p => layer.ShapesList.FirstOrDefault(s => s.Id == p.Id))
+            .Where(p => p != null).ToList();
+
+        var unselectedShapes = unselected.Select(p => layer.ShapesList.FirstOrDefault(s => s.Id == p.Id))
+            .Where(p => p != null).ToList();
+
+        if (selectedShapes.Count > 0)
+            layer.SelectedShape = selectedShapes[0];
+        else
+            layer.SelectedShape = null;
+
+        await layer.SelectedShapeChanged.InvokeAsync(layer.SelectedShape);
+
+        await layer.SelectionChanged.InvokeAsync(new SelectionChangedArgs() { SelectedShapes = selectedShapes, UnselectedShapes = unselectedShapes });
     }
 
     [JSInvokable]
@@ -1057,5 +1093,20 @@ public partial class Map : IAsyncDisposable
         {
             LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
+    }
+
+    /// <summary>
+    /// Sets the selection settings for a layer
+    /// </summary>
+    /// <param name="layer"></param>
+    /// <param name="selectionEnabled"></param>
+    /// <param name="selectionStyle"></param>
+    /// <returns></returns>
+    public async Task SetSelectionSettings(Layer? layer, bool selectionEnabled, StyleOptions? selectionStyle, bool multiSelect)
+    {
+        if (_module == null)
+            return;
+        
+        await _module.InvokeVoidAsync("MapOLSetSelectionSettings", _mapId, layer?.Id, selectionEnabled, selectionStyle, multiSelect);
     }
 }

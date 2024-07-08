@@ -39,7 +39,7 @@ Pointer: @_pointer
                OnMarkerClick="@((o) => AddMessage($"OnMarkerClicked {o}"))"
                OnShapeAdded="@((o) => AddMessage($"OnShapeAdded {o}"))">
     <Layers>
-        <Layer @ref="_layer" LayerType="LayerType.Vector" SourceType="SourceType.Vector">
+        <Layer @ref="_layer" LayerType="LayerType.Vector" SourceType="SourceType.Vector" SelectionEnabled SelectionChanged="@((o) => AddMessage($"SelectionChanged {o}"))">
             <Shapes>
                 <Circle Center="new(9.674681, 46.778543)" Radius="100000" BorderColor="red" BackgroundColor="#77777777" BorderSize="5" OnChanged="@((o) => AddMessage($"Shape.OnChanged {o}"))"></Circle>
             </Shapes>

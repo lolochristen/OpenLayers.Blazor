@@ -402,6 +402,27 @@ public partial class Layer : ComponentBase
     [Parameter]
     public EventCallback<Shape> OnShapeRemoved { get; set; }
 
+    [Parameter]
+    public bool SelectionEnabled { get; set; }
+
+    [Parameter]
+    public StyleOptions? SelectionStyle { get; set; }
+
+    [Parameter]
+    public EventCallback<SelectionChangedArgs> SelectionChanged { get; set; }
+
+    [Parameter]
+    public Shape SelectedShape { get; set; }
+
+    [Parameter]
+    public EventCallback<Shape> SelectedShapeChanged { get; set; }
+
+    [Parameter]
+    public bool MultiSelect { get; set; }
+
+    /// <summary>
+    ///    Gets the list of shapes in the layer.
+    /// </summary>
     public ObservableCollection<Shape> ShapesList { get; } = new();
 
     internal void Initialize(Map map)
@@ -469,6 +490,22 @@ public partial class Layer : ComponentBase
 
         if (parameters.TryGetValue(nameof(Extent), out Extent extent) && extent != Extent)
             _updateableParametersChanged = true;
+
+        bool selectionParamsChanged = false;
+
+        if (parameters.TryGetValue(nameof(SelectionEnabled), out bool selectionEnabled) && selectionEnabled != SelectionEnabled)
+            selectionParamsChanged = true;
+
+        if (parameters.TryGetValue(nameof(SelectionStyle), out StyleOptions? style) && style != SelectionStyle)
+            selectionParamsChanged = true;
+
+        if (parameters.TryGetValue(nameof(MultiSelect), out bool? multiSelect) && multiSelect != MultiSelect)
+            selectionParamsChanged = true;
+
+        if (selectionParamsChanged && Map != null)
+        {
+            _ = Map.SetSelectionSettings(this, selectionEnabled, style, multiSelect);
+        }
 
         return base.SetParametersAsync(parameters);
     }

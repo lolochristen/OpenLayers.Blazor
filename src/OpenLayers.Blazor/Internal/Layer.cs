@@ -8,6 +8,7 @@ public class Layer
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public LayerType LayerType { get; set; }
+
     public string? ClassName { get; set; }
     public double Opacity { get; set; } = 1;
     public bool Visibility { get; set; } = true;

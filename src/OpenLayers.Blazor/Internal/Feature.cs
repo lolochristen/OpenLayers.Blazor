@@ -25,8 +25,7 @@ public class Feature : IEquatable<Feature>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public GeometryTypes? GeometryType { get; set; }
 
-    [Parameter]
-    public Coordinates Coordinates { get; set; }
+    [Parameter] public Coordinates Coordinates { get; set; }
 
     [JsonIgnore]
     public Coordinate? Point
@@ -64,8 +63,7 @@ public class Feature : IEquatable<Feature>
     {
         if (Coordinates is JsonElement || Coordinates != null)
             return HashCode.Combine(Id, GeometryType ?? GeometryTypes.None, Coordinates, Properties);
-        else
-            return HashCode.Combine(Id, GeometryType ?? GeometryTypes.None, Properties);
+        return HashCode.Combine(Id, GeometryType ?? GeometryTypes.None, Properties);
     }
 
     public override bool Equals(object? obj)

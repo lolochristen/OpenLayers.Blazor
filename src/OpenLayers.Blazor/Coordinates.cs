@@ -94,6 +94,13 @@ public class Coordinates : IEnumerable<IList<Coordinate>>, IEquatable<Coordinate
         return GetEnumerator();
     }
 
+    public bool Equals(Coordinates? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Type == other.Type && Values.SequenceEqual(other.Values, new CoordinatesEqualityComparer());
+    }
+
     public static implicit operator Coordinates(double[] c)
     {
         return new Coordinates(c);
@@ -109,27 +116,26 @@ public class Coordinates : IEnumerable<IList<Coordinate>>, IEquatable<Coordinate
         return new Coordinates(c);
     }
 
-    public static bool operator ==(Coordinates c1, Coordinates? c2) => c1.Equals(c2);
+    public static bool operator ==(Coordinates c1, Coordinates? c2)
+    {
+        return c1.Equals(c2);
+    }
 
-    public static bool operator !=(Coordinates c1, Coordinates? c2) => !c1.Equals(c2);
+    public static bool operator !=(Coordinates c1, Coordinates? c2)
+    {
+        return !c1.Equals(c2);
+    }
 
     public override string ToString()
     {
         return $"{nameof(Coordinates)}:{Type}[{(Type == CoordinatesType.List ? Default.Count : Values.Count)}]";
     }
 
-    public bool Equals(Coordinates? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Type == other.Type && Values.SequenceEqual(other.Values, new CoordinatesEqualityComparer());
-    }
-
     public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((Coordinates)obj);
     }
 

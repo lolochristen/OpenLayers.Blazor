@@ -10,7 +10,7 @@ public class SwissMap : Map
         SetBaseLayer(LayerId);
         Center = new Coordinate { X = 2660013.54, Y = 1185171.98 }; // Swiss Center
         Options.CoordinatesProjection = "EPSG:2056";
-        Options.ViewProjection = "EPSG:2056"; 
+        Options.ViewProjection = "EPSG:2056";
         Zoom = 2.4;
     }
 
@@ -31,7 +31,7 @@ public class SwissMap : Map
 #endif
         var layer = new Layer
         {
-            Extent = new double[] { 2485071.58, 1074261.72, 2837119.8, 1299941.79 },
+            Extent = new[] { 2485071.58, 1074261.72, 2837119.8, 1299941.79 },
             SourceType = SourceType.TileWMS,
             Url = "https://wms.geo.admin.ch/",
             CrossOrigin = "anonymous",

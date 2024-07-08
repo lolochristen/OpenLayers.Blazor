@@ -1,15 +1,12 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.VisualBasic.CompilerServices;
-
-namespace OpenLayers.Blazor;
+﻿namespace OpenLayers.Blazor;
 
 /// <summary>
-/// Represents an extent or bounding box of a layer or visible map
+///     Represents an extent or bounding box of a layer or visible map
 /// </summary>
 public class Extent : IEquatable<Extent>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Extent"/> class with default values.
+    ///     Initializes a new instance of the <see cref="Extent" /> class with default values.
     /// </summary>
     public Extent()
     {
@@ -20,7 +17,7 @@ public class Extent : IEquatable<Extent>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Extent"/> class with the specified array.
+    ///     Initializes a new instance of the <see cref="Extent" /> class with the specified array.
     /// </summary>
     /// <param name="array">The array containing the extent values.</param>
     /// <exception cref="ArgumentException">Thrown when the array length is not 4.</exception>
@@ -36,7 +33,7 @@ public class Extent : IEquatable<Extent>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Extent"/> class with the specified coordinates.
+    ///     Initializes a new instance of the <see cref="Extent" /> class with the specified coordinates.
     /// </summary>
     /// <param name="x1">The X coordinate of the bottom left corner.</param>
     /// <param name="y1">The Y coordinate of the bottom left corner.</param>
@@ -51,90 +48,27 @@ public class Extent : IEquatable<Extent>
     }
 
     /// <summary>
-    /// Gets or sets the X coordinate of the bottom left corner.
+    ///     Gets or sets the X coordinate of the bottom left corner.
     /// </summary>
     public double X1 { get; set; }
 
     /// <summary>
-    /// Gets or sets the Y coordinate of the bottom left corner.
+    ///     Gets or sets the Y coordinate of the bottom left corner.
     /// </summary>
     public double Y1 { get; set; }
 
     /// <summary>
-    /// Gets or sets the X coordinate of the top right corner.
+    ///     Gets or sets the X coordinate of the top right corner.
     /// </summary>
     public double X2 { get; set; }
 
     /// <summary>
-    /// Gets or sets the Y coordinate of the top right corner.
+    ///     Gets or sets the Y coordinate of the top right corner.
     /// </summary>
     public double Y2 { get; set; }
 
     /// <summary>
-    /// Calculates the hash code for the <see cref="Extent"/> object.
-    /// </summary>
-    /// <returns>The calculated hash code.</returns>
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(X1, Y1, X2, Y2);
-    }
-
-    /// <summary>
-    /// Returns a string representation of the <see cref="Extent"/> object.
-    /// </summary>
-    /// <returns>A string representation of the <see cref="Extent"/> object.</returns>
-    public override string ToString()
-    {
-        return $"{X1}/{Y1}:{X2}/{Y2}";
-    }
-
-    /// <summary>
-    /// Converts the <see cref="Extent"/> object to an array of doubles.
-    /// </summary>
-    /// <returns>An array of doubles representing the extent.</returns>
-    public double[] ToArray()
-    {
-        return new[] { X1, Y1, X2, Y2 };
-    }
-
-    /// <summary>
-    /// Determines whether the specified <see cref="Extent"/> object is equal to the current <see cref="Extent"/> object.
-    /// </summary>
-    /// <param name="other">The <see cref="Extent"/> object to compare with the current <see cref="Extent"/> object.</param>
-    /// <returns>true if the specified <see cref="Extent"/> object is equal to the current <see cref="Extent"/> object; otherwise, false.</returns>
-    public bool Equals(Extent? other)
-    {
-        if (other is null)
-            return false;
-        return X1.Equals(other.X1) && Y1.Equals(other.Y1) && X2.Equals(other.X2) && Y2.Equals(other.Y2);
-    }
-
-    /// <summary>
-    /// Determines whether the specified object is equal to the current <see cref="Extent"/> object.
-    /// </summary>
-    /// <param name="obj">The object to compare with the current <see cref="Extent"/> object.</param>
-    /// <returns>true if the specified object is equal to the current <see cref="Extent"/> object; otherwise, false.</returns>
-    public override bool Equals(object? obj)
-    {
-        return obj is Extent other && Equals(other);
-    }
-
-    /// <summary>
-    /// Implicitly converts the <see cref="Extent"/> object to an array of doubles.
-    /// </summary>
-    /// <param name="extent">The <see cref="Extent"/> object to convert.</param>
-    /// <returns>An array of doubles representing the extent.</returns>
-    public static implicit operator double[](Extent extent) => extent.ToArray();
-
-    /// <summary>
-    /// Implicitly converts an array of doubles to a <see cref="Extent"/> object.
-    /// </summary>
-    /// <param name="values">The array of doubles to convert.</param>
-    /// <returns>A <see cref="Extent"/> object representing the extent.</returns>
-    public static implicit operator Extent?(double[]? values) => values != null ? new Extent(values) : null;
-
-    /// <summary>
-    /// Gets or sets the coordinate value at the specified index.
+    ///     Gets or sets the coordinate value at the specified index.
     /// </summary>
     /// <param name="index">The index of the coordinate value.</param>
     /// <returns>The coordinate value at the specified index.</returns>
@@ -172,5 +106,77 @@ public class Extent : IEquatable<Extent>
                     throw new IndexOutOfRangeException();
             }
         }
+    }
+
+    /// <summary>
+    ///     Determines whether the specified <see cref="Extent" /> object is equal to the current <see cref="Extent" /> object.
+    /// </summary>
+    /// <param name="other">The <see cref="Extent" /> object to compare with the current <see cref="Extent" /> object.</param>
+    /// <returns>
+    ///     true if the specified <see cref="Extent" /> object is equal to the current <see cref="Extent" /> object;
+    ///     otherwise, false.
+    /// </returns>
+    public bool Equals(Extent? other)
+    {
+        if (other is null)
+            return false;
+        return X1.Equals(other.X1) && Y1.Equals(other.Y1) && X2.Equals(other.X2) && Y2.Equals(other.Y2);
+    }
+
+    /// <summary>
+    ///     Calculates the hash code for the <see cref="Extent" /> object.
+    /// </summary>
+    /// <returns>The calculated hash code.</returns>
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(X1, Y1, X2, Y2);
+    }
+
+    /// <summary>
+    ///     Returns a string representation of the <see cref="Extent" /> object.
+    /// </summary>
+    /// <returns>A string representation of the <see cref="Extent" /> object.</returns>
+    public override string ToString()
+    {
+        return $"{X1}/{Y1}:{X2}/{Y2}";
+    }
+
+    /// <summary>
+    ///     Converts the <see cref="Extent" /> object to an array of doubles.
+    /// </summary>
+    /// <returns>An array of doubles representing the extent.</returns>
+    public double[] ToArray()
+    {
+        return new[] { X1, Y1, X2, Y2 };
+    }
+
+    /// <summary>
+    ///     Determines whether the specified object is equal to the current <see cref="Extent" /> object.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current <see cref="Extent" /> object.</param>
+    /// <returns>true if the specified object is equal to the current <see cref="Extent" /> object; otherwise, false.</returns>
+    public override bool Equals(object? obj)
+    {
+        return obj is Extent other && Equals(other);
+    }
+
+    /// <summary>
+    ///     Implicitly converts the <see cref="Extent" /> object to an array of doubles.
+    /// </summary>
+    /// <param name="extent">The <see cref="Extent" /> object to convert.</param>
+    /// <returns>An array of doubles representing the extent.</returns>
+    public static implicit operator double[](Extent extent)
+    {
+        return extent.ToArray();
+    }
+
+    /// <summary>
+    ///     Implicitly converts an array of doubles to a <see cref="Extent" /> object.
+    /// </summary>
+    /// <param name="values">The array of doubles to convert.</param>
+    /// <returns>A <see cref="Extent" /> object representing the extent.</returns>
+    public static implicit operator Extent?(double[]? values)
+    {
+        return values != null ? new Extent(values) : null;
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor.Internal;
 
@@ -22,13 +21,13 @@ public class Source
     public string? Url { get; set; }
     public string[]? Urls { get; set; }
     public bool WrapX { get; set; } = true;
-    public bool Transition { get; set; }        
+    public bool Transition { get; set; }
     public double ZDirection { get; set; } = 0;
     public string? Key { get; set; }
     public string? ImagerySet { get; set; }
     public string? Layer { get; set; }
     public string? MatrixSet { get; set; }
-    public string? Format { get; set; } 
+    public string? Format { get; set; }
     public dynamic? FormatOptions { get; set; }
     public dynamic? Data { get; set; }
     public dynamic? Options { get; set; }

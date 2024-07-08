@@ -9,7 +9,6 @@ internal class CoordinatesEqualityComparer : IEqualityComparer<IList<Coordinate>
         if (ReferenceEquals(y, null)) return false;
         if (x.GetType() != y.GetType()) return false;
         return x.SequenceEqual(y);
-
     }
 
     public int GetHashCode(IList<Coordinate> obj)

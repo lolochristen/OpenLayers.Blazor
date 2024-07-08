@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
@@ -14,11 +13,11 @@ namespace OpenLayers.Blazor;
 /// </summary>
 public partial class Map : IAsyncDisposable
 {
+    private static int _counter = 0;
     private string _mapId;
     private IJSObjectReference? _module;
     private Feature? _popupContext;
     private string _popupId;
-    private static int _counter = 0;
 
 
     /// <summary>
@@ -270,75 +269,120 @@ public partial class Map : IAsyncDisposable
     private DotNetObjectReference<Map>? Instance { get; set; }
 
     /// <summary>
-    /// Get or sets an event callback when a feature is added to the map.
+    ///     Get or sets an event callback when a feature is added to the map.
     /// </summary>
-    [Parameter] public EventCallback<Shape> OnShapeAdded { get; set; }
+    [Parameter]
+    public EventCallback<Shape> OnShapeAdded { get; set; }
 
     /// <summary>
-    /// Get or sets an event callback when a feature is changed on the map.
+    ///     Get or sets an event callback when a feature is changed on the map.
     /// </summary>
-    [Parameter] public EventCallback<Shape> OnShapeChanged { get; set; }
+    [Parameter]
+    public EventCallback<Shape> OnShapeChanged { get; set; }
 
     /// <summary>
-    /// Get or sets an event callback when a feature is removed from the map.
+    ///     Get or sets an event callback when a feature is removed from the map.
     /// </summary>
-    [Parameter] public EventCallback<Shape> OnShapeRemoved { get; set; }
+    [Parameter]
+    public EventCallback<Shape> OnShapeRemoved { get; set; }
 
     /// <summary>
-    /// Get or sets a callback the return a <see cref="StyleOptions"/> of style for the given shape. This callback can be used to provide custom styles per shapes.
+    ///     Get or sets a callback the return a <see cref="StyleOptions" /> of style for the given shape. This callback can be
+    ///     used to provide custom styles per shapes.
     /// </summary>
-    [Parameter] public Func<Shape, StyleOptions> ShapeStyleCallback { get; set; } = DefaultShapeStyleCallback;
+    [Parameter]
+    public Func<Shape, StyleOptions> ShapeStyleCallback { get; set; } = DefaultShapeStyleCallback;
 
     /// <summary>
-    /// Set or gets if any interaction is active.
+    ///     Set or gets if any interaction is active.
     /// </summary>
     [Parameter]
     public bool InteractionsEnabled { get; set; }
 
     /// <summary>
-    /// Get or sets if the zoom control is visible
+    ///     Get or sets if the zoom control is visible
     /// </summary>
-    [Parameter] public bool ZoomControl { get => Options.ZoomControl; set => Options.ZoomControl = value; }
+    [Parameter]
+    public bool ZoomControl
+    {
+        get => Options.ZoomControl;
+        set => Options.ZoomControl = value;
+    }
 
     /// <summary>
-    /// Gets or sets if the attribution control is visible
+    ///     Gets or sets if the attribution control is visible
     /// </summary>
-    [Parameter] public bool AttributionControl { get => Options.AttributionControl; set => Options.AttributionControl = value; }
+    [Parameter]
+    public bool AttributionControl
+    {
+        get => Options.AttributionControl;
+        set => Options.AttributionControl = value;
+    }
 
     /// <summary>
-    /// Gets or sets if full screen control is visible 
+    ///     Gets or sets if full screen control is visible
     /// </summary>
-    [Parameter] public bool FullScreenControl { get => Options.FullScreenControl; set => Options.FullScreenControl = value; }
+    [Parameter]
+    public bool FullScreenControl
+    {
+        get => Options.FullScreenControl;
+        set => Options.FullScreenControl = value;
+    }
 
     /// <summary>
-    /// Gets or sets boolean if zoom slider control is visible
+    ///     Gets or sets boolean if zoom slider control is visible
     /// </summary>
-    [Parameter] public bool ZoomSliderControl { get => Options.ZoomSliderControl; set => Options.ZoomSliderControl = value; }
+    [Parameter]
+    public bool ZoomSliderControl
+    {
+        get => Options.ZoomSliderControl;
+        set => Options.ZoomSliderControl = value;
+    }
 
     /// <summary>
-    /// Gets or sets boolean if rotate to 0 control is visible
+    ///     Gets or sets boolean if rotate to 0 control is visible
     /// </summary>
-    [Parameter] public bool RotateControl { get => Options.RotateControl; set => Options.RotateControl = value; }
+    [Parameter]
+    public bool RotateControl
+    {
+        get => Options.RotateControl;
+        set => Options.RotateControl = value;
+    }
 
     /// <summary>
-    /// Gets or sets boolean if a overview map using first layer is visible
+    ///     Gets or sets boolean if a overview map using first layer is visible
     /// </summary>
-    [Parameter] public bool OverviewMap { get => Options.OverviewMap; set => Options.OverviewMap = value; }
+    [Parameter]
+    public bool OverviewMap
+    {
+        get => Options.OverviewMap;
+        set => Options.OverviewMap = value;
+    }
 
     /// <summary>
-    /// Gets or sets boolean if zoom to extent control is visible
+    ///     Gets or sets boolean if zoom to extent control is visible
     /// </summary>
-    [Parameter] public bool ZoomToExtentControl { get => Options.ZoomToExtentControl; set => Options.ZoomToExtentControl = value; }
+    [Parameter]
+    public bool ZoomToExtentControl
+    {
+        get => Options.ZoomToExtentControl;
+        set => Options.ZoomToExtentControl = value;
+    }
 
     /// <summary>
-    /// Gets or set the default layer for shapes.
+    ///     Gets or set the default layer for shapes.
     /// </summary>
     public Layer? ShapesLayer { get; set; }
 
     /// <summary>
-    /// Gets or set the default layer for markers.
+    ///     Gets or set the default layer for markers.
     /// </summary>
     public Layer? MarkersLayer { get; set; }
+
+    /// <summary>
+    ///     Returns a IEnumerable of all features assigned to map.
+    /// </summary>
+    public IEnumerable<Feature> FeaturesList => ShapesList.OfType<Feature>().Union(MarkersList);
 
     /// <summary>
     ///     Disposing resources.
@@ -426,12 +470,8 @@ public partial class Map : IAsyncDisposable
                     Instance);
 
             foreach (var layer in LayersList)
-            {
                 if (layer.ShapesList.Count > 0)
-                {
                     await SetShapesInternal(layer, layer.ShapesList);
-                }
-            }
 
             LayersList.CollectionChanged += LayersOnCollectionChanged;
 
@@ -506,7 +546,9 @@ public partial class Map : IAsyncDisposable
             StateHasChanged();
         }
         else
+        {
             await OnShapeClick.InvokeAsync(new Shape(shape));
+        }
     }
 
     [JSInvokable]
@@ -624,7 +666,6 @@ public partial class Map : IAsyncDisposable
         {
             await layer.OnInternalShapeRemoved(existingShape);
             await OnShapeRemoved.InvokeAsync(existingShape);
-
         }
     }
 
@@ -675,7 +716,10 @@ public partial class Map : IAsyncDisposable
     ///     Zooms to the given extent
     /// </summary>
     /// <param name="extent"></param>
-    /// <param name="padding">Padding (in pixels) to be cleared inside the view. Values in the array are top, right, bottom and left padding. defaults to [0,0,0,0]</param>
+    /// <param name="padding">
+    ///     Padding (in pixels) to be cleared inside the view. Values in the array are top, right, bottom and
+    ///     left padding. defaults to [0,0,0,0]
+    /// </param>
     /// <returns></returns>
     public ValueTask SetZoomToExtent(ExtentType extent, decimal[]? padding = null)
     {
@@ -692,7 +736,7 @@ public partial class Map : IAsyncDisposable
     [Obsolete("Use map.AddLayer or LayerList.Add(new Layer() { LayerType=LayerType.Vector, SourceType=SourceType.VectorGeoJson, Data=data } instead.")]
     public async ValueTask<Layer> LoadGeoJson(JsonElement json, string? dataProjection = null, bool raiseEvents = true, Dictionary<string, object>? styles = null)
     {
-        var layer = new Layer()
+        var layer = new Layer
         {
             LayerType = LayerType.Vector,
             SourceType = SourceType.VectorGeoJson,
@@ -829,7 +873,7 @@ public partial class Map : IAsyncDisposable
 #endif
         if (shape.Layer == null)
             throw new InvalidOperationException("Shape must be assigned to a layer");
-                
+
         return _module?.InvokeVoidAsync("MapOLUpdateShape", _mapId, shape.Layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
     }
 
@@ -856,7 +900,7 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
-    /// Reads and updates the coordinates of a shape.
+    ///     Reads and updates the coordinates of a shape.
     /// </summary>
     /// <param name="shape"></param>
     /// <returns></returns>
@@ -866,10 +910,7 @@ public partial class Map : IAsyncDisposable
         if (_module == null)
             return;
 
-        if (FeaturesList.All(p => p.Id != feature.Id))
-        {
-            throw new InvalidOperationException("Given shape is not assigned to map");
-        }
+        if (FeaturesList.All(p => p.Id != feature.Id)) throw new InvalidOperationException("Given shape is not assigned to map");
 
         var c = await _module.InvokeAsync<dynamic>("MapOLGetCoordinates", _mapId, feature.Id);
         if (c is JsonElement)
@@ -877,11 +918,6 @@ public partial class Map : IAsyncDisposable
         else
             feature.InternalFeature.Coordinates = c;
     }
-
-    /// <summary>
-    /// Returns a IEnumerable of all features assigned to map.
-    /// </summary>
-    public IEnumerable<Feature> FeaturesList => ShapesList.OfType<Feature>().Union(MarkersList);
 
     private void LayersOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
@@ -911,11 +947,20 @@ public partial class Map : IAsyncDisposable
         });
     }
 
-    internal ValueTask SetShapesInternal(Layer layer, IEnumerable<Shape>? shapes) => _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, layer.Id, shapes?.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
+    internal ValueTask SetShapesInternal(Layer layer, IEnumerable<Shape>? shapes)
+    {
+        return _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, layer.Id, shapes?.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
+    }
 
-    internal ValueTask RemoveShapeInternal(Layer layer, Shape shape) => _module?.InvokeVoidAsync("MapOLRemoveShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+    internal ValueTask RemoveShapeInternal(Layer layer, Shape shape)
+    {
+        return _module?.InvokeVoidAsync("MapOLRemoveShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+    }
 
-    internal ValueTask AddShapeInternal(Layer layer, Shape shape) => _module?.InvokeVoidAsync("MapOLAddShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+    internal ValueTask AddShapeInternal(Layer layer, Shape shape)
+    {
+        return _module?.InvokeVoidAsync("MapOLAddShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+    }
 
     internal Layer GetOrCreateShapesLayer()
     {
@@ -925,19 +970,20 @@ public partial class Map : IAsyncDisposable
         var layer = LayersList.FirstOrDefault(p => p.Id == "shapes");
         if (layer == null)
         {
-            layer = new Layer()
+            layer = new Layer
             {
                 LayerType = LayerType.Vector,
                 SourceType = SourceType.Vector,
                 RaiseShapeEvents = true,
                 ZIndex = 998,
-                Id = "shapes",
+                Id = "shapes"
             };
             LayersList.Add(layer);
             if (layer.Map == null)
                 layer.Initialize(this);
             ShapesLayer = layer;
         }
+
         return layer;
     }
 
@@ -949,24 +995,25 @@ public partial class Map : IAsyncDisposable
         var layer = LayersList.FirstOrDefault(p => p.Id == "markers");
         if (layer == null)
         {
-            layer = new Layer()
+            layer = new Layer
             {
                 LayerType = LayerType.Vector,
                 SourceType = SourceType.Vector,
                 RaiseShapeEvents = true,
                 ZIndex = 999,
-                Id = "markers",
+                Id = "markers"
             };
             LayersList.Add(layer);
             if (layer.Map == null)
                 layer.Initialize(this);
             MarkersLayer = layer;
         }
+
         return layer;
     }
 
     /// <summary>
-    /// Explicitly adds a layer to the map.
+    ///     Explicitly adds a layer to the map.
     /// </summary>
     /// <param name="layer">Layer to add</param>
     /// <returns></returns>
@@ -990,7 +1037,7 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
-    /// Explicitly removes a layer from the map
+    ///     Explicitly removes a layer from the map
     /// </summary>
     /// <param name="layer"></param>
     /// <returns></returns>

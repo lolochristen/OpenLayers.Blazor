@@ -13,19 +13,21 @@ public abstract class Shape<T> : Shape where T : Internal.Shape, new()
 }
 
 /// <summary>
-///     A base class for a shape on a map. 
+///     A base class for a shape on a map.
 /// </summary>
 public class Shape : Feature, IDisposable
 {
+    internal bool _updateableParametersChanged;
+
     /// <summary>
-    /// Initializes a new instance of <see cref="Shape"/>.
+    ///     Initializes a new instance of <see cref="Shape" />.
     /// </summary>
     public Shape() : this(ShapeType.Point)
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Shape"/>.
+    ///     Initializes a new instance of <see cref="Shape" />.
     /// </summary>
     /// <param name="shapeType"></param>
     public Shape(ShapeType shapeType)
@@ -45,17 +47,19 @@ public class Shape : Feature, IDisposable
     }
 
     /// <summary>
-    /// Gets or sets the attached parent map.
+    ///     Gets or sets the attached parent map.
     /// </summary>
-    [CascadingParameter] public Map? Map { get; set; }
+    [CascadingParameter]
+    public Map? Map { get; set; }
 
     /// <summary>
-    /// Gets or sets the attached parent layer.
+    ///     Gets or sets the attached parent layer.
     /// </summary>
-    [CascadingParameter] public Layer? Layer { get; set; }
+    [CascadingParameter]
+    public Layer? Layer { get; set; }
 
     /// <summary>
-    /// Gets or sets the type of shape.
+    ///     Gets or sets the type of shape.
     /// </summary>
     [Parameter]
     public ShapeType ShapeType
@@ -226,8 +230,6 @@ public class Shape : Feature, IDisposable
 
         base.OnInitialized();
     }
-
-    internal bool _updateableParametersChanged = false; 
 
     public override Task SetParametersAsync(ParameterView parameters)
     {

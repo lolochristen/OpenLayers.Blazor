@@ -3,19 +3,19 @@
 namespace OpenLayers.Blazor;
 
 /// <summary>
-/// A Marker component to attach to a <see cref="Map"/>
+///     A Marker component to attach to a <see cref="Map" />
 /// </summary>
 public class Marker : Shape<Internal.Marker>
 {
     /// <summary>
-    /// Default Constructor
+    ///     Default Constructor
     /// </summary>
     public Marker() : base(new Internal.Marker())
     {
     }
 
     /// <summary>
-    /// Constructor with key parameters.
+    ///     Constructor with key parameters.
     /// </summary>
     /// <param name="type"></param>
     /// <param name="coordinate"></param>
@@ -28,7 +28,7 @@ public class Marker : Shape<Internal.Marker>
     }
 
     /// <summary>
-    /// Constructor for a Marker <see cref="MarkerType.MarkerAwesome"/>
+    ///     Constructor for a Marker <see cref="MarkerType.MarkerAwesome" />
     /// </summary>
     /// <param name="coordinate"></param>
     /// <param name="icon"></param>
@@ -40,7 +40,7 @@ public class Marker : Shape<Internal.Marker>
     }
 
     /// <summary>
-    /// Extended consturctor.
+    ///     Extended consturctor.
     /// </summary>
     /// <param name="coordinate"></param>
     /// <param name="imageSource"></param>
@@ -58,7 +58,7 @@ public class Marker : Shape<Internal.Marker>
     }
 
     /// <summary>
-    /// Type of the marker: <see cref="MarkerType"/>
+    ///     Type of the marker: <see cref="MarkerType" />
     /// </summary>
     [Parameter]
     public MarkerType Type
@@ -68,7 +68,7 @@ public class Marker : Shape<Internal.Marker>
     }
 
     /// <summary>
-    /// Size of the marker in width/height
+    ///     Size of the marker in width/height
     /// </summary>
     [Parameter]
     public float[]? Size
@@ -78,7 +78,7 @@ public class Marker : Shape<Internal.Marker>
     }
 
     /// <summary>
-    /// Anchor point for the marker image/icon
+    ///     Anchor point for the marker image/icon
     /// </summary>
     [Parameter]
     public float[]? Anchor
@@ -89,7 +89,7 @@ public class Marker : Shape<Internal.Marker>
 
 
     /// <summary>
-    /// Coordinate of the marker.
+    ///     Coordinate of the marker.
     /// </summary>
     [Parameter]
     public Coordinate? Coordinate
@@ -99,7 +99,7 @@ public class Marker : Shape<Internal.Marker>
     }
 
     /// <summary>
-    /// Icon Rotation in radiant
+    ///     Icon Rotation in radiant
     /// </summary>
     [Parameter]
     public double? Rotation

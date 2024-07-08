@@ -3,7 +3,7 @@
 namespace OpenLayers.Blazor;
 
 /// <summary>
-/// Shape types.
+///     Shape types.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ShapeType

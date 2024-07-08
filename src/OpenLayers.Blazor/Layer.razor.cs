@@ -499,7 +499,7 @@ public partial class Layer : ComponentBase
         if (parameters.TryGetValue(nameof(SelectionStyle), out StyleOptions? style) && style != SelectionStyle)
             selectionParamsChanged = true;
 
-        if (parameters.TryGetValue(nameof(MultiSelect), out bool? multiSelect) && multiSelect != MultiSelect)
+        if (parameters.TryGetValue(nameof(MultiSelect), out bool multiSelect) && multiSelect != MultiSelect)
             selectionParamsChanged = true;
 
         if (selectionParamsChanged && Map != null)

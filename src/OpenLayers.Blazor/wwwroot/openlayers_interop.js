@@ -782,11 +782,11 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
     var that = this;
     var defaultSelectionStyle = new ol.style.Style({
         fill: new ol.style.Fill({
-            color: '#eeeeee',
+            color: '#eeeeeeaa',
         }),
         stroke: new ol.style.Stroke({
-            color: 'rgba(255, 255, 255, 0.7)',
-            width: 2,
+            color: 'rgba(67, 141, 239, 0.7)',
+            width: 5,
         }),
     });
 
@@ -797,7 +797,7 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
                 if (style) {
                     return that.mapStyleOptionsToStyle(style, feature);
                 } else {
-                    const color = feature.get('COLOR') || '#eeeeee';
+                    const color = feature.get('COLOR') || '#eeeeeeaa';
                     defaultSelectionStyle.getFill().setColor(color);
                     return defaultSelectionStyle;
                 }

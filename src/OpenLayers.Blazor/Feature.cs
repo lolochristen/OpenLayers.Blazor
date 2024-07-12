@@ -70,4 +70,16 @@ public class Feature : ComponentBase
     }
 
     [JsonIgnore] [Parameter] public EventCallback OnClick { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the attached parent map.
+    /// </summary>
+    [CascadingParameter]
+    public Map? Map { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the attached parent layer.
+    /// </summary>
+    [CascadingParameter]
+    public Layer? Layer { get; set; }
 }

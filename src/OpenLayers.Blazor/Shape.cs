@@ -38,18 +38,6 @@ public class Shape : Feature, IDisposable
     }
 
     /// <summary>
-    ///     Gets or sets the attached parent map.
-    /// </summary>
-    [CascadingParameter]
-    public Map? Map { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the attached parent layer.
-    /// </summary>
-    [CascadingParameter]
-    public Layer? Layer { get; set; }
-
-    /// <summary>
     ///     Gets or sets the type of shape.
     /// </summary>
     [Parameter]

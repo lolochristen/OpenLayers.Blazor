@@ -852,11 +852,13 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
     var circle = image && image.getRadius != null ? circle = image : null;
     var icon = image && image.getSrc != null ? icon = image : null;
 
-    var id = feature.getId().toString();
+    var id = feature.getId();
 
     if (id == null) {
         id = self.crypto.randomUUID();
         feature.setId(id);
+    } else {
+        id = id.toString();
     }
 
     var objectWithoutKey = (object, key) => {

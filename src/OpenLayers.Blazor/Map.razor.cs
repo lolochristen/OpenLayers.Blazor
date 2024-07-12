@@ -287,6 +287,18 @@ public partial class Map : IAsyncDisposable
     public EventCallback<Shape> OnShapeRemoved { get; set; }
 
     /// <summary>
+    ///     Gets or sets and event callback when a layer is added to the map.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Layer> OnLayerAdded { get; set; }
+
+    /// <summary>
+    ///     Gets or sets and event callback when a layer is removed from the map.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Layer> OnLayerRemoved { get; set; }
+
+    /// <summary>
     ///     Get or sets a callback the return a <see cref="StyleOptions" /> of style for the given shape. This callback can be
     ///     used to provide custom styles per shapes.
     /// </summary>
@@ -1082,6 +1094,8 @@ public partial class Map : IAsyncDisposable
         {
             LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
+
+        await OnLayerAdded.InvokeAsync(layer);
     }
 
     /// <summary>
@@ -1105,6 +1119,8 @@ public partial class Map : IAsyncDisposable
         {
             LayersList.CollectionChanged += LayersOnCollectionChanged;
         }
+
+        await OnLayerRemoved.InvokeAsync(layer);
     }
 
     /// <summary>

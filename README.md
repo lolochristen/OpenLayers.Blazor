@@ -2,9 +2,15 @@
 
 This is a map component based on [OpenLayers](https://openlayers.org/) to show different types and layers of maps from sources like OpenStreet, Bing, SwissTopo ary WMTS/WMS compatible source with some features like markes or shape drawing. The component has implemented the swiss specific coordination projection (VL03/VL95) and therefore can project map content from swisstopo (https://map.geo.admin.ch/). 
 
-## Major Changes
+## Release 2.0 changes and features
 
-Starting fromn version 1.5, the coordinates are represented and defined according to EPSG. This means the input for a Coordinate object will be switched: Coordinate(1197650, 2604200) > Coordinate(2604200, 1197650) or new Coordinate(51, 0) > Coordinate(0, 51)
+- Full support for vector layers including adding shapes per layer
+- Capability to fully adjust vector styles
+- Shape selection feature with events on layers
+- Automatic update on a parameter change on layers and shapes (only when rendered as component)
+- Internal shape/drawing and marker layers are added on demand and are part of the layers collection
+- Fix when Map.InteractionsEnabled = false also no mouse events are handled
+- + many more small improvements and bug fixes
 
 ## Demo/Examples
 

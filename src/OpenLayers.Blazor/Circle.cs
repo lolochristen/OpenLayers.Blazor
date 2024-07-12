@@ -15,9 +15,17 @@ public class Circle : Shape
     }
 
     [Parameter]
-    public Coordinate? Center
+    public Coordinate Center
     {
         get => InternalFeature.Point;
-        set => InternalFeature.Point = value?.Value;
+        set => InternalFeature.Point = value;
+    }
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue(nameof(Center), out Coordinate coordinate) && !coordinate.Equals(Center))
+            _updateableParametersChanged = true;
+
+        return base.SetParametersAsync(parameters);
     }
 }

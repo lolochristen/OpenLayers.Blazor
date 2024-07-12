@@ -25,7 +25,7 @@ public class Feature
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public GeometryTypes? GeometryType { get; set; }
 
-    [Parameter] public Coordinates Coordinates { get; set; }
+    public Coordinates Coordinates { get; set; }
 
     [JsonIgnore]
     public Coordinate Point

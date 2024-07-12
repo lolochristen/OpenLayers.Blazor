@@ -19,10 +19,10 @@ public class Point : Shape
     }
 
     [Parameter]
-    public Coordinate? Coordinate
+    public Coordinate Coordinate
     {
         get => InternalFeature.Point;
-        set => InternalFeature.Point = value?.Value;
+        set => InternalFeature.Point = value;
     }
 
     protected override void SetFill(string color) => GetOrCreateStyleOptions<StyleOptions.CircleStyleOptions>().Fill = new StyleOptions.FillOptions() { Color = color };
@@ -57,7 +57,7 @@ public class Point : Shape
 
     public override Task SetParametersAsync(ParameterView parameters)
     {
-        if (parameters.TryGetValue(nameof(Coordinate), out Coordinate coordinate) && coordinate != Coordinate)
+        if (parameters.TryGetValue(nameof(Coordinate), out Coordinate coordinate) && !coordinate.Equals(Coordinate))
             _updateableParametersChanged = true;
 
         return base.SetParametersAsync(parameters);

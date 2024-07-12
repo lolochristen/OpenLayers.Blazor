@@ -33,4 +33,12 @@ public class Line : Shape
         get => InternalFeature.Coordinates.Default;
         set => InternalFeature.Coordinates.Default = value;
     }
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue(nameof(Points), out IList<Coordinate>? points) && points != Points)
+            _updateableParametersChanged = true;
+
+        return base.SetParametersAsync(parameters);
+    }
 }

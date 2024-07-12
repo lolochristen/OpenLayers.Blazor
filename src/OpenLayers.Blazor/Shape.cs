@@ -402,10 +402,7 @@ public class Shape : Feature, IDisposable
         if (parameters.TryGetValue(nameof(Font), out string? font) && font != Font)
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c != Coordinates)
-        {
-            Console.WriteLine($"Coordinates changed {c} {Coordinates}");
             _updateableParametersChanged = true;
-        }
 
         return base.SetParametersAsync(parameters);
     }

@@ -489,6 +489,8 @@ public partial class Map : IAsyncDisposable
 
             foreach (var layer in LayersList)
             {
+                await OnLayerAdded.InvokeAsync(layer);
+
                 if (layer.ShapesList.Count > 0)
                     await SetShapesInternal(layer, layer.ShapesList);
                 if (layer.SelectionEnabled)

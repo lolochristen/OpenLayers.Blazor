@@ -161,7 +161,7 @@ public class StyleOptions
 
     public class IconStyleOptions : ImageStyleOptions
     {
-        public double[] Anchor { get; set; } = [ 0.5, 0.5 ];
+        public double[]? Anchor { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public IconOrigin AnchorOrigin { get; set; } = IconOrigin.TopLeft;
@@ -177,7 +177,7 @@ public class StyleOptions
         public string CrossOrigin { get; set; }
         public double? Width { get; set; }
         public double? Height { get; set; }
-        public List<double> Offset { get; set; } = new() { 0, 0 };
+        public double[]? Offset { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public IconOrigin OffsetOrigin { get; set; } = IconOrigin.TopLeft;

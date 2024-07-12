@@ -3,15 +3,6 @@ using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
 
-public abstract class Shape<T> : Shape where T : Internal.Shape, new()
-{
-    internal Shape(T shape) : base(shape)
-    {
-    }
-
-    internal new T InternalFeature => (T)base.InternalFeature;
-}
-
 /// <summary>
 ///     A base class for a shape on a map.
 /// </summary>

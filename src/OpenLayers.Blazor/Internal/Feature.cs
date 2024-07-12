@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace OpenLayers.Blazor.Internal;
 
-public class Feature : IEquatable<Feature>
+public class Feature
 {
     public Feature()
     {
@@ -40,13 +40,6 @@ public class Feature : IEquatable<Feature>
 
     public Dictionary<string, dynamic> Properties { get; set; } = new();
 
-    public bool Equals(Feature? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Id.Equals(other.Id) && GeometryType == other.GeometryType && Coordinates.Equals(other.Coordinates) && Properties.Equals(other.Properties);
-    }
-
     public T? GetProperty<T>(string key)
     {
         if (Properties.ContainsKey(key))
@@ -57,20 +50,5 @@ public class Feature : IEquatable<Feature>
         }
 
         return default;
-    }
-
-    public override int GetHashCode()
-    {
-        if (Coordinates is JsonElement || Coordinates != null)
-            return HashCode.Combine(Id, GeometryType ?? GeometryTypes.None, Coordinates, Properties);
-        return HashCode.Combine(Id, GeometryType ?? GeometryTypes.None, Properties);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Feature)obj);
     }
 }

@@ -92,7 +92,12 @@
     {
         string url = $"https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry={coordinate.X},{coordinate.Y}&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=975,1117,96&lang=en&layers=all:{_selectedLayer}&limit=10&mapExtent={_map.VisibleExtent.X1},{_map.VisibleExtent.Y1},{_map.VisibleExtent.X2},{_map.VisibleExtent.Y2}&returnGeometry=true&sr=2056&timeInstant=2021&tolerance=10";
         var json = await HttpClient.GetFromJsonAsync<JsonElement>(url);
-        var results = json.GetProperty("results");await _map.LoadGeoJson(results[0], _map.Options.CoordinatesProjection); // json is in EPSG:2056
+        Console.WriteLine(json);
+        if (json.TryGetProperty("results", out var results))
+        {
+            if (results.ValueKind == JsonValueKind.Array)
+                _map.LayersList.Add(new Layer() { LayerType = LayerType.Vector, SourceType = SourceType.VectorGeoJson, Data = results[0], Projection = "EPSG:2056" });
+        }
     }
 
     private void OnFeatureClick(Feature feature)

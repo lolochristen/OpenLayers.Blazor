@@ -497,33 +497,33 @@ public partial class Map : IAsyncDisposable
         Console.WriteLine($"OnInternalShapeClick: {JsonSerializer.Serialize(shape)}");
 #endif
         var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
-        if (layer == null)
-            return;
-
-        var existingShape = layer.ShapesList.FirstOrDefault(p => p.Id == shape.Id);
-
-        if (existingShape != null)
+        if (layer != null)
         {
-            _popupContext = existingShape;
+            var existingShape = layer.ShapesList.FirstOrDefault(p => p.Id == shape.Id);
 
-            await OnFeatureClick.InvokeAsync(existingShape);
+            if (existingShape != null)
+            {
+                _popupContext = existingShape;
 
-            if (existingShape is Marker marker)
-                await OnMarkerClick.InvokeAsync(marker);
-            else
-                await OnShapeClick.InvokeAsync(existingShape);
-            await existingShape.OnClick.InvokeAsync();
-            StateHasChanged();
+                await OnFeatureClick.InvokeAsync(existingShape);
+
+                if (existingShape is Marker marker)
+                    await OnMarkerClick.InvokeAsync(marker);
+                else
+                    await OnShapeClick.InvokeAsync(existingShape);
+                await existingShape.OnClick.InvokeAsync();
+                StateHasChanged();
+                return;
+            }
         }
+
+        // unknown layer or shape
+        await OnFeatureClick.InvokeAsync(new Feature(shape));
+
+        if (shape.Type == nameof(Marker))
+            await OnMarkerClick.InvokeAsync(new Marker(shape));
         else
-        {
-            await OnFeatureClick.InvokeAsync(new Feature(shape));
-
-            if (shape.Type == nameof(Marker))
-                await OnMarkerClick.InvokeAsync(new Marker(shape));
-            else
-                await OnShapeClick.InvokeAsync(new Shape(shape));
-        }
+            await OnShapeClick.InvokeAsync(new Shape(shape));
     }
 
     [JSInvokable]
@@ -1065,6 +1065,10 @@ public partial class Map : IAsyncDisposable
     {
         if (_module == null)
             return;
+
+#if DEBUG
+        Console.WriteLine($"AddLayer {layer.Id} {layer.LayerType} {layer.SourceType} {layer.Url}");
+#endif
 
         try
         {

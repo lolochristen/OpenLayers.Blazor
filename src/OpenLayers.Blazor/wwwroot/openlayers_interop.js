@@ -494,7 +494,7 @@ MapOL.prototype.setZoom = function(zoom) {
 MapOL.prototype.setZoomToExtent = function(layerId, padding) {
     if (padding == null) padding = undefined;
     const layer = this.getLayer(layerId);
-    var extent = layer.getSource().getExtent();
+    const extent = layer.getSource().getExtent();
     if (extent[0] === Infinity) return;
     this.Map.getView().fit(extent, { size: this.Map.getSize(), padding: padding });
 };
@@ -765,10 +765,10 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
     var that = this;
     var defaultSelectionStyle = new ol.style.Style({
         fill: new ol.style.Fill({
-            color: '#eeeeeeaa',
+            color: "#eeeeeeaa",
         }),
         stroke: new ol.style.Stroke({
-            color: 'rgba(67, 141, 239, 0.7)',
+            color: "rgba(67, 141, 239, 0.7)",
             width: 5,
         }),
     });
@@ -780,7 +780,7 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
                 if (style) {
                     return that.mapStyleOptionsToStyle(style);
                 } else {
-                    const color = feature.get('COLOR') || '#eeeeeeaa';
+                    const color = feature.get("COLOR") || "#eeeeeeaa";
                     defaultSelectionStyle.getFill().setColor(color);
                     return defaultSelectionStyle;
                 }
@@ -804,7 +804,7 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
             this.currentSelection = null;
         }
     }
-}
+};
 MapOL.prototype.onFeatureAdded = function(layerId, feature) {
     const shape = this.mapFeatureToShape(feature);
     this.Instance.invokeMethodAsync("OnInternalShapeAdded", layerId, shape);
@@ -888,9 +888,11 @@ MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoor
     const viewProjection = this.Map.getView().getProjection();
     const sourceProjection = source ? source.getProjection() : null;
     if (shape.coordinates) {
-        const coordinates = transformCoordinates ? MapOL.transformCoordinates(shape.coordinates,
-            sourceProjection ?? this.Options.coordinatesProjection,
-            viewProjection) : shape.coordinates;
+        const coordinates = transformCoordinates
+            ? MapOL.transformCoordinates(shape.coordinates,
+                sourceProjection ?? this.Options.coordinatesProjection,
+                viewProjection)
+            : shape.coordinates;
 
         switch (shape.geometryType) {
         case "Point":
@@ -1059,7 +1061,7 @@ MapOL.prototype.getShapeStyle = function(feature, layer_id) {
 MapOL.prototype.mapStyleOptionsToStyle = function(style) {
 
     style = MapOL.transformNullToUndefined(style);
-    
+
     if (style.icon && style.icon.shapeSource) {
         const canvas = document.createElement("canvas");
         const context = ol.render.toContext(canvas.getContext("2d"),
@@ -1075,9 +1077,9 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style) {
 
     if (style.icon && style.icon.scale) {
         style.icon.width = undefined;
-        style.icon.height = undefined; 
+        style.icon.height = undefined;
     }
-    
+
     if (style.circle) {
         if (style.circle.fill) style.circle.fill = new ol.style.Fill(style.circle.fill);
         if (style.circle.stroke) style.circle.stroke = new ol.style.Stroke(style.circle.stroke);
@@ -1113,97 +1115,121 @@ MapOL.prototype.mapStylesToStyleOptions = function(style) {
         circle = image;
     }
     return {
-        fill: fill ? {
-            color: fill.getColor()
-        } : undefined,
-        stroke: stroke ? {
-            color: stroke.getColor(),
-            lineCap: stroke.getLineCap(),
-            lineJoin: stroke.getLineJoin(),
-            lineDash: stroke.getLineDash(),
-            lineDashOffset: stroke.getLineDashOffset(),
-            miterLimit: stroke.getMiterLimit(),
-            width: stroke.getWidth(),
-        } : undefined,
-        text: text ? {
-            font: text.getFont(),
-            maxAngle: text.getMaxAngle(),
-            offsetX: text.getOffsetX(),
-            offsetY: text.getOffsetY(),
-            overflow: text.getOverflow(),
-            placement: text.getPlacement(),
-            repeat: text.getRepeat(),
-            scale: text.getScale(),
-            rotateWithView: text.getRotateWithView(),
-            rotation: text.getRotation(),
-            text: text.getText(),
-            textAlign: text.getTextAlign(),
-            justify: text.getJustify(),
-            textBaseline: text.getTextBaseline(),
-            fill : text.getFill() ? {
-                color: text.getFill().getColor()
-            } : undefined,
-            backgroundFill: text.getBackgroundFill() ? { 
-                color: text.getBackgroundFill().getColor()
-            } : undefined,
-            stroke: text.getStroke() ? {
-                color: text.getStroke().getColor(),
-                lineCap: text.getStroke().getLineCap(),
-                lineJoin: text.getStroke().getLineJoin(),
-                lineDash: text.getStroke().getLineDash(),
-                lineDashOffset: text.getStroke().getLineDashOffset(),
-                miterLimit: text.getStroke().getMiterLimit(),
-                width: text.getStroke().getWidth(),
-            } : undefined,
-            backgroundStroke: text.getBackgroundStroke() ? {
-                color: text.getBackgroundStroke().getColor(),
-                lineCap: text.getBackgroundStroke().getLineCap(),
-                lineJoin: text.getBackgroundStroke().getLineJoin(),
-                lineDash: text.getBackgroundStroke().getLineDash(),
-                lineDashOffset: text.getBackgroundStroke().getLineDashOffset(),
-                miterLimit: text.getBackgroundStroke().getMiterLimit(),
-                width: text.getBackgroundStroke().getWidth(),
-            } : undefined,
-            backgroundFill: text.getBackgroundFill() ? {
-                color: text.getBackgroundFill().getColor()
-            } : undefined,
-            padding: text.getPadding(),
-        } : undefined,
-        circle: circle ? {
-            radius: circle.getRadius(),
-            fill: circle.fill ? {
-                color: circle.fill.getColor()
-            } : undefined,
-            rotation: circle.getRotation(),
-            rotateWithView: circle.getRotateWithView(),
-            declutterMode: circle.getDeclutterMode(),
-            displacement: circle.getDisplacement(),
-            stroke: circle.stroke ? {
-                color: circle.stroke.getColor(),
-                lineCap: circle.stroke.getLineCap(),
-                lineJoin: circle.stroke.getLineJoin(),
-                lineDash: circle.stroke.getLineDash(),
-                lineDashOffset: circle.stroke.getLineDashOffset(),
-                miterLimit: circle.stroke.getMiterLimit(),
-                width: circle.stroke.getWidth(),
-            } : undefined,
-        } : undefined,
-        icon: icon ? {
-            anchor: icon.getAnchor(),
-            color: icon.getColor(),
-            declutterMode: icon.getDeclutterMode(),
-            height: icon.getHeight(),
-            opacity: icon.getOpacity(),
-            rotation: icon.getRotation(),
-            rotateWithView: icon.getRotateWithView(),
-            scale: icon.getScale(),
-            size: icon.getSize(),
-            width: icon.getWidth(),
-            src : icon.getSrc(),
-        } : undefined,
+        fill: fill
+            ? {
+                color: fill.getColor()
+            }
+            : undefined,
+        stroke: stroke
+            ? {
+                color: stroke.getColor(),
+                lineCap: stroke.getLineCap(),
+                lineJoin: stroke.getLineJoin(),
+                lineDash: stroke.getLineDash(),
+                lineDashOffset: stroke.getLineDashOffset(),
+                miterLimit: stroke.getMiterLimit(),
+                width: stroke.getWidth(),
+            }
+            : undefined,
+        text: text
+            ? {
+                font: text.getFont(),
+                maxAngle: text.getMaxAngle(),
+                offsetX: text.getOffsetX(),
+                offsetY: text.getOffsetY(),
+                overflow: text.getOverflow(),
+                placement: text.getPlacement(),
+                repeat: text.getRepeat(),
+                scale: text.getScale(),
+                rotateWithView: text.getRotateWithView(),
+                rotation: text.getRotation(),
+                text: text.getText(),
+                textAlign: text.getTextAlign(),
+                justify: text.getJustify(),
+                textBaseline: text.getTextBaseline(),
+                fill: text.getFill()
+                    ? {
+                        color: text.getFill().getColor()
+                    }
+                    : undefined,
+                backgroundFill: text.getBackgroundFill()
+                    ? {
+                        color: text.getBackgroundFill().getColor()
+                    }
+                    : undefined,
+                stroke: text.getStroke()
+                    ? {
+                        color: text.getStroke().getColor(),
+                        lineCap: text.getStroke().getLineCap(),
+                        lineJoin: text.getStroke().getLineJoin(),
+                        lineDash: text.getStroke().getLineDash(),
+                        lineDashOffset: text.getStroke().getLineDashOffset(),
+                        miterLimit: text.getStroke().getMiterLimit(),
+                        width: text.getStroke().getWidth(),
+                    }
+                    : undefined,
+                backgroundStroke: text.getBackgroundStroke()
+                    ? {
+                        color: text.getBackgroundStroke().getColor(),
+                        lineCap: text.getBackgroundStroke().getLineCap(),
+                        lineJoin: text.getBackgroundStroke().getLineJoin(),
+                        lineDash: text.getBackgroundStroke().getLineDash(),
+                        lineDashOffset: text.getBackgroundStroke().getLineDashOffset(),
+                        miterLimit: text.getBackgroundStroke().getMiterLimit(),
+                        width: text.getBackgroundStroke().getWidth(),
+                    }
+                    : undefined,
+                backgroundFill: text.getBackgroundFill()
+                    ? {
+                        color: text.getBackgroundFill().getColor()
+                    }
+                    : undefined,
+                padding: text.getPadding(),
+            }
+            : undefined,
+        circle: circle
+            ? {
+                radius: circle.getRadius(),
+                fill: circle.fill
+                    ? {
+                        color: circle.fill.getColor()
+                    }
+                    : undefined,
+                rotation: circle.getRotation(),
+                rotateWithView: circle.getRotateWithView(),
+                declutterMode: circle.getDeclutterMode(),
+                displacement: circle.getDisplacement(),
+                stroke: circle.stroke
+                    ? {
+                        color: circle.stroke.getColor(),
+                        lineCap: circle.stroke.getLineCap(),
+                        lineJoin: circle.stroke.getLineJoin(),
+                        lineDash: circle.stroke.getLineDash(),
+                        lineDashOffset: circle.stroke.getLineDashOffset(),
+                        miterLimit: circle.stroke.getMiterLimit(),
+                        width: circle.stroke.getWidth(),
+                    }
+                    : undefined,
+            }
+            : undefined,
+        icon: icon
+            ? {
+                anchor: icon.getAnchor(),
+                color: icon.getColor(),
+                declutterMode: icon.getDeclutterMode(),
+                height: icon.getHeight(),
+                opacity: icon.getOpacity(),
+                rotation: icon.getRotation(),
+                rotateWithView: icon.getRotateWithView(),
+                scale: icon.getScale(),
+                size: icon.getSize(),
+                width: icon.getWidth(),
+                src: icon.getSrc(),
+            }
+            : undefined,
         zIndex: style.getZIndex()
     };
-}
+};
 
 MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {
     for (const key in obj) {
@@ -1239,51 +1265,30 @@ MapOL.transformCoordinates = function(coordinates, source, destination) {
     return newCoordinates;
 };
 
-/*
- * Swiss projection transform functions downloaded from
- * https://www.swisstopo.admin.ch/en/knowledge-facts/surveying-geodesy/reference-systems/map-projections.html
- */
-
-// Convert WGS lat/long (° dec) to CH y
+// Swiss projection transform https://www.swisstopo.admin.ch/en/knowledge-facts/surveying-geodesy/reference-systems/map-projections.html
 MapOL.WGStoLV03y = function WGStoLV03y(lat, lng) {
-    // Converts degrees dec to sex
     lat = DECtoSEX(lat);
     lng = DECtoSEX(lng);
-
-    // Converts degrees to seconds (sex)
     lat = DEGtoSEC(lat);
     lng = DEGtoSEC(lng);
-
-    // Axillary values (% Bern)
     const lat_aux = (lat - 169028.66) / 10000;
     const lng_aux = (lng - 26782.5) / 10000;
-
-    // Process Y
     const y =
         600072.37 +
             211455.93 * lng_aux -
             10938.51 * lng_aux * lat_aux -
             0.36 * lng_aux * Math.pow(lat_aux, 2) -
             44.54 * Math.pow(lng_aux, 3);
-
     return y;
 };
 
-// Convert WGS lat/long (° dec) to CH x
 MapOL.WGStoLV03x = function WGStoLV03x(lat, lng) {
-    // Converts degrees dec to sex
     lat = DECtoSEX(lat);
     lng = DECtoSEX(lng);
-
-    // Converts degrees to seconds (sex)
     lat = DEGtoSEC(lat);
     lng = DEGtoSEC(lng);
-
-    // Axillary values (% Bern)
     const lat_aux = (lat - 169028.66) / 10000;
     const lng_aux = (lng - 26782.5) / 10000;
-
-    // Process X
     const x =
         200147.07 +
             308807.95 * lat_aux +
@@ -1291,18 +1296,12 @@ MapOL.WGStoLV03x = function WGStoLV03x(lat, lng) {
             76.63 * Math.pow(lat_aux, 2) -
             194.56 * Math.pow(lng_aux, 2) * lat_aux +
             119.79 * Math.pow(lat_aux, 3);
-
     return x;
 };
 
-// Convert CH y/x to WGS lat
 MapOL.CHtoLV03lat = function CHtoLV03lat(y, x) {
-    // Converts military to civil and to unit = 1000km
-    // Axillary values (% Bern)
     const y_aux = (y - 600000) / 1000000;
     const x_aux = (x - 200000) / 1000000;
-
-    // Process lat
     let lat =
         16.9023892 +
             3.238272 * x_aux -
@@ -1310,137 +1309,95 @@ MapOL.CHtoLV03lat = function CHtoLV03lat(y, x) {
             0.002528 * Math.pow(x_aux, 2) -
             0.0447 * Math.pow(y_aux, 2) * x_aux -
             0.014 * Math.pow(x_aux, 3);
-
-    // Unit 10000" to 1 " and converts seconds to degrees (dec)
     lat = (lat * 100) / 36;
-
     return lat;
 };
 
-// Convert CH y/x to WGS long
 MapOL.CHtoLV03lng = function CHtoLV03lng(y, x) {
-    // Converts military to civil and to unit = 1000km
-    // Axillary values (% Bern)
     const y_aux = (y - 600000) / 1000000;
     const x_aux = (x - 200000) / 1000000;
-
-    // Process long
     let lng =
         2.6779094 +
             4.728982 * y_aux +
             0.791484 * y_aux * x_aux +
             0.1306 * y_aux * Math.pow(x_aux, 2) -
             0.0436 * Math.pow(y_aux, 3);
-
-    // Unit 10000" to 1 " and converts seconds to degrees (dec)
     lng = (lng * 100) / 36;
-
     return lng;
 };
 
-// Convert DEC angle to SEX DMS
 MapOL.DECtoSEX = function DECtoSEX(angle) {
-    // Extract DMS
     const deg = parseInt(angle, 10);
     const min = parseInt((angle - deg) * 60, 10);
     const sec = ((angle - deg) * 60 - min) * 60;
-
-    // Result in degrees sex (dd.mmss)
     return deg + min / 100 + sec / 10000;
 };
-
-// Convert Degrees angle to seconds
 MapOL.DEGtoSEC = function DEGtoSEC(angle) {
-    // Extract DMS
     const deg = parseInt(angle, 10);
     let min = parseInt((angle - deg) * 100, 10);
     let sec = ((angle - deg) * 100 - min) * 100;
-
-    // Avoid rounding problems with seconds=0
     const parts = String(angle).split(".");
     if (parts.length == 2 && parts[1].length == 2) {
         min = Number(parts[1]);
         sec = 0;
     }
-
-    // Result in degrees sex (dd.mmss)
     return sec + min * 60 + deg * 3600;
 };
 
-// LV95 / port from https://github.com/perron2/lv95/blob/master/lib/lv95.dart
 MapOL.WGStoLV95y = function WGStoLV95y(lat, lng) {
     const phi = (lat * 3600 - 169028.66) / 10000;
     const phi2 = phi * phi;
-
     const lambda = (lng * 3600 - 26782.5) / 10000;
     const lambda2 = lambda * lambda;
     const lambda3 = lambda2 * lambda;
-
     const y = 2600072.37 +
         211455.93 * lambda -
         10938.51 * lambda * phi -
         0.36 * lambda * phi2 -
         44.54 * lambda3;
-
     return y;
 };
 
-// Convert WGS lat/long (° dec) to CH x
 MapOL.WGStoLV95x = function WGStoLV95x(lat, lng) {
     const phi = (lat * 3600 - 169028.66) / 10000;
     const phi2 = phi * phi;
     const phi3 = phi2 * phi;
-
     const lambda = (lng * 3600 - 26782.5) / 10000;
     const lambda2 = lambda * lambda;
-
     const x = 1200147.07 +
         308807.95 * phi +
         3745.25 * lambda2 +
         76.63 * phi2 -
         194.56 * lambda2 * phi +
         119.79 * phi3;
-
     return x;
 };
 
-// Convert CH y/x to WGS lat
 MapOL.LV95toWGSlat = function LV95toWGSlat(y, x) {
     const x1 = (x - 1200000) / 1000000;
     const x2 = x1 * x1;
     const x3 = x2 * x1;
-
     const y1 = (y - 2600000) / 1000000;
     const y2 = y1 * y1;
-
-    // Calculate latitude
     const latitude = 16.9023892 +
         3.238272 * x1 -
         0.270978 * y2 -
         0.002528 * x2 -
         0.0447 * y2 * x1 -
         0.0140 * x3;
-
-    // Convert to degrees
     return (latitude * 100 / 36);
 };
 
-// Convert CH y/x to WGS long
 MapOL.LV95toWGSlng = function LV95toWGSlng(y, x) {
     const x1 = (x - 1200000) / 1000000;
     const x2 = x1 * x1;
-
     const y1 = (y - 2600000) / 1000000;
     const y2 = y1 * y1;
     const y3 = y2 * y1;
-
-    // Calculate longitude
     const longitude = 2.6779094 +
         4.728982 * y1 +
         0.791484 * y1 * x1 +
         0.1306 * y1 * x2 -
         0.0436 * y3;
-
-    // Convert to degrees
     return (longitude * 100 / 36);
 };

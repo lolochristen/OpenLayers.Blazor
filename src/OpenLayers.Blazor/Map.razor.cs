@@ -131,6 +131,12 @@ public partial class Map : IAsyncDisposable
     public EventCallback<Coordinate> OnPointerMove { get; set; }
 
     /// <summary>
+    ///     Event when the pointer hovers over a shape
+    /// </summary>
+    [Parameter]
+    public EventCallback<Shape> OnHover { get; set; }
+
+    /// <summary>
     ///     Event when the rendering is complete
     /// </summary>
     [Parameter]
@@ -548,6 +554,15 @@ public partial class Map : IAsyncDisposable
     public Task OnInternalPointerMove(Coordinate coordinate)
     {
         return OnPointerMove.InvokeAsync(coordinate);
+    }
+
+    [JSInvokable]
+    public Task OnInternalHover(string shapeId, string layerId)
+    {
+        var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
+        if (layer != null && layer.ShapesList.FirstOrDefault(p => p.Id == shapeId) is Shape shape)
+            return OnHover.InvokeAsync(shape);
+        return Task.CompletedTask;
     }
 
     [JSInvokable]

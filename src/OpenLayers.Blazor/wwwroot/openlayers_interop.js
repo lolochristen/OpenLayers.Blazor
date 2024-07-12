@@ -619,6 +619,18 @@ MapOL.prototype.onMapPointerMove = function(evt, element) {
         this.Map.getView().getProjection(),
         this.Options.coordinatesProjection);
     this.Instance.invokeMethodAsync("OnInternalPointerMove", coordinate);
+
+    var that = this;
+    this.Map.forEachFeatureAtPixel(evt.pixel,
+        function (feature, layer) {
+            if (!layer)
+                return; // no layer = drawing
+            const featureId = feature.getId();
+            if (!featureId)
+                return;
+            const layerId = layer.get("id");
+            that.Instance.invokeMethodAsync("OnInternalHover", featureId.toString(), layerId);
+        });
 };
 
 MapOL.prototype.onMapResolutionChanged = function() {

@@ -22,14 +22,14 @@
         <div id="popup" class="ol-box">
             @if (context is Marker marker)
             {
-                <h3>@marker.Title</h3>
+                <h3>@marker.Text</h3>
                 <p>@marker.Coordinate</p>
             }
         </div>
     </Popup>
     <Features>
         <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(2604200, 1197650)"></Marker>
-        <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
+        <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Text="Hallo" Fill="#449933" Popup></Marker>
      </Features>
  </SwissMap>
  
@@ -41,8 +41,6 @@
 
     private async Task OnMapClick(Coordinate coordinate)
     {
-        _map.MarkersList.Clear();
-
         switch (_selectedMarkerType)
         {
             case MarkerType.MarkerPin:
@@ -50,10 +48,10 @@
                 _map.MarkersList.Add(new Marker(_selectedMarkerType, coordinate, DateTime.Now.ToShortTimeString()));
                 break;
             case MarkerType.MarkerAwesome:
-                _map.MarkersList.Add(new Marker(coordinate, '\uf0f4'));
+                _map.MarkersList.Add(new Marker(coordinate, '\uf06e'));
                 break;
             case MarkerType.MarkerCustomImage:
-                _map.MarkersList.Add(new Marker(coordinate, "_content/OpenLayers.Blazor.Demo.Components/pin.png", 414, 602, 414, 602) { Scale = 0.1, Popup = true, Title = "Custom Pin" });
+                _map.MarkersList.Add(new Marker(coordinate, "_content/OpenLayers.Blazor.Demo.Components/pin.png", 414, 602, 414, 602) { Scale = 0.1, Popup = true });
                 break;
         }
     }
@@ -65,7 +63,11 @@
         for (var i = 0; i < 20; i++)
         {
             _map.MarkersList.Add(
-                new Marker(MarkerType.MarkerPin, new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1])));
+                new Marker(MarkerType.MarkerPin,
+                    new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]),
+                    i.ToString(),
+                    (PinColor)(i % 3))
+            );
         }
     }
 }

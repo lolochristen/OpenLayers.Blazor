@@ -4,44 +4,43 @@ using System.Text.Json.Serialization;
 namespace OpenLayers.Blazor;
 
 /// <summary>
-/// Represents a coordinate of two points
+///     Represents a coordinate of two points
 /// </summary>
 [JsonConverter(typeof(CoordinateConverter))]
-public class Coordinate : IEquatable<Coordinate>
+public struct Coordinate : IEquatable<Coordinate>
 {
-    private static readonly char[] _separatorsAlt = new[] { '/', ':' };
-    private static readonly char[] _separators = new[] { ',', '/', ':' };
-
-    private readonly double[] _value;
+    private static readonly char[] _separatorsAlt = { '/', ':' };
+    private static readonly char[] _separators = { ',', '/', ':' };
+    public static Coordinate Empty => new();
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Coordinate"/>.
+    ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
     public Coordinate()
     {
-        _value = new double[2];
+        Value = new double[2];
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Coordinate"/>.
+    ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
     /// <param name="coordinates">X/Longitude, Y/Latitude</param>
     public Coordinate(double x, double y)
     {
-        _value = new[] { x, y };
+        Value = new[] { x, y };
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Coordinate"/>.
+    ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
     /// <param name="coordinate"></param>
     public Coordinate(Coordinate coordinate)
     {
-        _value = coordinate._value;
+        Value = coordinate.Value;
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Coordinate"/>.
+    ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
     /// <param name="coordinates"></param>
     /// <exception cref="ArgumentException"></exception>
@@ -49,46 +48,64 @@ public class Coordinate : IEquatable<Coordinate>
     {
         if (coordinates.Length < 2)
             throw new ArgumentException(nameof(coordinates));
-        _value = coordinates;
+        Value = coordinates;
     }
 
     /// <summary>
-    /// Gets the internal array of points
+    ///     Gets the internal array of points
     /// </summary>
-    public double[] Value => _value;
+    public double[] Value { get; }
 
     /// <summary>
-    /// Latitude
+    ///     Latitude
     /// </summary>
     [JsonIgnore]
     public double Latitude => Y;
 
     /// <summary>
-    /// Y
+    ///     Y
     /// </summary>
     public double Y
     {
-        get => _value[1];
-        set => _value[1] = value;
+        get => Value[1];
+        set => Value[1] = value;
     }
 
     /// <summary>
-    /// Longitude
+    ///     Longitude
     /// </summary>
     [JsonIgnore]
     public double Longitude => X;
 
     /// <summary>
-    /// X
+    ///     X
     /// </summary>
     public double X
     {
-        get => _value[0];
-        set => _value[0] = value;
+        get => Value[0];
+        set => Value[0] = value;
     }
 
     /// <summary>
+    ///     Indexed access to coordinates
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public double this[int key]
+    {
+        get => Value[key];
+        set => Value[key] = value;
+    }
+
     /// <inheritdoc />
+    public bool Equals(Coordinate other)
+    {
+        var precision = 0.0000001;
+        return Math.Abs(Value[0] - other.Value[0]) < precision && Math.Abs(Value[1] - other.Value[1]) < precision;
+    }
+
+    /// <summary>
+    ///     <inheritdoc />
     /// </summary>
     /// <returns></returns>
     public override string ToString()
@@ -97,7 +114,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Coordinate"/>.
+    ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
     /// <param name="val"></param>
     public static implicit operator Coordinate(string val)
@@ -106,7 +123,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Coordinate"/>.
+    ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
     /// <param name="val"></param>
     public static implicit operator Coordinate(double[] val)
@@ -115,7 +132,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    /// Indicates if given objects are equal
+    ///     Indicates if given objects are equal
     /// </summary>
     /// <param name="c1"></param>
     /// <param name="c2"></param>
@@ -128,7 +145,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    /// Indicates if given objects are not equal
+    ///     Indicates if given objects are not equal
     /// </summary>
     /// <param name="c1"></param>
     /// <param name="c2"></param>
@@ -138,20 +155,9 @@ public class Coordinate : IEquatable<Coordinate>
         return !c1.Equals(c2);
     }
 
-    /// <summary>
-    /// Indexed access to coordinates
-    /// </summary>
-    /// <param name="key"></param>
-    /// <returns></returns>
-    public double this[int key]
-    {
-        get => _value[key];
-        set => _value[key] = value;
-    }
-
 
     /// <summary>
-    /// Parses a new instances of <see cref="Coordinate"/>
+    ///     Parses a new instances of <see cref="Coordinate" />
     /// </summary>
     /// <param name="val"></param>
     /// <param name="formatProvider"></param>
@@ -172,7 +178,7 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    /// Parses a new instances of <see cref="Coordinate"/>
+    ///     Parses a new instances of <see cref="Coordinate" />
     /// </summary>
     /// <param name="val"></param>
     /// <param name="result"></param>
@@ -247,14 +253,6 @@ public class Coordinate : IEquatable<Coordinate>
     /// <inheritdoc />
     public override int GetHashCode()
     {
-        return _value.GetHashCode();
-    }
-
-    /// <inheritdoc />
-    public bool Equals(Coordinate? other)
-    {
-        if (other is null)
-            return false;
-        return _value[0].Equals(other._value[0]) && _value[1].Equals(other._value[1]);
+        return Value.GetHashCode();
     }
 }

@@ -12,6 +12,7 @@
         <button class="btn btn-primary" @onclick="AddShapes">Add some shapes</button>
         <button class="btn btn-primary" @onclick="RemoveShape">Remove the last</button>
         <button class="btn btn-primary" @onclick="ZoomToShapes">Zoom to Shapes</button>
+        <button class="btn btn-primary" @onclick="MovePoint">Move</button>
         <p>
             <code>@_featureInfo</code>
         </p>
@@ -20,10 +21,10 @@
 
 <SwissMap @ref="_map" OnClick="OnMapClicked" OnFeatureClick="OnFeatureClicked" Style="height:800px;" Class="card">
     <Features>
-        <Line Points="new []{new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650)}" BorderColor="cyan" BorderSize="4"></Line>
-        <Circle Center="new Coordinate(2770557.824138796, 1197279.0774135895)" Radius="5000" BackgroundColor="#2222AA66"></Circle>
-        <Point Coordinate="new Coordinate(2604200, 1197650)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
-        <Polygon Points="new []{new Coordinate(2604900, 1207650), new Coordinate(2634200, 1177650), new Coordinate(2621200, 1177950)}" BorderColor="green" BorderSize="4" BackgroundColor="#2222AA66"></Polygon>
+        <Circle Center="new Coordinate(2770557.824138796, 1197279.0774135895)" Radius="5000" Fill="#2222AA66" Stroke="red" StrokeThickness="8"></Circle>
+        <Point Coordinate="@_pos" StrokeThickness="4" Stroke="red" Fill="cyan" Radius="5"></Point>
+        <Polygon Points="new []{new Coordinate(2604900, 1207650), new Coordinate(2634200, 1177650), new Coordinate(2621200, 1177950), new Coordinate(2551200, 1207650)}" Stroke="green" StrokeThickness="4" Fill="#2222AA66" Text="Ugly polygon" Font="20px sans-serif" TextColor="yellow"></Polygon>
+        <Line Points="new []{new Coordinate(2734200, 1197650), new Coordinate(2754200, 1177650)}" Styles="new() { _lineStyle }"></Line>
     </Features>
 </SwissMap>
 
@@ -32,6 +33,19 @@
 @code {
     private SwissMap _map = null!;
     private string _featureInfo;
+    private Coordinate _pos = new (2604200, 1197650);
+
+    private StyleOptions _lineStyle = new StyleOptions()
+    {
+        Stroke = new StyleOptions.StrokeOptions() { Color = "cyan", Width = 5 },
+        Text = new StyleOptions.TextOptions()
+        {
+            Text = "don't walk", Font = "20px sans-serif",
+            Fill = new StyleOptions.FillOptions() { Color = "red" },
+            Stroke = new StyleOptions.StrokeOptions() { Color = "white", Width = 2 },
+            Placement = StyleOptions.TextPlacement.Line
+        }
+    };
 
     private void OnFeatureClicked(Feature feature)
     {
@@ -40,7 +54,7 @@
 
     private void OnMapClicked(Coordinate coordinate)
     {
-        _map.ShapesList.Add(new Circle(coordinate, 2000) { BackgroundColor = "#33DD5588", });
+        _map.ShapesList.Add(new Circle(coordinate, 2000) { Fill = "#33DD5588", });
     }
 
     private async Task AddShapes()
@@ -52,10 +66,15 @@
             _map.ShapesList.Add(
                 new Point(new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]))
                 {
-                    BorderColor = $"#{random.Next(0, 255):x2}{random.Next(0, 255):x2}{random.Next(0, 255):x2}",
-                    BorderSize = 4
+                    Stroke = $"#{random.Next(0, 255):x2}{random.Next(0, 255):x2}{random.Next(0, 255):x2}",
+                    StrokeThickness = 4
                 });
         }
+    }
+
+    private void MovePoint()
+    {
+        _pos = new Coordinate(_pos.X + 1000, _pos.Y); // set new coordinate to trigger refresh
     }
 
     private async Task RemoveShape()

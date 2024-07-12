@@ -7,7 +7,7 @@ namespace OpenLayers.Blazor;
 ///     Represents a list of coordinates
 /// </summary>
 [JsonConverter(typeof(CoordinatesConverter))]
-public class Coordinates : IEnumerable<IList<Coordinate>>
+public class Coordinates : IEnumerable<IList<Coordinate>>, IEquatable<Coordinates>
 {
     public Coordinates()
     {
@@ -68,19 +68,16 @@ public class Coordinates : IEnumerable<IList<Coordinate>>
     }
 
     [JsonIgnore]
-    public Coordinate? Point
+    public Coordinate Point
     {
-        get => Default.Count > 0 ? Default[0] : null;
+        get => Default.Count > 0 ? Default[0] : Coordinate.Empty;
         set
         {
-            if (value is not null)
-            {
-                if (Default.Count == 0)
-                    Default.Add(value);
-                else
-                    Default[0] = value;
-                Type = CoordinatesType.Point;
-            }
+            if (Default.Count == 0)
+                Default.Add(value);
+            else
+                Default[0] = value;
+            Type = CoordinatesType.Point;
         }
     }
 
@@ -92,6 +89,13 @@ public class Coordinates : IEnumerable<IList<Coordinate>>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    public bool Equals(Coordinates? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Type == other.Type && Values.SequenceEqual(other.Values, new CoordinatesEqualityComparer());
     }
 
     public static implicit operator Coordinates(double[] c)
@@ -109,8 +113,31 @@ public class Coordinates : IEnumerable<IList<Coordinate>>
         return new Coordinates(c);
     }
 
+    public static bool operator ==(Coordinates c1, Coordinates? c2)
+    {
+        return c1.Equals(c2);
+    }
+
+    public static bool operator !=(Coordinates c1, Coordinates? c2)
+    {
+        return !c1.Equals(c2);
+    }
+
     public override string ToString()
     {
         return $"{nameof(Coordinates)}:{Type}[{(Type == CoordinatesType.List ? Default.Count : Values.Count)}]";
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((Coordinates)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine((int)Type, Values);
     }
 }

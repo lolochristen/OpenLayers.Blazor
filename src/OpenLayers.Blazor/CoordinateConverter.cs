@@ -1,8 +1,6 @@
 ﻿using System.Globalization;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace OpenLayers.Blazor;
 
@@ -15,11 +13,11 @@ internal class CoordinateConverter : JsonConverter<Coordinate>
             var val = reader.GetString();
             return Coordinate.Parse(val, CultureInfo.InvariantCulture);
         }
-        else if (reader.TokenType == JsonTokenType.StartObject)
+
+        if (reader.TokenType == JsonTokenType.StartObject)
         {
             double x = 0, y = 0;
             while (reader.Read())
-            {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     var prop = reader.GetString();
@@ -34,10 +32,11 @@ internal class CoordinateConverter : JsonConverter<Coordinate>
                         reader.TryGetDouble(out y);
                     }
                 }
-            }
+
             return new Coordinate(x, y);
         }
-        else if (reader.TokenType == JsonTokenType.StartArray)
+
+        if (reader.TokenType == JsonTokenType.StartArray)
         {
             reader.Read();
             reader.TryGetDouble(out var x);
@@ -47,7 +46,8 @@ internal class CoordinateConverter : JsonConverter<Coordinate>
                 reader.Read();
             return new Coordinate(x, y);
         }
-        else if (reader.TokenType == JsonTokenType.Number)
+
+        if (reader.TokenType == JsonTokenType.Number)
         {
             reader.TryGetDouble(out var x);
             reader.Read();

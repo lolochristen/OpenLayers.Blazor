@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components;
 using OpenLayers.Blazor.Internal;
 
@@ -11,7 +10,7 @@ namespace OpenLayers.Blazor;
 public class Feature : ComponentBase
 {
     /// <summary>
-    /// Initializes a new instance of <see cref="Feature"/>.
+    ///     Initializes a new instance of <see cref="Feature" />.
     /// </summary>
     public Feature()
     {
@@ -19,7 +18,7 @@ public class Feature : ComponentBase
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Feature"/>.
+    ///     Initializes a new instance of <see cref="Feature" />.
     /// </summary>
     /// <param name="feature"></param>
     internal Feature(Internal.Feature feature)
@@ -33,35 +32,35 @@ public class Feature : ComponentBase
     [Parameter]
     public string Id
     {
-        get => InternalFeature.Id.ToString();
+        get => InternalFeature.Id;
         set => InternalFeature.Id = value;
     }
 
     internal Internal.Feature InternalFeature { get; set; }
 
     /// <summary>
-    /// Gets the geometry type of the feature.
+    ///     Gets the geometry type of the feature.
     /// </summary>
     public GeometryTypes? GeometryType => InternalFeature.GeometryType;
 
     /// <summary>
-    /// Gets to type of feature.
+    ///     Gets to type of feature.
     /// </summary>
     public string? Type => InternalFeature.Type;
 
     /// <summary>
-    /// Gets a dictionary of all dynamic properties of a feature.
+    ///     Gets a dictionary of all dynamic properties of a feature.
     /// </summary>
     public Dictionary<string, dynamic> Properties => InternalFeature.Properties;
 
     /// <summary>
-    /// Gets the point coordinate if the shape is defined by a single coordinate e.g. point, circle.
+    ///     Gets the point coordinate if the shape is defined by a single coordinate e.g. point, circle.
     /// </summary>
     [JsonIgnore]
     public Coordinate? Point => InternalFeature.Point;
 
     /// <summary>
-    /// Gets or sets the coordinates of a feature or shape.
+    ///     Gets or sets the coordinates of a feature or shape.
     /// </summary>
     [Parameter]
     public Coordinates Coordinates
@@ -69,4 +68,6 @@ public class Feature : ComponentBase
         get => InternalFeature.Coordinates;
         set => InternalFeature.Coordinates = value;
     }
+
+    [JsonIgnore] [Parameter] public EventCallback OnClick { get; set; }
 }

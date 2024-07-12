@@ -1,7 +1,7 @@
 ﻿namespace OpenLayers.Blazor;
 
 /// <summary>
-/// Types of coordinates
+///     Types of coordinates
 /// </summary>
 public enum CoordinatesType
 {

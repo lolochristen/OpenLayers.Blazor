@@ -16,6 +16,7 @@ public enum SourceType
     Stamen,
     TileDebug,
     StadiaMaps,
+    Vector,
     VectorKML,
     VectorEsriJson,
     VectorGeoJson,
@@ -30,5 +31,9 @@ public enum SourceType
     VectorGPX,
     VectorOSMXML,
     VectorWFS,
-    Graticule
+    ImageArcGISRest,
+    ImageCanvasSource,
+    ImageMapGuide,
+    ImageStatic,
+    ImageWMS
 }

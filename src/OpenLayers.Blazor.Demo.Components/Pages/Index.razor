@@ -57,17 +57,18 @@ Visible Extent: @_map?.VisibleExtent
 <SwissMap @ref="_map" OnClick="OnMapClick" OnPointerMove="OnPointerMove" OnRenderComplete="@(() => { _info = "Render complete: " + DateTime.Now.ToString("h:mm:ss.ms"); })" @bind-Zoom="_zoom" Style="height:800px;" Class="card" InteractionsEnabled="@_enableInteractions" @bind-Rotation="_rotation" ZoomSliderControl FullScreenControl>
     <Popup>
         <div id="popup" class="ol-box">
-            @if (context is Marker marker)
-            {
-                <h3>@marker.Title</h3>
-                <p>@marker.Coordinate.X,@marker.Coordinate.Y</p>
-            }
+        @if (context is Marker marker)
+        {
+            <h3>@marker.Text</h3>
+            <p>@marker.Coordinate.X,@marker.Coordinate.Y</p>
+        }
         </div>
     </Popup>
+    
     <Features>
         <Marker Type="MarkerType.MarkerPin" Coordinate="@("2604200/1197650")" Popup></Marker>
-        <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
-         <Line Coordinates="new double[][] { new double[] {2604200, 1197650}, new double[] { 2624200, 1177650 } }" BorderColor="cyan"></Line>
+        <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Text="Hallo" Fill="#449933" Popup></Marker>
+        <Line Coordinates="new double[][] { new double[] {2604200, 1197650}, new double[] { 2624200, 1177650 } }" Stroke="cyan"></Line>
      </Features>
  </SwissMap>
 
@@ -104,8 +105,9 @@ Visible Extent: @_map?.VisibleExtent
 
     private async Task AddMarkLocation()
     {
-        var coord = await _map.GetCurrentGeoLocation();
-        _map.MarkersList.Add(new Marker { Type = MarkerType.MarkerPin, Coordinate = coord });
+        var coordinate = await _map.GetCurrentGeoLocation();
+        if (coordinate != null)
+            _map.MarkersList.Add(new Marker { Type = MarkerType.MarkerPin, Coordinate = (Coordinate) coordinate});
     }
 
     private async Task GetAltitude(Coordinate coordinate)

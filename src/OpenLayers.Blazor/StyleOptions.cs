@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor;
 
@@ -15,9 +16,9 @@ public class StyleOptions
 
     public enum CanvasTextBaseline
     {
+        Middle,
         Bottom,
         Top,
-        Middle,
         Alphabetic,
         Hanging,
         Ideographic
@@ -32,8 +33,8 @@ public class StyleOptions
 
     public enum IconAnchorUnits
     {
-        Fraction,
-        Pixels
+        Pixels,
+        Fraction
     }
 
     public enum IconOrigin
@@ -58,7 +59,6 @@ public class StyleOptions
     }
 
     public FillOptions? Fill { get; set; }
-    public ImageOptions? Image { get; set; }
 
     public StrokeOptions? Stroke { get; set; }
 
@@ -68,7 +68,7 @@ public class StyleOptions
 
     public IconStyleOptions? Icon { get; set; }
 
-    public double? zIndex { get; set; }
+    public int? ZIndex { get; set; }
 
     /// <summary>
     ///     https://openlayers.org/en/latest/apidoc/module-ol_style_Fill-Fill.html
@@ -89,7 +89,7 @@ public class StyleOptions
         public double? Scale { get; set; }
         public double[]? Displacement { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public DeclutterMode? DeclutterMode { get; set; }
     }
 
@@ -117,27 +117,31 @@ public class StyleOptions
         public double? OffsetX { get; set; }
         public double? OffsetY { get; set; }
         public bool Overflow { get; set; } = false;
-        public string? Placement { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
+        public TextPlacement? Placement { get; set; }
+
         public double? Repeat { get; set; }
         public double? Scale { get; set; }
         public bool? RotateWithView { get; set; }
         public double? Rotation { get; set; }
         public string Text { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public CanvasTextAlign? TextAlign { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public TextJustify? Justify { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public CanvasTextBaseline? TextBaseline { get; set; }
 
         public FillOptions? Fill { get; set; }
         public StrokeOptions? Stroke { get; set; }
         public FillOptions? BackgroundFill { get; set; }
         public StrokeOptions? BackgroundStroke { get; set; }
-        public List<double> Padding { get; set; } = new() { 0, 0, 0, 0 };
+
+        public double[] Padding { get; set; }
     }
 
     /// <summary>
@@ -157,39 +161,36 @@ public class StyleOptions
 
     public class IconStyleOptions : ImageStyleOptions
     {
-        public List<double> Anchor { get; set; } = new() { 0.5, 0.5 };
+        public double[] Anchor { get; set; } = [ 0.5, 0.5 ];
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public IconOrigin AnchorOrigin { get; set; } = IconOrigin.TopLeft;
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public IconAnchorUnits AnchorXUnits { get; set; } = IconAnchorUnits.Fraction;
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
+        public IconAnchorUnits AnchorXUnits { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public IconAnchorUnits AnchorYUnits { get; set; } = IconAnchorUnits.Fraction;
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
+        public IconAnchorUnits AnchorYUnits { get; set; }
 
         public string Color { get; set; }
 
         public string CrossOrigin { get; set; }
-
-        // public object Img { get; set; } // You can specify the type based on the actual image object types you plan to use
-        public double[]? Displacement { get; set; }
-        public double Opacity { get; set; } = 1;
         public double? Width { get; set; }
         public double? Height { get; set; }
-        public double Scale { get; set; } = 1;
-        public bool RotateWithView { get; set; } = false;
-        public double Rotation { get; set; } = 0;
         public List<double> Offset { get; set; } = new() { 0, 0 };
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public IconOrigin OffsetOrigin { get; set; } = IconOrigin.TopLeft;
 
-        public string Size { get; set; }
+        public double[] Size { get; set; }
+
+        [JsonPropertyName("src")]
         public string Source { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DeclutterMode? DeclutterMode { get; set; }
+        [JsonIgnore]
+        public Shape? Shape { get; set; }
+
+        public Internal.Shape? ShapeSource => Shape?.InternalFeature;
     }
 
     /// <summary>
@@ -207,6 +208,9 @@ public class StyleOptions
         public double? Rotation { get; set; } = 0;
         public bool? RotateWithView { get; set; } = false;
         public double? Scale { get; set; } = 1;
+        public FillOptions? Fill{ get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public DeclutterMode? DeclutterMode { get; set; }
     }
 
@@ -215,15 +219,5 @@ public class StyleOptions
     /// </summary>
     public class CircleStyleOptions : RegularShapeStyleOptions
     {
-        public FillOptions? Fill { get; set; }
-        public double Radius { get; set; }
-        public StrokeOptions? Stroke { get; set; }
-        public double[]? Displacement { get; set; }
-        public double? Scale { get; set; } = 1;
-        public double? Rotation { get; set; } = 0;
-        public bool? RotateWithView { get; set; }
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DeclutterMode? DeclutterMode { get; set; }
     }
 }

@@ -23,6 +23,8 @@
 		<EmbeddedResource Include="Pages\DrawDemo.razor" />
 		<EmbeddedResource Include="Pages\GermanGdzDemo.razor" />
 		<EmbeddedResource Include="Pages\FlightTracker.razor" />
+		<EmbeddedResource Include="Pages\VectorLayersDemo.razor" />
+		<EmbeddedResource Include="Pages\EventsDemo.razor" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -7,10 +7,11 @@ namespace OpenLayers.Blazor;
 ///     Represents a coordinate of two points
 /// </summary>
 [JsonConverter(typeof(CoordinateConverter))]
-public class Coordinate : IEquatable<Coordinate>
+public struct Coordinate : IEquatable<Coordinate>
 {
     private static readonly char[] _separatorsAlt = { '/', ':' };
     private static readonly char[] _separators = { ',', '/', ':' };
+    public static Coordinate Empty => new();
 
     /// <summary>
     ///     Initializes a new instance of <see cref="Coordinate" />.
@@ -97,13 +98,9 @@ public class Coordinate : IEquatable<Coordinate>
     }
 
     /// <inheritdoc />
-    public bool Equals(Coordinate? other)
+    public bool Equals(Coordinate other)
     {
         var precision = 0.0000001;
-
-        if (other is null)
-            return false;
-
         return Math.Abs(Value[0] - other.Value[0]) < precision && Math.Abs(Value[1] - other.Value[1]) < precision;
     }
 

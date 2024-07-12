@@ -120,10 +120,10 @@ public class Marker : Shape
     ///     Coordinate of the marker.
     /// </summary>
     [Parameter]
-    public Coordinate? Coordinate
+    public Coordinate Coordinate
     {
         get => InternalFeature.Point;
-        set => InternalFeature.Point = value?.Value;
+        set => InternalFeature.Point = value;
     }
 
     /// <summary>

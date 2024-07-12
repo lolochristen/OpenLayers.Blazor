@@ -28,14 +28,10 @@ public class Feature
     [Parameter] public Coordinates Coordinates { get; set; }
 
     [JsonIgnore]
-    public Coordinate? Point
+    public Coordinate Point
     {
         get => Coordinates.Point;
-        set
-        {
-            Coordinates.Point = value;
-            Coordinates.Type = CoordinatesType.Point;
-        }
+        set => Coordinates.Point = value;
     }
 
     public Dictionary<string, dynamic> Properties { get; set; } = new();

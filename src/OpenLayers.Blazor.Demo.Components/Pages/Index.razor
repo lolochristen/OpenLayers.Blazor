@@ -105,8 +105,9 @@ Visible Extent: @_map?.VisibleExtent
 
     private async Task AddMarkLocation()
     {
-        var coord = await _map.GetCurrentGeoLocation();
-        _map.MarkersList.Add(new Marker { Type = MarkerType.MarkerPin, Coordinate = coord });
+        var coordinate = await _map.GetCurrentGeoLocation();
+        if (coordinate != null)
+            _map.MarkersList.Add(new Marker { Type = MarkerType.MarkerPin, Coordinate = (Coordinate) coordinate});
     }
 
     private async Task GetAltitude(Coordinate coordinate)

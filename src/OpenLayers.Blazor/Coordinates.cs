@@ -68,19 +68,16 @@ public class Coordinates : IEnumerable<IList<Coordinate>>, IEquatable<Coordinate
     }
 
     [JsonIgnore]
-    public Coordinate? Point
+    public Coordinate Point
     {
-        get => Default.Count > 0 ? Default[0] : null;
+        get => Default.Count > 0 ? Default[0] : Coordinate.Empty;
         set
         {
-            if (value is not null)
-            {
-                if (Default.Count == 0)
-                    Default.Add(value);
-                else
-                    Default[0] = value;
-                Type = CoordinatesType.Point;
-            }
+            if (Default.Count == 0)
+                Default.Add(value);
+            else
+                Default[0] = value;
+            Type = CoordinatesType.Point;
         }
     }
 

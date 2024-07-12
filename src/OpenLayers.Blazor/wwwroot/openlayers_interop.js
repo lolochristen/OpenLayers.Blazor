@@ -91,8 +91,8 @@ export function MapOLAddShape(mapId, layerId, shape) {
     _MapOL[mapId].addShape(layerId, shape);
 }
 
-export function MapOLGetCoordinates(mapId, shapeId) {
-    return _MapOL[mapId].getCoordinates(shapeId);
+export function MapOLGetCoordinates(mapId, layerId, shapeId) {
+    return _MapOL[mapId].getCoordinates(layerId, shapeId);
 }
 
 export function MapOLSetInteractions(mapId, active) {
@@ -1049,8 +1049,8 @@ MapOL.prototype.addShape = function(layerId, shape) {
     source.addFeature(feature);
 };
 
-MapOL.prototype.getCoordinates = function(featureId) {
-    const feature = this.getShapesLayer().getSource().getFeatureById(featureId);
+MapOL.prototype.getCoordinates = function(layerId, featureId) {
+    const feature = this.getLayer(layerId).getSource().getFeatureById(featureId);
     if (feature) {
         let coord = feature.getGeometry().getCoordinates();
         if (!coord)

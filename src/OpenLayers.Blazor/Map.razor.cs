@@ -400,7 +400,7 @@ public partial class Map : IAsyncDisposable
     /// <summary>
     ///     Returns a IEnumerable of all features assigned to map.
     /// </summary>
-    public IEnumerable<Feature> FeaturesList => ShapesList.OfType<Feature>().Union(MarkersList);
+    public IEnumerable<Feature> FeaturesList => LayersList.SelectMany(p => p.ShapesList);
 
     /// <summary>
     ///     Disposing resources.
@@ -476,10 +476,10 @@ public partial class Map : IAsyncDisposable
             _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js");
             Instance ??= DotNetObjectReference.Create(this);
 
-            if (ShapesList.Count > 0)
+            if (ShapesLayer != null && ShapesList.Count > 0)
                 GetOrCreateShapesLayer();
 
-            if (MarkersList.Count > 0)
+            if (MarkersLayer != null && MarkersList.Count > 0)
                 GetOrCreateMarkersLayer();
 
             if (_module != null)
@@ -983,9 +983,11 @@ public partial class Map : IAsyncDisposable
         if (_module == null)
             return;
 
-        if (FeaturesList.All(p => p.Id != feature.Id)) throw new InvalidOperationException("Given shape is not assigned to map");
+        if (feature.Layer == null)
+            throw new InvalidOperationException("Feature must be assigned to a layer");
 
-        var c = await _module.InvokeAsync<dynamic>("MapOLGetCoordinates", _mapId, feature.Id);
+        var c = await _module.InvokeAsync<dynamic>("MapOLGetCoordinates", _mapId, feature.Layer.Id, feature.Id);
+
         if (c is JsonElement)
             feature.InternalFeature.Coordinates = CoordinatesHelper.DeserializeCoordinates((JsonElement)c);
         else

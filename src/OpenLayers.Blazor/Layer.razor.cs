@@ -21,7 +21,7 @@ public partial class Layer : ComponentBase
     /// </summary>
     /// <example>
     ///     <Shapes>
-    ///         <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+    ///         <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" Stroke="cyan"></Line>
     ///     </Shapes>
     /// </example>
     [Parameter]

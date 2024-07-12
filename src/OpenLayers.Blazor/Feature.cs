@@ -69,5 +69,5 @@ public class Feature : ComponentBase
         set => InternalFeature.Coordinates = value;
     }
 
-    [Parameter] public EventCallback OnClick { get; set; }
+    [JsonIgnore] [Parameter] public EventCallback OnClick { get; set; }
 }

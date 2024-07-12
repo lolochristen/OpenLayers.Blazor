@@ -89,9 +89,9 @@
     {
         foreach (var shape in _map.LayersList.First(p => p.Id == "geojson").ShapesList)
         {
-            shape.BorderSize = 5;
-            shape.BorderColor = "green";
-            shape.BackgroundColor = "rgba(0, 255, 50, 0.5)";
+            shape.StrokeThickness = 5;
+            shape.Stroke = "green";
+            shape.Fill = "rgba(0, 255, 50, 0.5)";
             await _map.UpdateShape(shape);
         }
     }

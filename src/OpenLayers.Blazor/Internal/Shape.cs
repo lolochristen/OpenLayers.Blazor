@@ -16,50 +16,39 @@ public class Shape : Feature, IEquatable<Shape>
         set => Properties["popup"] = value;
     }
 
+    //[JsonIgnore]
+    //public string? Label
+    //{
+    //    get => GetProperty<string>("label");
+    //    set => Properties["label"] = value;
+    //}
 
-    [JsonIgnore]
-    public string? Label
-    {
-        get => GetProperty<string>("label");
-        set => Properties["label"] = value;
-    }
+    //[JsonIgnore]
+    //public string? Title
+    //{
+    //    get => GetProperty<string>("title");
+    //    set => Properties["title"] = value;
+    //}
 
-    [JsonIgnore]
-    public string? Title
-    {
-        get => GetProperty<string>("title");
-        set => Properties["title"] = value;
-    }
+    public Dictionary<string, object>? FlatStyle { get; set; }
 
-    [JsonIgnore]
-    public string? Style
-    {
-        get => GetProperty<string>("style");
-        set => Properties["style"] = value;
-    }
+    public List<StyleOptions>? Styles { get; set; }
 
-    [JsonIgnore]
-    public string? Content
-    {
-        get => GetProperty<string>("content");
-        set => Properties["content"] = value;
-    }
+    // public double? TextScale { get; set; } = 1;
 
-    public double? TextScale { get; set; } = 1;
+    //public string? Color { get; set; } = "#FFFFFF";
 
-    public string? Color { get; set; } = "#FFFFFF";
+    //public string? Stroke { get; set; } = "#FFFFFF";
 
-    public string? BorderColor { get; set; } = "#FFFFFF";
+    //public int? BorderSize { get; set; } = 1;
 
-    public int? BorderSize { get; set; } = 1;
-
-    public string? BackgroundColor { get; set; } = "#000000";
+    //public string? BackgroundColor { get; set; } = "#000000";
 
     public double? Radius { get; set; }
 
-    public double? Scale { get; set; } = 1;
+    //public double? Scale { get; set; } = 1;
 
-    public int? ZIndex { get; set; }
+    //public int? ZIndex { get; set; }
 
     public bool Equals(Shape? other)
     {
@@ -68,10 +57,10 @@ public class Shape : Feature, IEquatable<Shape>
         return base.GetHashCode() == other.GetHashCode();
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(base.GetHashCode(), HashCode.Combine(TextScale, Color, BorderColor, BorderSize, BackgroundColor, Radius, Scale), HashCode.Combine(ZIndex));
-    }
+    //public override int GetHashCode()
+    //{
+    //    return HashCode.Combine(base.GetHashCode(), HashCode.Combine(TextScale, Radius, Scale), HashCode.Combine(ZIndex));
+    //}
 
     public override bool Equals(object? obj)
     {

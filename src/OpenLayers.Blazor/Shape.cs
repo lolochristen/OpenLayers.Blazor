@@ -118,17 +118,36 @@ public class Shape : Feature, IDisposable
     [Parameter] public EventCallback<Shape> OnChanged { get; set; }
 
     [Parameter]
-    public string? Title
+    public string? Font
     {
-        get => InternalFeature.Title;
-        set => InternalFeature.Title = value;
+        get => HasStyleOptions<StyleOptions.TextOptions>() ? GetOrCreateStyleOptions<StyleOptions.TextOptions>().Font : null;
+        set => GetOrCreateStyleOptions<StyleOptions.TextOptions>().Font = value;
     }
 
     [Parameter]
-    public string? Label
+    public string? Text
     {
-        get => InternalFeature.Label;
-        set => InternalFeature.Label = value;
+        get => GetText();
+        set => SetText(value);
+    }
+
+    protected virtual void SetText(string value)
+    {
+        GetOrCreateStyleOptions<StyleOptions.TextOptions>().Text = value;
+    }
+
+    protected virtual string? GetText()
+    {
+        if (HasStyleOptions<StyleOptions.TextOptions>())
+            return GetOrCreateStyleOptions<StyleOptions.TextOptions>().Text;
+        return null;
+    }
+
+    [Parameter]
+    public string? TextColor
+    {
+        get => HasStyleOptions<StyleOptions.TextOptions>() ? GetOrCreateStyleOptions<StyleOptions.TextOptions>().Fill?.Color : null;
+        set => GetOrCreateStyleOptions<StyleOptions.TextOptions>().Fill = new StyleOptions.FillOptions() { Color = value };
     }
 
     [Parameter]
@@ -141,66 +160,204 @@ public class Shape : Feature, IDisposable
     [Parameter]
     public double? Radius
     {
-        get => InternalFeature.Radius;
-        set => InternalFeature.Radius = value;
+        get => GetRadius();
+        set => SetRadius((double)value);
+    }
+
+    protected virtual void SetRadius(double value)
+    {
+        InternalFeature.Radius = value;
+    }
+
+    protected virtual double? GetRadius()
+    {
+        return InternalFeature.Radius;
     }
 
     [Parameter]
-    public string? Color
+    public string? Stroke
     {
-        get => InternalFeature.Color;
-        set => InternalFeature.Color = value;
+        get => GetStroke();
+        set => SetStroke(value);
+    }
+
+    protected virtual void SetStroke(string color)
+    {
+        GetOrCreateStyleOptions<StyleOptions.StrokeOptions>().Color = color;
+    }
+
+    protected virtual string? GetStroke()
+    {
+        if (HasStyleOptions<StyleOptions.StrokeOptions>())
+            return GetOrCreateStyleOptions<StyleOptions.StrokeOptions>().Color;
+        return null;
     }
 
     [Parameter]
-    public string? BorderColor
+    public double? StrokeThickness
     {
-        get => InternalFeature.BorderColor;
-        set => InternalFeature.BorderColor = value;
+        get => GetStrokeThickness();
+        set => SetStrokeThickness((double)value);
     }
 
-
-    [Parameter]
-    public int? BorderSize
+    protected virtual void SetStrokeThickness(double value)
     {
-        get => InternalFeature.BorderSize;
-        set => InternalFeature.BorderSize = value;
+        GetOrCreateStyleOptions<StyleOptions.StrokeOptions>().Width = value;
     }
 
+    protected virtual double? GetStrokeThickness()
+    {
+        if (HasStyleOptions<StyleOptions.StrokeOptions>())
+            return GetOrCreateStyleOptions<StyleOptions.StrokeOptions>().Width;
+        return null;
+    }
 
     [Parameter]
-    public string? BackgroundColor
+    public string? Fill
     {
-        get => InternalFeature.BackgroundColor;
-        set => InternalFeature.BackgroundColor = value;
+        get => GetFill();
+        set => SetFill(value);
+    }
+
+    protected virtual void SetFill(string color)
+    {
+        GetOrCreateStyleOptions<StyleOptions.FillOptions>().Color = color;
+    }
+
+    protected virtual string? GetFill()
+    {
+        if (HasStyleOptions<StyleOptions.FillOptions>())
+            return GetOrCreateStyleOptions<StyleOptions.FillOptions>().Color;
+        return null;
     }
 
     [Parameter]
     public double? Scale
     {
-        get => InternalFeature.Scale;
-        set => InternalFeature.Scale = value;
+        get => GetScale();
+        set => SetScale(value);
+    }
+
+    protected virtual void SetScale(double? value)
+    {
+        GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>().Scale = value;
+    }
+
+    protected virtual double? GetScale()
+    {
+        if (HasStyleOptions<StyleOptions.IconStyleOptions>())
+            return GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>().Scale;
+        return null;
     }
 
     [Parameter]
     public double? TextScale
     {
-        get => InternalFeature.TextScale;
-        set => InternalFeature.TextScale = value;
-    }
-
-    [Parameter]
-    public string? Content
-    {
-        get => InternalFeature.Content;
-        set => InternalFeature.Content = value;
+        get => HasStyleOptions<StyleOptions.TextOptions>() ? GetOrCreateStyleOptions<StyleOptions.TextOptions>().Scale : null;
+        set => GetOrCreateStyleOptions<StyleOptions.TextOptions>().Scale = value;
     }
 
     [Parameter]
     public int? ZIndex
     {
-        get => InternalFeature.ZIndex;
-        set => InternalFeature.ZIndex = value;
+        get => GetOrCreateStyleOptions<StyleOptions>().ZIndex;
+        set => GetOrCreateStyleOptions<StyleOptions>().ZIndex = value;
+    }
+
+    [Parameter]
+    public Dictionary<string, object>? FlatStyle
+    {
+        get => InternalFeature.FlatStyle;
+        set => InternalFeature.FlatStyle = value;
+    }
+
+    [Parameter]
+    public List<StyleOptions>? Styles
+    {
+        get => InternalFeature.Styles;
+        set => InternalFeature.Styles = value;
+    }
+
+    protected T GetOrCreateStyleOptions<T>(int? index = null) where T : class
+    {
+        if (Styles == null)
+            Styles = new List<StyleOptions>();
+
+        if (index == null)
+            index = Styles.Count - 1; // last
+
+        if (index < 0)
+            index = 0;
+
+        while(Styles.Count <= index)
+            Styles.Add(new StyleOptions());
+
+        var style = Styles[(int)index];
+
+        if (typeof(T) == typeof(StyleOptions.StrokeOptions))
+        {
+            style.Stroke ??= new StyleOptions.StrokeOptions();
+            return style.Stroke as T;
+        }
+        if (typeof(T) == typeof(StyleOptions.FillOptions))
+        {
+            style.Fill ??= new StyleOptions.FillOptions();
+            return style.Fill as T;
+        }
+        if (typeof(T) == typeof(StyleOptions.TextOptions))
+        {
+            style.Text ??= new StyleOptions.TextOptions();
+            return style.Text as T;
+        }
+        if (typeof(T) == typeof(StyleOptions.CircleStyleOptions))
+        {
+            style.Circle ??= new StyleOptions.CircleStyleOptions();
+            return style.Circle as T;
+        }
+        if (typeof(T) == typeof(StyleOptions.TextOptions))
+        {
+            style.Text ??= new StyleOptions.TextOptions();
+            return style.Text as T;
+        }
+        if (typeof(T) == typeof(StyleOptions.IconStyleOptions))
+        {
+            style.Icon ??= new StyleOptions.IconStyleOptions();
+            return style.Icon as T;
+        }
+        if (typeof(T) == typeof(StyleOptions))
+        {
+            return style as T;
+        }
+        throw new ArgumentException("Invalid style option type");
+    }
+
+    protected bool HasStyleOptions<T>(int? index = null) where T : class
+    {
+        if (Styles == null)
+            return false;
+
+        if (index == null)
+            index = Styles.Count - 1;
+
+        if (Styles.Count <= index)
+            return false;
+
+        var style = Styles[(int)index];
+
+        if (typeof(T) == typeof(StyleOptions.StrokeOptions))
+            return style.Stroke != null;
+        if (typeof(T) == typeof(StyleOptions.FillOptions))
+            return style.Fill != null;
+        if (typeof(T) == typeof(StyleOptions.TextOptions))
+            return style.Text != null;
+        if (typeof(T) == typeof(StyleOptions.CircleStyleOptions))
+            return style.Circle != null;
+        if (typeof(T) == typeof(StyleOptions.TextOptions))
+            return style.Text != null;
+        if (typeof(T) == typeof(StyleOptions.IconStyleOptions))
+            return style.Icon != null;
+
+        throw new ArgumentException("Invalid style option type");
     }
 
     public void Dispose()
@@ -233,19 +390,15 @@ public class Shape : Feature, IDisposable
 
     public override Task SetParametersAsync(ParameterView parameters)
     {
-        if (parameters.TryGetValue(nameof(Color), out string? color) && color != Color)
-            _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(BackgroundColor), out string? bg) && bg != BackgroundColor)
+        if (parameters.TryGetValue(nameof(Fill), out string? bg) && bg != Fill)
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(ZIndex), out int? zindex) && zindex != ZIndex)
             _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(BorderColor), out string? bc) && bc != BorderColor)
+        if (parameters.TryGetValue(nameof(Stroke), out string? bc) && bc != Stroke)
             _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(BorderSize), out int? bs) && bs != BorderSize)
+        if (parameters.TryGetValue(nameof(StrokeThickness), out double? bs) && bs != StrokeThickness)
             _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(Label), out string? label) && label != Label)
-            _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(Content), out string? content) && bc != Content)
+        if (parameters.TryGetValue(nameof(Text), out string? text) && text != Text)
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(Radius), out double? radius) && radius != Radius)
             _updateableParametersChanged = true;
@@ -255,7 +408,7 @@ public class Shape : Feature, IDisposable
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(TextScale), out double? ts) && ts != TextScale)
             _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(Title), out string? title) && title != Title)
+        if (parameters.TryGetValue(nameof(Font), out string? font) && font != Font)
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c != Coordinates)
         {
@@ -275,6 +428,10 @@ public class Shape : Feature, IDisposable
         }
     }
 
+    /// <summary>
+    ///     Update the shape explicitly on the parent layer.
+    /// </summary>
+    /// <returns></returns>
     public async Task UpdateShape()
     {
         if (Map != null && Layer != null)

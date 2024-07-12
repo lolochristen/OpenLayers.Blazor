@@ -163,7 +163,7 @@ public partial class Map : IAsyncDisposable
     /// <example>
     ///     <Features>
     ///         <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(1197650, 2604200)"></Marker>
-    ///         <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" BorderColor="cyan"></Line>
+    ///         <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(1177650, 2624200)}" Stroke="cyan"></Line>
     ///     </Features>
     /// </example>
     [Parameter]
@@ -491,46 +491,6 @@ public partial class Map : IAsyncDisposable
     }
 
     [JSInvokable]
-    public async Task OnInternalFeatureClick(Internal.Feature feature, string layerId)
-    {
-#if DEBUG
-        Console.WriteLine($"OnInternalFeatureClick: {JsonSerializer.Serialize(feature)}");
-#endif
-        var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
-        if (layer == null)
-            return;
-
-        var existingShape = layer.ShapesList.FirstOrDefault(p => p.Id == feature.Id);
-
-        if (existingShape != null)
-            await OnFeatureClick.InvokeAsync(existingShape);
-        else
-            await OnFeatureClick.InvokeAsync(new Feature(feature));
-    }
-
-    [JSInvokable]
-    public async Task OnInternalMarkerClick(Internal.Marker marker, string layerId)
-    {
-#if DEBUG
-        Console.WriteLine($"OnInternalMarkerClick: {JsonSerializer.Serialize(marker)}");
-#endif
-
-        var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
-        if (layer == null)
-            return;
-
-        var existingMarker = layer.ShapesList.FirstOrDefault(p => p.Id == marker.Id) as Marker;
-
-        if (existingMarker != null)
-        {
-            _popupContext = existingMarker;
-            await OnMarkerClick.InvokeAsync(existingMarker);
-            await existingMarker.OnClick.InvokeAsync();
-            StateHasChanged();
-        }
-    }
-
-    [JSInvokable]
     public async Task OnInternalShapeClick(Internal.Shape shape, string layerId)
     {
 #if DEBUG
@@ -545,13 +505,24 @@ public partial class Map : IAsyncDisposable
         if (existingShape != null)
         {
             _popupContext = existingShape;
-            await OnShapeClick.InvokeAsync(existingShape);
+
+            await OnFeatureClick.InvokeAsync(existingShape);
+
+            if (existingShape is Marker marker)
+                await OnMarkerClick.InvokeAsync(marker);
+            else
+                await OnShapeClick.InvokeAsync(existingShape);
             await existingShape.OnClick.InvokeAsync();
             StateHasChanged();
         }
         else
         {
-            await OnShapeClick.InvokeAsync(new Shape(shape));
+            await OnFeatureClick.InvokeAsync(new Feature(shape));
+
+            if (shape.Type == nameof(Marker))
+                await OnMarkerClick.InvokeAsync(new Marker(shape));
+            else
+                await OnShapeClick.InvokeAsync(new Shape(shape));
         }
     }
 
@@ -757,9 +728,32 @@ public partial class Map : IAsyncDisposable
     ///     left padding. defaults to [0,0,0,0]
     /// </param>
     /// <returns></returns>
-    public ValueTask SetZoomToExtent(ExtentType extent, decimal[]? padding = null)
+    public ValueTask SetZoomToExtent(ExtentType extent, double[]? padding = null)
     {
-        return _module?.InvokeVoidAsync("MapOLZoomToExtent", _mapId, extent.ToString(), padding) ?? ValueTask.CompletedTask;
+        switch (extent)
+        {
+            case ExtentType.Markers:
+                if (MarkersLayer != null) return SetZoomToExtent(MarkersLayer, padding);
+                break;
+            case ExtentType.Geometries:
+                if (ShapesLayer != null) return SetZoomToExtent(ShapesLayer, padding);
+                break;
+        }
+        return SetZoomToExtent(LayersList.First(), padding);
+    }
+
+    /// <summary>
+    ///     Zooms to the given extent of the layer
+    /// </summary>
+    /// <param name="layer"></param>
+    /// <param name="padding">
+    ///     Padding (in pixels) to be cleared inside the view. Values in the array are top, right, bottom and
+    ///     left padding. defaults to [0,0,0,0]
+    /// </param>
+    /// <returns></returns>
+    public ValueTask SetZoomToExtent(Layer layer, double[]? padding = null)
+    {
+        return _module?.InvokeVoidAsync("MapOLZoomToExtent", _mapId, layer.Id, padding) ?? ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -924,14 +918,28 @@ public partial class Map : IAsyncDisposable
         {
             Stroke = new StyleOptions.StrokeOptions
             {
-                Color = "blue",
+                Color = Options.DefaultStroke,
                 Width = 3,
                 LineDash = new double[] { 4 }
             },
             Fill = new StyleOptions.FillOptions
             {
-                Color = "rgba(0, 0, 255, 0.3)"
-            }
+                Color = Options.DefaultFill
+            },
+            Circle = shape.ShapeType == ShapeType.Point ? new StyleOptions.CircleStyleOptions()
+            {
+                Radius = 6,
+                Fill = new StyleOptions.FillOptions
+                {
+                    Color = Blazor.Options.DefaultFill
+                },
+                Stroke = new StyleOptions.StrokeOptions
+                {
+                    Color = Blazor.Options.DefaultStroke,
+                    Width = 2
+                }
+            } : null
+            
         };
     }
 

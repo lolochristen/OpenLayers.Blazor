@@ -24,8 +24,8 @@ export function MapOLSetOptions(mapId, options) {
     _MapOL[mapId].setOptions(options);
 }
 
-export function MapOLZoomToExtent(mapId, extentType, padding) {
-    _MapOL[mapId].setZoomToExtent(extentType, padding);
+export function MapOLZoomToExtent(mapId, layerId, padding) {
+    _MapOL[mapId].setZoomToExtent(layerId, padding);
 }
 
 export function MapOLSetShapes(mapId, layerId, shapes) {
@@ -376,7 +376,7 @@ MapOL.prototype.prepareLayers = function(layers) {
                 } else if (l.style) {
                     var styleOptions = l.style;
                     l.style = function(feature, resolution) {
-                        return that.mapStyleOptionsToStyle(styleOptions, feature);
+                        return that.mapStyleOptionsToStyle(styleOptions);
                     };
                 } else if (l.flatStyle) {
                     l.style = l.flatStyle;
@@ -491,22 +491,12 @@ MapOL.prototype.setZoom = function(zoom) {
     this.Map.getView().setZoom(zoom);
 };
 
-MapOL.prototype.setZoomToExtent = function(extentType, padding) {
-    if (padding == null)
-        padding = undefined;
-    switch (extentType) {
-    case "Markers":
-        var extent = this.getMarkersLayer().getSource().getExtent();
-        if (extent[0] === Infinity) return;
-        this.Map.getView().fit(extent, { size: this.Map.getSize(), padding: padding });
-        break;
-
-    case "Geometries":
-        var extent = this.getShapesLayer().getSource().getExtent();
-        if (extent[0] === Infinity) return;
-        this.Map.getView().fit(extent, { size: this.Map.getSize(), padding: padding });
-        break;
-    }
+MapOL.prototype.setZoomToExtent = function(layerId, padding) {
+    if (padding == null) padding = undefined;
+    const layer = this.getLayer(layerId);
+    var extent = layer.getSource().getExtent();
+    if (extent[0] === Infinity) return;
+    this.Map.getView().fit(extent, { size: this.Map.getSize(), padding: padding });
 };
 
 MapOL.prototype.setCenter = function(point) {
@@ -592,15 +582,8 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
             const layerId = layer.get("id");
 
             if (shape) {
-                that.Instance.invokeMethodAsync("OnInternalFeatureClick", shape, layerId);
-
-                if (shape.properties.type == "Marker") {
-                    invokeMethod = false;
-                    that.Instance.invokeMethodAsync("OnInternalMarkerClick", shape, layerId);
-                } else {
-                    invokeMethod = false;
-                    that.Instance.invokeMethodAsync("OnInternalShapeClick", shape, layerId);
-                }
+                invokeMethod = false;
+                that.Instance.invokeMethodAsync("OnInternalShapeClick", shape, layerId);
             }
 
             var showPopup = false;
@@ -795,7 +778,7 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
             condition: ol.events.condition.click,
             style: function(feature) {
                 if (style) {
-                    return that.mapStyleOptionsToStyle(style, feature);
+                    return that.mapStyleOptionsToStyle(style);
                 } else {
                     const color = feature.get('COLOR') || '#eeeeeeaa';
                     defaultSelectionStyle.getFill().setColor(color);
@@ -822,23 +805,6 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
         }
     }
 }
-
-//const selected = new ol.style.Style({
-//    fill: new ol.style.Fill({
-//        color: '#eeeeee',
-//    }),
-//    stroke: new ol.style.Stroke({
-//        color: 'rgba(255, 255, 255, 0.7)',
-//        width: 2,
-//    }),
-//});
-
-//function selectStyle(feature) {
-//    const color = feature.get('COLOR') || '#eeeeee';
-//    selected.getFill().setColor(color);
-//    return selected;
-//}
-
 MapOL.prototype.onFeatureAdded = function(layerId, feature) {
     const shape = this.mapFeatureToShape(feature);
     this.Instance.invokeMethodAsync("OnInternalShapeAdded", layerId, shape);
@@ -871,9 +837,21 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
 
     var style = feature.getStyle();
     if (typeof(style) == "function") style = style(feature, this.Map.getView().getResolution());
+
+    var styleOptions = new Array();
+    if (Array.isArray(style)) {
+        style.forEach((s) => styleOptions.push(this.mapStylesToStyleOptions(s)));
+    } else {
+        if (style) styleOptions = [this.mapStylesToStyleOptions(style)];
+    }
+
     var stroke = style && !Array.isArray(style) ? style.getStroke() : null;
     var fill = style && !Array.isArray(style) ? style.getFill() : null;
     var text = style && !Array.isArray(style) ? style.getText() : null;
+    var image = style && !Array.isArray(style) ? style.getImage() : null;
+    var circle = image && image.getRadius != null ? circle = image : null;
+    var icon = image && image.getSrc != null ? icon = image : null;
+
     var id = feature.getId();
 
     if (id == null) {
@@ -894,37 +872,26 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
         geometryType: geometry ? geometry.getType() : "None",
         coordinates: coordinates,
         properties: properties,
-        borderColor: stroke ? stroke.getColor() : null,
-        borderSize: stroke ? stroke.getWidth() : null,
-        backgroundColor: fill ? fill.getColor() : null,
-        color: text && text.getStroke() ? text.getStroke().getColor() : null,
-        textScale: text ? text.getScale() : null,
-        zIndex: style && !Array.isArray(style) ? style.getZIndex() : null
+        styles: styleOptions
     };
 
-    if (geometry.getType() == "Circle") {
+    if (geometry && geometry.getType() == "Circle" && geometry.getRadius) {
         shape.radius = geometry.getRadius();
-    }
-
-    if (style && !Array.isArray(style)) {
-        var imageStyle = style.getImage();
-        if (imageStyle) {
-            shape.scale = imageStyle.getScale();
-        }
     }
 
     return shape;
 };
 
-MapOL.prototype.mapShapeToFeature = function(shape, source = null) {
+MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoordinates = true) {
 
     var geometry;
     const viewProjection = this.Map.getView().getProjection();
     const sourceProjection = source ? source.getProjection() : null;
     if (shape.coordinates) {
-        const coordinates = MapOL.transformCoordinates(shape.coordinates,
+        const coordinates = transformCoordinates ? MapOL.transformCoordinates(shape.coordinates,
             sourceProjection ?? this.Options.coordinatesProjection,
-            viewProjection);
+            viewProjection) : shape.coordinates;
+
         switch (shape.geometryType) {
         case "Point":
             geometry = new ol.geom.Point(coordinates);
@@ -953,42 +920,27 @@ MapOL.prototype.mapShapeToFeature = function(shape, source = null) {
     const feature = new ol.Feature({
         type: shape.properties.type,
         popup: shape.properties.popup,
-        title: shape.properties.title,
-        label: shape.properties.label,
-        content: shape.properties.content,
-        style: shape.properties.style,
+        markerstyle: shape.properties.markerstyle,
     });
+
+    feature.setId(shape.id);
 
     if (geometry) {
         feature.setGeometry(geometry);
     }
 
-    feature.setId(shape.id);
-
-    var style;
-    switch (shape.properties.style) {
-    case "MarkerPin":
-        style = this.pinStyle(shape);
-        break;
-
-    case "MarkerFlag":
-        style = this.flagStyle(shape);
-        break;
-
-    case "MarkerAwesome":
-        style = this.awesomeStyle(shape);
-        break;
-
-    case "MarkerCustomImage":
-        style = this.customImageStyle(shape);
-        break;
-
-    default:
-        style = this.getDefaultStyle(shape);
-        break;
+    if (shape.styles) {
+        if (Array.isArray(shape.styles)) {
+            var styles = new Array();
+            shape.styles.forEach((s) => styles.push(this.mapStyleOptionsToStyle(s)));
+            feature.setStyle(styles);
+        } else {
+            feature.setStyle(this.mapStyleOptionsToStyle(shape.styles));
+        }
     }
+    if (shape.flatStyle)
+        feature.setStyle(shape.flatStyle);
 
-    feature.setStyle(style);
     return feature;
 };
 
@@ -1092,183 +1044,40 @@ MapOL.prototype.getCoordinates = function(featureId) {
     return null;
 };
 
-//--- Styles -----------------------------------------------------------------//
-
-MapOL.prototype.pinStyle = function(marker) {
-    var src = "./_content/OpenLayers.Blazor/img/marker-pin-red.png";
-    if (marker.color == null || marker.color != "#FFFFFF")
-        src = `./_content/OpenLayers.Blazor/img/marker-pin-${marker.color}.png`;
-    return [
-        new ol.style.Style({
-            image: new ol.style.Icon({
-                anchor: [0, 60],
-                size: [160, 60],
-                offset: [0, 0],
-                opacity: 1,
-                scale: marker.scale,
-                anchorXUnits: "pixels",
-                anchorYUnits: "pixels",
-                src: "./_content/OpenLayers.Blazor/img/pin-back.png"
-            })
-        }),
-        new ol.style.Style({
-            image: new ol.style.Icon({
-                anchor: [100, 198],
-                size: [200, 200],
-                offset: [0, 0],
-                opacity: 1,
-                scale: marker.scale,
-                anchorXUnits: "pixels",
-                anchorYUnits: "pixels",
-                src: src
-            })
-        })
-    ];
-};
-
-MapOL.prototype.flagStyle = function(marker) {
-    const padTop = 4;
-    const padBottom = 2;
-    const padLeft = 5;
-    const padRight = 5;
-
-    const size = 10;
-    const width = size;
-    const height = size;
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    const context = ol.render.toContext(canvas.getContext("2d"),
-        {
-            size: [width, height],
-            pixelRatio: 1
-        });
-
-    const symbol = [
-        [0, 0],
-        [width, 0],
-        [width / 2, height],
-        [0, 0]
-    ];
-
-    context.setStyle(
-        new ol.style.Style({
-            fill: new ol.style.Fill({ color: marker.backgroundColor }),
-            stroke: new ol.style.Stroke({ color: marker.borderColor, width: marker.borderSize }),
-        })
-    );
-
-    context.drawGeometry(new ol.geom.Polygon([symbol]));
-
-    return new ol.style.Style({
-        image: new ol.style.Icon({
-            anchorXUnits: "pixels",
-            anchorYUnits: "pixels",
-            anchor: [width / 2, height],
-            size: [width, height],
-            offset: [0, 0],
-            img: canvas,
-            imgSize: [width, height],
-            scale: 1,
-        }),
-        text: new ol.style.Text({
-            text: marker.properties.title,
-            offsetY: -size - padBottom + 1,
-            offsetX: -size,
-            textAlign: "left",
-            textBaseline: "bottom",
-            scale: marker.textScale,
-            fill: new ol.style.Fill({ color: marker.color }),
-            backgroundFill: new ol.style.Fill({ color: marker.backgroundColor }),
-            backgroundStroke: new ol.style.Stroke({ color: marker.borderColor, width: marker.borderSize }),
-            padding: [padTop, padRight, padBottom, padLeft]
-        })
-    });
-};
-
-MapOL.prototype.awesomeStyle = function(marker) {
-    return [
-        new ol.style.Style({
-            image: new ol.style.Icon({
-                anchor: [0, 14],
-                size: [56, 21],
-                offset: [0, 0],
-                opacity: 1,
-                scale: 0.5,
-                color: marker.color ?? this.Options.color,
-                anchorXUnits: "pixels",
-                anchorYUnits: "pixels",
-                src: "./_content/OpenLayers.Blazor/img/pin-back.png"
-            }),
-        }),
-        new ol.style.Style({
-            text: new ol.style.Text({
-                text: String.fromCodePoint(0xF041), // Map Marker
-                scale: 2,
-                font: '900 18px "Font Awesome 6 Free"',
-                textBaseline: "bottom",
-                fill: new ol.style.Fill({ color: marker.backgroundColor ?? this.Options.backgroundColor }),
-                stroke: new ol.style.Stroke({ color: marker.borderColor ?? this.Options.borderColor, width: 3 })
-            })
-        }),
-        new ol.style.Style({
-            text: new ol.style.Text({
-                text: marker.properties?.label ?? this.Options.label,
-                offsetY: -22,
-                opacity: 1,
-                scale: 1,
-                font: '900 18px "Font Awesome 6 Free"',
-                fill: new ol.style.Fill({ color: marker.color ?? this.Options.color })
-            })
-        })
-    ];
-};
-
-MapOL.prototype.customImageStyle = function(marker) {
-    return [
-        new ol.style.Style({
-            image: new ol.style.Icon({
-                anchor: marker.anchor,
-                size: marker.size,
-                offset: [0, 0],
-                opacity: 1,
-                scale: marker.scale,
-                rotation: marker.rotation,
-                anchorXUnits: "pixels",
-                anchorYUnits: "pixels",
-                src: marker.properties["content"]
-            })
-        })
-    ];
-};
-
 // Shape Style
 MapOL.prototype.getShapeStyleAsync = async function(feature, layer_id) {
     const shape = this.mapFeatureToShape(feature);
     const style = await this.Instance.invokeMethodAsync("OnGetShapeStyleAsync", shape, layer_id);
-    return this.mapStyleOptionsToStyle(style, feature);
+    return this.mapStyleOptionsToStyle(style);
 };
 MapOL.prototype.getShapeStyle = function(feature, layer_id) {
     const shape = this.mapFeatureToShape(feature);
     const style = this.Instance.invokeMethod("OnGetShapeStyle", shape, layer_id);
-    return this.mapStyleOptionsToStyle(style, feature);
+    return this.mapStyleOptionsToStyle(style);
 };
 
-MapOL.prototype.mapStyleOptionsToStyle = function(style, feature) {
+MapOL.prototype.mapStyleOptionsToStyle = function(style) {
 
     style = MapOL.transformNullToUndefined(style);
-
-    if (feature.getGeometry().getType() == "Point") {
-        if (style.circle == undefined) {
-            style.circle = {
-                radius: 5,
-                fill: style.fill,
-                stroke: style.stroke
-            };
-        }
+    
+    if (style.icon && style.icon.shapeSource) {
+        const canvas = document.createElement("canvas");
+        const context = ol.render.toContext(canvas.getContext("2d"),
+            {
+                size: style.icon.size,
+                pixelRatio: 1
+            });
+        const feature = this.mapShapeToFeature(style.icon.shapeSource, null, false);
+        context.setStyle(feature.getStyle()[0]);
+        context.drawGeometry(feature.getGeometry());
+        style.icon.img = canvas;
     }
 
+    if (style.icon && style.icon.scale) {
+        style.icon.width = undefined;
+        style.icon.height = undefined; 
+    }
+    
     if (style.circle) {
         if (style.circle.fill) style.circle.fill = new ol.style.Fill(style.circle.fill);
         if (style.circle.stroke) style.circle.stroke = new ol.style.Stroke(style.circle.stroke);
@@ -1290,6 +1099,111 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style, feature) {
 
     return styleObject;
 };
+
+MapOL.prototype.mapStylesToStyleOptions = function(style) {
+    var image = style.getImage();
+    var fill = style.getFill();
+    var stroke = style.getStroke();
+    var text = style.getText();
+    var icon, circle;
+    if (image && image.getSrc) {
+        icon = image;
+    }
+    if (image && image.getRadius) {
+        circle = image;
+    }
+    return {
+        fill: fill ? {
+            color: fill.getColor()
+        } : undefined,
+        stroke: stroke ? {
+            color: stroke.getColor(),
+            lineCap: stroke.getLineCap(),
+            lineJoin: stroke.getLineJoin(),
+            lineDash: stroke.getLineDash(),
+            lineDashOffset: stroke.getLineDashOffset(),
+            miterLimit: stroke.getMiterLimit(),
+            width: stroke.getWidth(),
+        } : undefined,
+        text: text ? {
+            font: text.getFont(),
+            maxAngle: text.getMaxAngle(),
+            offsetX: text.getOffsetX(),
+            offsetY: text.getOffsetY(),
+            overflow: text.getOverflow(),
+            placement: text.getPlacement(),
+            repeat: text.getRepeat(),
+            scale: text.getScale(),
+            rotateWithView: text.getRotateWithView(),
+            rotation: text.getRotation(),
+            text: text.getText(),
+            textAlign: text.getTextAlign(),
+            justify: text.getJustify(),
+            textBaseline: text.getTextBaseline(),
+            fill : text.getFill() ? {
+                color: text.getFill().getColor()
+            } : undefined,
+            backgroundFill: text.getBackgroundFill() ? { 
+                color: text.getBackgroundFill().getColor()
+            } : undefined,
+            stroke: text.getStroke() ? {
+                color: text.getStroke().getColor(),
+                lineCap: text.getStroke().getLineCap(),
+                lineJoin: text.getStroke().getLineJoin(),
+                lineDash: text.getStroke().getLineDash(),
+                lineDashOffset: text.getStroke().getLineDashOffset(),
+                miterLimit: text.getStroke().getMiterLimit(),
+                width: text.getStroke().getWidth(),
+            } : undefined,
+            backgroundStroke: text.getBackgroundStroke() ? {
+                color: text.getBackgroundStroke().getColor(),
+                lineCap: text.getBackgroundStroke().getLineCap(),
+                lineJoin: text.getBackgroundStroke().getLineJoin(),
+                lineDash: text.getBackgroundStroke().getLineDash(),
+                lineDashOffset: text.getBackgroundStroke().getLineDashOffset(),
+                miterLimit: text.getBackgroundStroke().getMiterLimit(),
+                width: text.getBackgroundStroke().getWidth(),
+            } : undefined,
+            backgroundFill: text.getBackgroundFill() ? {
+                color: text.getBackgroundFill().getColor()
+            } : undefined,
+            padding: text.getPadding(),
+        } : undefined,
+        circle: circle ? {
+            radius: circle.getRadius(),
+            fill: circle.fill ? {
+                color: circle.fill.getColor()
+            } : undefined,
+            rotation: circle.getRotation(),
+            rotateWithView: circle.getRotateWithView(),
+            declutterMode: circle.getDeclutterMode(),
+            displacement: circle.getDisplacement(),
+            stroke: circle.stroke ? {
+                color: circle.stroke.getColor(),
+                lineCap: circle.stroke.getLineCap(),
+                lineJoin: circle.stroke.getLineJoin(),
+                lineDash: circle.stroke.getLineDash(),
+                lineDashOffset: circle.stroke.getLineDashOffset(),
+                miterLimit: circle.stroke.getMiterLimit(),
+                width: circle.stroke.getWidth(),
+            } : undefined,
+        } : undefined,
+        icon: icon ? {
+            anchor: icon.getAnchor(),
+            color: icon.getColor(),
+            declutterMode: icon.getDeclutterMode(),
+            height: icon.getHeight(),
+            opacity: icon.getOpacity(),
+            rotation: icon.getRotation(),
+            rotateWithView: icon.getRotateWithView(),
+            scale: icon.getScale(),
+            size: icon.getSize(),
+            width: icon.getWidth(),
+            src : icon.getSrc(),
+        } : undefined,
+        zIndex: style.getZIndex()
+    };
+}
 
 MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {
     for (const key in obj) {

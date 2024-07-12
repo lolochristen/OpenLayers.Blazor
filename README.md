@@ -35,14 +35,14 @@ https://openlayers-blazor-demo.laurent-christen.ch/
             <div id="popup" class="ol-box">
                 @if (context is Marker marker)
                 {
-                    <h3>@marker.Title</h3>
+                    <h3>@marker.Text</h3>
                     <p>@marker.Coordinate.X / @marker.Coordinate.Y</p>
                 }
             </div>
         </Popup>
         <Features>
             <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(2604200, 1197650)"></Marker>
-            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
+            <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Text="Hallo" BackgroundColor="#449933" Popup></Marker>
             <Line Points="new []{new Coordinate(1197650, 2604200), new Coordinate(2624200, 1177650)}" BorderColor="cyan"></Line>
         </Features>
     </SwissMap>

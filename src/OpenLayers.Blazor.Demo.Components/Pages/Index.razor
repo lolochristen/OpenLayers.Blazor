@@ -59,7 +59,7 @@ Visible Extent: @_map?.VisibleExtent
         <div id="popup" class="ol-box">
         @if (context is Marker marker)
         {
-            <h3>@marker.Title</h3>
+            <h3>@marker.Text</h3>
             <p>@marker.Coordinate.X,@marker.Coordinate.Y</p>
         }
         </div>
@@ -67,8 +67,8 @@ Visible Extent: @_map?.VisibleExtent
     
     <Features>
         <Marker Type="MarkerType.MarkerPin" Coordinate="@("2604200/1197650")" Popup></Marker>
-        <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Title="Hallo" BackgroundColor="#449933" Popup></Marker>
-        <Line Coordinates="new double[][] { new double[] {2604200, 1197650}, new double[] { 2624200, 1177650 } }" BorderColor="cyan"></Line>
+        <Marker Type="MarkerType.MarkerFlag" Coordinate="new Coordinate(2624200, 1177650)" Text="Hallo" Fill="#449933" Popup></Marker>
+        <Line Coordinates="new double[][] { new double[] {2604200, 1197650}, new double[] { 2624200, 1177650 } }" Stroke="cyan"></Line>
      </Features>
  </SwissMap>
 

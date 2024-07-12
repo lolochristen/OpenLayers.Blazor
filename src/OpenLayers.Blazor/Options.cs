@@ -5,30 +5,20 @@ namespace OpenLayers.Blazor;
 public class Options
 {
     /// <summary>
+    ///     Default fill color.
+    /// </summary>
+    public static string DefaultFill { get; set; } = "#2d7cc7cc";
+
+    /// <summary>
+    ///     Default stroke color
+    /// </summary>
+    public static string DefaultStroke { get; set; } = "#ffffff";
+
+    /// <summary>
     ///     Gets or sets whenever the popup shall be shown when clicking on a feature.
     /// </summary>
     public bool AutoPopup { get; set; }
-
-    /// <summary>
-    ///     Default label for markers.
-    /// </summary>
-    public string? Label { get; set; }
-
-    /// <summary>
-    ///     Default color for markers.
-    /// </summary>
-    public string Color { get; set; } = "#FFFFFF";
-
-    /// <summary>
-    ///     Default background color for markers.
-    /// </summary>
-    public string BackgroundColor { get; set; } = "#0000FF";
-
-    /// <summary>
-    ///     Default border color for markers.
-    /// </summary>
-    public string BorderColor { get; set; } = "#FFFFFF";
-
+ 
     /// <summary>
     ///     Projection code how the coordinates are represented. Default is EPSG:4326.
     /// </summary>

@@ -40,10 +40,10 @@ Zoom: @_map?.Zoom
     
     <Features>
         <Marker Type="MarkerType.MarkerPin" Coordinate="new Coordinate(x, y)" Title="You are Here" Popup></Marker>
-        <Circle Center="new Coordinate(x, y)" Radius="50" BackgroundColor="#2222AA66"></Circle>
-        <Point Coordinate="new Coordinate(x, y)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
-        <Point Coordinate="new Coordinate(x2, y2)" BorderSize="4" BorderColor="red" BackgroundColor="cyan" Radius="3"></Point>
-         <Line Points="new []{ new Coordinate(x, y), new Coordinate(x2, y2) }" BorderColor="cyan" BorderSize="20" BackgroundColor="cyan" Title="Test"></Line>
+        <Circle Center="new Coordinate(x, y)" Radius="50" Fill="#2222AA66"></Circle>
+        <Point Coordinate="new Coordinate(x, y)" StrokeThickness="4" Stroke="red" Fill="cyan" Radius="3"></Point>
+        <Point Coordinate="new Coordinate(x2, y2)" StrokeThickness="4" Stroke="red" Fill="cyan" Radius="3"></Point>
+         <Line Points="new []{ new Coordinate(x, y), new Coordinate(x2, y2) }" Stroke="cyan" StrokeThickness="20" Fill="cyan" Title="Test"></Line>
     </Features>
 
 

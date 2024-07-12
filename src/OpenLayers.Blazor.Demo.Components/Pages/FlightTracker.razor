@@ -98,7 +98,7 @@
                 if (marker == null)
                 {
                     marker = new Marker(new Coordinate(ac.Lon, ac.Lat), "_content/OpenLayers.Blazor.Demo.Components/airplane.png", 512, 512, 256, 256)
-                    { Scale = 0.05, Popup = true, Title = ac.Name, Rotation = ac.TrueHeading * Math.PI / 180 };
+                    { Scale = 0.05, Popup = true, Text = ac.Name, Rotation = ac.TrueHeading * Math.PI / 180 };
                     marker.Id = ac.Id;
                     _map.MarkersList.Add(marker);
                 }

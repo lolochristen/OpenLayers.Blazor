@@ -221,9 +221,9 @@ public class Marker : Shape
             scale = Scale.Value;
 
         var icon1 = GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>(0);
-        icon1.Anchor = [0, 60];
-        icon1.Size = [160, 60];
-        icon1.Offset = [0, 0];
+        icon1.Anchor = new double[] { 0, 60 };
+        icon1.Size = new double[] { 160, 60 };
+        icon1.Offset = new double[] { 0, 0 };
         icon1.Opacity = 1;
         icon1.Scale = scale;
         icon1.AnchorXUnits = StyleOptions.IconAnchorUnits.Pixels;
@@ -231,9 +231,9 @@ public class Marker : Shape
         icon1.Source = "./_content/OpenLayers.Blazor/img/pin-back.png";
 
         var icon2 = GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>(1);
-        icon2.Anchor = [100, 198];
-        icon2.Size = [200, 200];
-        icon2.Offset = [0, 0];
+        icon2.Anchor = new double[] {100, 198 };
+        icon2.Size = new double[] { 200, 200 };
+        icon2.Offset = new double[] { 0, 0 };
         icon2.Opacity = 1;
         icon2.Scale = scale;
         icon2.AnchorXUnits = StyleOptions.IconAnchorUnits.Pixels;
@@ -281,9 +281,9 @@ public class Marker : Shape
     protected void SetAwesomeStyle()
     {
         var icon1 = GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>(0);
-        icon1.Anchor = [0, 40];
-        icon1.Size = [160, 60];
-        icon1.Offset = [0, 0];
+        icon1.Anchor = new double[] { 0, 40 };
+        icon1.Size = new double[] { 160, 60 };
+        icon1.Offset = new double[] { 0, 0 };
         icon1.Opacity = 1;
         icon1.Scale = .2;
         icon1.AnchorXUnits = StyleOptions.IconAnchorUnits.Pixels;
@@ -330,18 +330,18 @@ public class Marker : Shape
         {
             Coordinates = new double[][][]
             {
-                [
-                    [0, 0],
-                    [width, 0],
-                    [width / 2, height],
-                    [0, 0]
-                ]
+                new double[][] {
+                    new double[] { 0, 0 },
+                    new double[] { width, 0},
+                    new double[] { width / 2, height},
+                    new double[] { 0, 0}
+                }
             },
             Fill = fill, Stroke = stroke
         };
-        icon.Size = [width, height];
-        icon.Anchor = [width / 2, height];
-        icon.Offset = [0, 0];
+        icon.Size = new double[] { width, height };
+        icon.Anchor = new double[] { width / 2, height };
+        icon.Offset = new double[] { 0, 0 };
         icon.AnchorXUnits = StyleOptions.IconAnchorUnits.Pixels;
         icon.AnchorYUnits = StyleOptions.IconAnchorUnits.Pixels;
     }

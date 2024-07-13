@@ -61,8 +61,8 @@ internal class CoordinateConverter : JsonConverter<Coordinate>
     public override void Write(Utf8JsonWriter writer, Coordinate value, JsonSerializerOptions options)
     {
         writer.WriteStartArray();
-        writer.WriteNumberValue(value[0]);
-        writer.WriteNumberValue(value[1]);
+        writer.WriteNumberValue(value.X);
+        writer.WriteNumberValue(value.Y);
         writer.WriteEndArray();
     }
 }

@@ -488,7 +488,7 @@ public partial class Layer : ComponentBase
         if (parameters.TryGetValue(nameof(ZIndex), out int zindex) && zindex != ZIndex)
             _updateableParametersChanged = true;
 
-        if (parameters.TryGetValue(nameof(Extent), out Extent extent) && extent != Extent)
+        if (parameters.TryGetValue(nameof(Extent), out Extent? extent) && extent != Extent)
             _updateableParametersChanged = true;
 
         bool selectionParamsChanged = false;

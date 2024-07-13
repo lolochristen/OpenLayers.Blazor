@@ -131,10 +131,10 @@ public partial class Map : IAsyncDisposable
     public EventCallback<Coordinate> OnPointerMove { get; set; }
 
     /// <summary>
-    ///     Event when the pointer hovers over a shape
+    ///     Event when the pointer hovers over a shape. Null when leaving a shape.
     /// </summary>
     [Parameter]
-    public EventCallback<Shape> OnHover { get; set; }
+    public EventCallback<Shape?> OnShapeHover { get; set; }
 
     /// <summary>
     ///     Event when the rendering is complete
@@ -559,12 +559,15 @@ public partial class Map : IAsyncDisposable
     }
 
     [JSInvokable]
-    public Task OnInternalHover(string shapeId, string layerId)
+    public Task OnInternalShapeHover(string? layerId, string? shapeId)
     {
+#if DEBUG
+        Console.WriteLine($"OnInternalShapeHover {layerId} {shapeId}");
+#endif
         var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
         if (layer != null && layer.ShapesList.FirstOrDefault(p => p.Id == shapeId) is Shape shape)
-            return OnHover.InvokeAsync(shape);
-        return Task.CompletedTask;
+            return OnShapeHover.InvokeAsync(shape);
+        return OnShapeHover.InvokeAsync(null);
     }
 
     [JSInvokable]

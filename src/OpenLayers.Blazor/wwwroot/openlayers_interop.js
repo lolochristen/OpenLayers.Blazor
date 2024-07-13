@@ -620,7 +620,7 @@ MapOL.prototype.onMapPointerMove = function(evt, element) {
         this.Options.coordinatesProjection);
     this.Instance.invokeMethodAsync("OnInternalPointerMove", coordinate);
 
-    var that = this;
+    var hoverFeatureId = null, hoverLayerId = null;
     this.Map.forEachFeatureAtPixel(evt.pixel,
         function (feature, layer) {
             if (!layer)
@@ -629,8 +629,17 @@ MapOL.prototype.onMapPointerMove = function(evt, element) {
             if (!featureId)
                 return;
             const layerId = layer.get("id");
-            that.Instance.invokeMethodAsync("OnInternalHover", featureId.toString(), layerId);
+            if (!hoverFeatureId) {
+                hoverFeatureId = featureId.toString();
+                hoverLayerId = layerId;
+            }
         });
+
+    if (this._hoverFeatureId != hoverFeatureId || this._hoverLayerId != hoverLayerId) {
+        this.Instance.invokeMethodAsync("OnInternalShapeHover", hoverLayerId, hoverFeatureId);
+        this._hoverFeatureId = hoverFeatureId;
+        this._hoverLayerId = hoverLayerId;
+    }
 };
 
 MapOL.prototype.onMapResolutionChanged = function() {

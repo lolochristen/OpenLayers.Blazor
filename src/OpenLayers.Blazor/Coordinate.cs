@@ -14,11 +14,22 @@ public struct Coordinate : IEquatable<Coordinate>
     public static Coordinate Empty => new();
 
     /// <summary>
+    ///     X
+    /// </summary>
+    public double X;
+
+    /// <summary>
+    ///     Y
+    /// </summary>
+    public double Y;
+
+    /// <summary>
     ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
     public Coordinate()
     {
-        Value = new double[2];
+        X = 0;
+        Y = 0;
     }
 
     /// <summary>
@@ -27,7 +38,8 @@ public struct Coordinate : IEquatable<Coordinate>
     /// <param name="coordinates">X/Longitude, Y/Latitude</param>
     public Coordinate(double x, double y)
     {
-        Value = new[] { x, y };
+        X = x;
+        Y = y;
     }
 
     /// <summary>
@@ -36,7 +48,8 @@ public struct Coordinate : IEquatable<Coordinate>
     /// <param name="coordinate"></param>
     public Coordinate(Coordinate coordinate)
     {
-        Value = coordinate.Value;
+        X = coordinate.X;
+        Y = coordinate.Y;
     }
 
     /// <summary>
@@ -48,13 +61,9 @@ public struct Coordinate : IEquatable<Coordinate>
     {
         if (coordinates.Length < 2)
             throw new ArgumentException(nameof(coordinates));
-        Value = coordinates;
+        X = coordinates[0];
+        Y = coordinates[1];
     }
-
-    /// <summary>
-    ///     Gets the internal array of points
-    /// </summary>
-    public double[] Value { get; }
 
     /// <summary>
     ///     Latitude
@@ -63,45 +72,16 @@ public struct Coordinate : IEquatable<Coordinate>
     public double Latitude => Y;
 
     /// <summary>
-    ///     Y
-    /// </summary>
-    public double Y
-    {
-        get => Value[1];
-        set => Value[1] = value;
-    }
-
-    /// <summary>
     ///     Longitude
     /// </summary>
     [JsonIgnore]
     public double Longitude => X;
 
-    /// <summary>
-    ///     X
-    /// </summary>
-    public double X
-    {
-        get => Value[0];
-        set => Value[0] = value;
-    }
-
-    /// <summary>
-    ///     Indexed access to coordinates
-    /// </summary>
-    /// <param name="key"></param>
-    /// <returns></returns>
-    public double this[int key]
-    {
-        get => Value[key];
-        set => Value[key] = value;
-    }
-
     /// <inheritdoc />
     public bool Equals(Coordinate other)
     {
         var precision = 0.0000001;
-        return Math.Abs(Value[0] - other.Value[0]) < precision && Math.Abs(Value[1] - other.Value[1]) < precision;
+        return Math.Abs(X - other.X) < precision && Math.Abs(Y - other.Y) < precision;
     }
 
     /// <summary>
@@ -253,6 +233,6 @@ public struct Coordinate : IEquatable<Coordinate>
     /// <inheritdoc />
     public override int GetHashCode()
     {
-        return Value.GetHashCode();
+        return HashCode.Combine(X.GetHashCode(), Y.GetHashCode());
     }
 }

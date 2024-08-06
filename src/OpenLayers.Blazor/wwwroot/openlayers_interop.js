@@ -891,13 +891,6 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
         if (style) styleOptions = [this.mapStylesToStyleOptions(style)];
     }
 
-    var stroke = style && !Array.isArray(style) ? style.getStroke() : null;
-    var fill = style && !Array.isArray(style) ? style.getFill() : null;
-    var text = style && !Array.isArray(style) ? style.getText() : null;
-    var image = style && !Array.isArray(style) ? style.getImage() : null;
-    var circle = image && image.getRadius != null ? circle = image : null;
-    var icon = image && image.getSrc != null ? icon = image : null;
-
     var id = feature.getId();
 
     if (id == null) {
@@ -1017,55 +1010,6 @@ MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoor
     return feature;
 };
 
-MapOL.prototype.getDefaultStyle = function(shape) {
-
-    if (shape.geometryType == "Point") {
-        const viewProjection = this.Map.getView().getProjection();
-        const coordinates = ol.proj.transform(shape.coordinates ?? this.Map.getView().getCenter(),
-            this.Options.coordinatesProjection,
-            viewProjection);
-        let radius = 5;
-        if (shape.radius != null) {
-            radius = shape.radius;
-        }
-        if (coordinates.length > 0) {
-            radius = radius / ol.proj.getPointResolution(viewProjection, 1, coordinates);
-        }
-        return new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: radius,
-                fill: new ol.style.Fill({
-                    color: shape.backgroundColor,
-                }),
-                stroke: new ol.style.Stroke({
-                    color: shape.borderColor,
-                    width: shape.borderSize
-                })
-            }),
-            zIndex: shape.zIndex ?? Infinity
-        });
-    } else {
-        return new ol.style.Style({
-            fill: shape.backgroundColor ? new ol.style.Fill({ color: shape.backgroundColor }) : null,
-            stroke: new ol.style.Stroke({ color: shape.borderColor, width: shape.borderSize }),
-            text: shape.label
-                ? new ol.style.Text({
-                    overflow: true,
-                    text: shape.label,
-                    placement: "line",
-                    scale: shape.textScale,
-                    fill: new ol.style.Fill({ color: shape.color }),
-                    stroke: new ol.style.Stroke({ color: shape.color, width: shape.color }),
-                    offsetX: 0,
-                    offsetY: 0,
-                    rotation: 0
-                })
-                : null,
-            zIndex: shape.zIndex ?? undefined
-        });
-    }
-};
-
 MapOL.prototype.onFeatureRemoved = function(layerId, feature) {
     const shape = this.mapFeatureToShape(feature);
     this.Instance.invokeMethodAsync("OnInternalShapeRemoved", layerId, shape);
@@ -1167,7 +1111,8 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style) {
         stroke: style.stroke ? new ol.style.Stroke(style.stroke) : undefined,
         fill: style.fill ? new ol.style.Fill(style.fill) : undefined,
         text: style.text ? new ol.style.Text(style.text) : undefined,
-        image: style.circle ? new ol.style.Circle(style.circle) : style.icon ? new ol.style.Icon(style.icon) : undefined
+        image: style.circle ? new ol.style.Circle(style.circle) : style.icon ? new ol.style.Icon(style.icon) : undefined,
+        zIndex: style.zIndex,
     });
 
     return styleObject;

@@ -1,0 +1,46 @@
+﻿@page "/swissbasemap"
+@rendermode Components.RenderMode.DefaultRenderMode
+
+<Map @ref="_map" Style="height:800px" Class="card" OnFeatureClick="FeatureClick">
+    <Layers>
+        <Layer LayerType="LayerType.MapboxVectorLayer" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="terrain_v1.0.0"></Layer>
+        <Layer LayerType="LayerType.MapboxVectorLayer" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="base_v1.0.0"></Layer>
+    </Layers>
+</Map>
+
+@if (_feature != null)
+{
+    <div>
+        <h3>Feature @_feature.Id</h3>
+        <table class="table table-striped">
+            @foreach (var prop in _feature.Properties)
+            {
+                <tr>
+                    <td>@prop.Key</td>
+                    <td>@prop.Value</td>
+                </tr>
+            }
+        </table>
+
+    </div>
+}
+
+@code {
+    private Map _map = null!;
+    private Feature? _feature;
+
+    override protected async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _map.Center = new Coordinate(7.45150, 46.92815);
+            _map.Zoom = 15.5;
+        }
+    }
+
+    private void FeatureClick(Feature feature)
+    {
+        if (feature.Id != null)
+            _feature = feature;
+    }
+}

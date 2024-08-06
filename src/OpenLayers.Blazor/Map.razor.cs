@@ -547,6 +547,15 @@ public partial class Map : IAsyncDisposable
     }
 
     [JSInvokable]
+    public async Task OnInternalFeatureClick(Internal.Feature feature, string layerId)
+    {
+#if DEBUG
+        Console.WriteLine($"OnInternalFeatureClick: {JsonSerializer.Serialize(feature)}");
+#endif
+        await OnFeatureClick.InvokeAsync(new Feature(feature));
+    }
+
+    [JSInvokable]
     public Task OnInternalClick(Coordinate coordinate)
     {
         return OnClick.InvokeAsync(coordinate);

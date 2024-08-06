@@ -27,4 +27,5 @@ public class Layer
     public StyleOptions? Style { get; set; }
     public bool RaiseShapeEvents { get; set; }
     public bool UseStyleCallback { get; set; }
+    public bool Declutter { get; set; } = true;
 }

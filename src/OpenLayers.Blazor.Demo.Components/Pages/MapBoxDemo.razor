@@ -16,7 +16,7 @@
         <Layers>
         @if (!string.IsNullOrEmpty(_accessToken))
         {
-            <Layer LayerType="LayerType.MapboxVectorStyle" Url="mapbox://styles/mapbox/bright-v9" Options="@(new { AccessToken = _accessToken })"></Layer>
+            <Layer LayerType="LayerType.MapboxVectorStyle" Url="mapbox://styles/mapbox/bright-v9" Options="@(new { AccessToken = _accessToken })" Declutter></Layer>
         }
         </Layers>
     </Map>

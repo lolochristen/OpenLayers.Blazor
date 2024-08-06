@@ -13,8 +13,8 @@
 
 <Map @ref="_map" Style="height:800px" Class="card" OnFeatureClick="FeatureClick" InitialCenter="new Coordinate(7.45150, 46.92815)" InitialZoom="15.5">
     <Layers>
-        <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="terrain_v1.0.0"></Layer>
-        <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="base_v1.0.0"></Layer>
+        <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="terrain_v1.0.0" Declutter></Layer>
+        <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="base_v1.0.0" Declutter></Layer>
     </Layers>
     <Popup>
         @if (context != null)

@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6A316A55-944
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{717EBEE2-DC73-4FFA-BF30-A3591D310620}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenLayers.Blazor.FlightTracker", "src\OpenLayers.Blazor.FlightTracker\OpenLayers.Blazor.FlightTracker.csproj", "{42B89AEF-120B-4381-A3F2-37FF42F8A457}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,12 @@ Global
 		{9BEEE062-7A06-4391-9934-B3963D62B50D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BEEE062-7A06-4391-9934-B3963D62B50D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BEEE062-7A06-4391-9934-B3963D62B50D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42B89AEF-120B-4381-A3F2-37FF42F8A457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42B89AEF-120B-4381-A3F2-37FF42F8A457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42B89AEF-120B-4381-A3F2-37FF42F8A457}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{42B89AEF-120B-4381-A3F2-37FF42F8A457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42B89AEF-120B-4381-A3F2-37FF42F8A457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42B89AEF-120B-4381-A3F2-37FF42F8A457}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +74,7 @@ Global
 		{0FEB3FC9-8E58-4AE7-B09B-7FA248687EC8} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
 		{D235BF12-E194-49CA-AB16-27E23D87B9C5} = {717EBEE2-DC73-4FFA-BF30-A3591D310620}
 		{9BEEE062-7A06-4391-9934-B3963D62B50D} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
+		{42B89AEF-120B-4381-A3F2-37FF42F8A457} = {6A316A55-944A-4222-ACE2-EFA591915C2E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CD0B2594-9026-4061-B859-28912AB5C59F}

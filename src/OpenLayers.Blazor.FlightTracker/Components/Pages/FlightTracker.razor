@@ -1,0 +1,19 @@
+﻿@page "/"
+
+<OpenStreetMap @ref="_map" Style="border:0px;height:100%;width:100%; position:fixed">
+    <Popup>
+        <div id="popup" class="ol-box">
+            @if (context is Marker marker && _flightData != null)
+            {
+                var flight = _flightData.Flights.FirstOrDefault(p => p.Id == marker.Id);
+                if (flight != null)
+                {
+                    <h4>Flight @flight.Name</h4>
+                    <p>Location: @marker.Coordinate.X / @marker.Coordinate.Y</p>
+                    <p>Registration: @flight.Registration @flight.Type</p>
+                    <p>Altitude: @flight.AltitudeBaro Speed (ground): @flight.GroundSpeed</p>
+                }
+            }
+        </div>
+    </Popup>
+</OpenStreetMap>

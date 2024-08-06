@@ -25,9 +25,8 @@ Pointer: @_pointer
     </div>
 </div>
 
-@* OnRenderComplete="@(() => AddMessage($"OnRenderComplete"))" *@
-
 <OpenStreetMap @ref="_map" Style="height: 500px" Class="card mb-2"
+               InitialZoom="5" InitialCenter="new Coordinate(8.000, 45.896)"
                EnableEditShapes
                CenterChanged="@((o) => AddMessage($"CenterChanged {o}"))"
                OnClick="@((o) => AddMessage($"OnClick {o}"))"
@@ -68,8 +67,6 @@ Pointer: @_pointer
     {
         if (firstRender)
         {
-            _map.Zoom = 5;
-            _map.Center = new Coordinate(8.000, 45.896);
             _map.ShapesLayer = _layer;
             AddMessage($"Page.OnAfterRender firstRender: {firstRender}");
         }

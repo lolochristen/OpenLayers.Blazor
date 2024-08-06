@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<Map @ref="_map" Style="height:800px" Class="card" OnFeatureClick="FeatureClick">
+<Map @ref="_map" Style="height:800px" Class="card" OnFeatureClick="FeatureClick" InitialCenter="new Coordinate(7.45150, 46.92815)" InitialZoom="15.5">
     <Layers>
         <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="terrain_v1.0.0"></Layer>
         <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="base_v1.0.0"></Layer>
@@ -37,16 +37,7 @@
 <CodeView Source="SwissBaseMapDemo.razor" />
 
 @code {
-    private Map _map = null!;
-    override protected async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _map.Center = new Coordinate(7.45150, 46.92815);
-            _map.Zoom = 15.5;
-        }
-    }
-
+    private Map _map;
     private async Task FeatureClick(Feature feature)
     {
         if (!string.IsNullOrEmpty(feature.Id) && feature.Type == "Point")

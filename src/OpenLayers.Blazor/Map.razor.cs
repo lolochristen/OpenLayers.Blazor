@@ -388,6 +388,18 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
+    ///     Gets or sets the default or initial center of the map.
+    /// </summary>
+    [Parameter]
+    public Coordinate InitialCenter { get; set; } = Coordinate.Empty;
+
+    /// <summary>
+    ///     Gets or sets the default or initial center of the map.
+    /// </summary>
+    [Parameter]
+    public double InitialZoom { get; set; } = 0;
+
+    /// <summary>
     ///     Gets or set the default layer for shapes.
     /// </summary>
     public Layer? ShapesLayer { get; set; }
@@ -481,6 +493,12 @@ public partial class Map : IAsyncDisposable
 
             if (MarkersLayer != null && MarkersList.Count > 0)
                 GetOrCreateMarkersLayer();
+
+            if (InitialCenter != Coordinate.Empty)
+                Center = InitialCenter;
+
+            if (InitialZoom != 0)
+                Zoom = InitialZoom;
 
             if (_module != null)
                 await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom, Rotation, InteractionsEnabled,

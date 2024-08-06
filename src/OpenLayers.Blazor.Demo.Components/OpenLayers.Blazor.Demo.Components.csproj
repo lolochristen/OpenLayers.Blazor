@@ -25,7 +25,8 @@
 		<EmbeddedResource Include="Pages\FlightTracker.razor" />
 		<EmbeddedResource Include="Pages\VectorLayersDemo.razor" />
 		<EmbeddedResource Include="Pages\EventsDemo.razor" />
-    <EmbeddedResource Include="Pages\SwissBaseMapDemo.razor" />
+		<EmbeddedResource Include="Pages\SwissBaseMapDemo.razor" />
+		<EmbeddedResource Include="Pages\MapBoxDemo.razor" />
   </ItemGroup>
 
 	<ItemGroup>

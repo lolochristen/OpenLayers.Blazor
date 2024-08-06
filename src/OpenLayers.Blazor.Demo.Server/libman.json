@@ -3,7 +3,7 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "openlayers@9.0.0",
+      "library": "openlayers@10.0.0",
       "destination": "wwwroot/lib/openlayers/",
       "files": [
         "dist/ol.js",
@@ -73,6 +73,16 @@
         "js/bootstrap.js.map",
         "js/bootstrap.min.js",
         "js/bootstrap.min.js.map"
+      ]
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "ol-mapbox-style@12.3.4",
+      "destination": "wwwroot/lib/ol-mapbox-style/",
+      "files": [
+        "dist/olms.js",
+        "dist/olms.js.map",
+        "dist/olms.min.js"
       ]
     }
   ]

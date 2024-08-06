@@ -1,34 +1,43 @@
 ﻿@page "/swissbasemap"
 @rendermode Components.RenderMode.DefaultRenderMode
 
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">Swiss Base Map</h3>
+    </div>
+    <div class="card-body">
+        See <a href="https://www.swisstopo.admin.ch/de/webkarten-base-map">here</a> for more info.
+        The layers use a mapbox vector style definition as Url. The library <a href="https://github.com/openlayers/ol-mapbox-style">ol-mapbox-style</a> is required to process the styles and must be included manually.
+    </div>
+</div>
+
 <Map @ref="_map" Style="height:800px" Class="card" OnFeatureClick="FeatureClick">
     <Layers>
-        <Layer LayerType="LayerType.MapboxVectorLayer" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="terrain_v1.0.0"></Layer>
-        <Layer LayerType="LayerType.MapboxVectorLayer" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="base_v1.0.0"></Layer>
+        <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="terrain_v1.0.0"></Layer>
+        <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="base_v1.0.0"></Layer>
     </Layers>
+    <Popup>
+        @if (context != null)
+        {
+            <div id="popup" class="ol-box">
+                <table class="table table-striped small">
+                    @foreach (var prop in context.Properties)
+                    {
+                        <tr>
+                            <td>@prop.Key</td>
+                            <td>@prop.Value</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    </Popup>
 </Map>
 
-@if (_feature != null)
-{
-    <div>
-        <h3>Feature @_feature.Id</h3>
-        <table class="table table-striped">
-            @foreach (var prop in _feature.Properties)
-            {
-                <tr>
-                    <td>@prop.Key</td>
-                    <td>@prop.Value</td>
-                </tr>
-            }
-        </table>
-
-    </div>
-}
+<CodeView Source="SwissBaseMapDemo.razor" />
 
 @code {
     private Map _map = null!;
-    private Feature? _feature;
-
     override protected async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -38,9 +47,9 @@
         }
     }
 
-    private void FeatureClick(Feature feature)
+    private async Task FeatureClick(Feature feature)
     {
-        if (feature.Id != null)
-            _feature = feature;
+        if (!string.IsNullOrEmpty(feature.Id) && feature.Type == "Point")
+            await _map.ShowPopup(feature);
     }
 }

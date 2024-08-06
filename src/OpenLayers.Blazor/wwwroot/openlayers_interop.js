@@ -103,6 +103,10 @@ export function MapOLSetSelectionSettings(mapId, layerId, selectionEnabled, sele
     _MapOL[mapId].setSelectionSettings(layerId, selectionEnabled, selectionStyle, multiSelect);
 }
 
+export function MapOLShowPopup(mapId, coordinates) {
+    _MapOL[mapId].showPopup(coordinates);
+}
+
 // --- MapOL ----------------------------------------------------------------------------//
 function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
     this.Instance = instance;
@@ -204,17 +208,17 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
 
     var popupElement = document.getElementById(popupId);
 
-    var popup = new ol.Overlay({
+    this.OverlayPopup = new ol.Overlay({
         element: popupElement,
         positioning: "bottom-center",
         stopEvent: false,
         offset: [0, -50]
     });
 
-    this.Map.addOverlay(popup);
+    this.Map.addOverlay(this.OverlayPopup);
 
-    this.Map.on("click", function(evt) { that.onMapClick(evt, popup, popupElement) });
-    this.Map.on("pointermove", function(evt) { that.onMapPointerMove(evt, popupElement) });
+    this.Map.on("click", function(evt) { that.onMapClick(evt, that.OverlayPopup, popupElement) });
+    this.Map.on("pointermove", function(evt) { that.onMapPointerMove(evt) });
     this.Map.on("rendercomplete", function(evt) { that.Instance.invokeMethodAsync("OnInternalRenderComplete"); });
     this.Map.getView().on("change:resolution", function(evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function(evt) { that.onMapCenterChanged(); });
@@ -426,7 +430,7 @@ MapOL.prototype.prepareLayers = function(layers) {
                     layer = new ol.layer.WebGLTile(l);
                     break;
 
-                case "MapboxVectorLayer":
+                case "MapboxVectorStyle":
                     l.styleUrl = l.source.url;
                     l.source = l.source.layer;
                     layer = new olms.MapboxVectorLayer(l);
@@ -613,6 +617,9 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
                     invokeMethod = false;
                     that.Instance.invokeMethodAsync("OnInternalFeatureClick", intFeature, layerId);
                 }
+                if (that.Options.autoPopup) {
+                    popup.setPosition(intFeature.coordinates);
+                }
             }
         });
 
@@ -625,7 +632,13 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
     }
 };
 
-MapOL.prototype.onMapPointerMove = function(evt, element) {
+MapOL.prototype.showPopup = function(coordinates) {
+    this.OverlayPopup.setPosition(
+        ol.proj.transform(coordinates,
+            this.Options.coordinatesProjection,
+            this.Map.getView().getProjection()));
+}
+MapOL.prototype.onMapPointerMove = function(evt) {
     if (evt.dragging || Number.isNaN(evt.coordinate[0])) {
         return;
     }
@@ -921,7 +934,14 @@ MapOL.prototype.mapFeatureToInternalFeature = function (feature) {
     if (feature == null) return null;
 
     var viewProjection = this.Map ? this.Map.getView().getProjection() : (this.Options.viewProjection ?? "EPSG:3857");
-    const coordinates = MapOL.transformCoordinates(feature.getFlatCoordinates(), viewProjection, this.Options.coordinatesProjection);
+    var coordinates = null;
+
+    var c = feature.getFlatCoordinates();
+    var l = c.length;
+    if (Array.isArray(c[0])) c.forEach((g2) => l = l + g2.length);
+    if (l < this.Options.serializationCoordinatesLimit)
+        coordinates = MapOL.transformCoordinates(c, viewProjection, this.Options.coordinatesProjection);
+    
     var id = feature.getId() ?? feature.getProperties().feature_id;
     var properties = feature.getProperties();
     properties.type = feature.getType();
@@ -929,7 +949,7 @@ MapOL.prototype.mapFeatureToInternalFeature = function (feature) {
     return {
         id: id ? id.toString() : null,
         coordinates: coordinates,
-        properties: properties,
+        properties: properties
     }
 }
 

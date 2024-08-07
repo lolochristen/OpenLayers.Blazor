@@ -1,0 +1,59 @@
+﻿@page "/swissbasemap"
+@rendermode Components.RenderMode.DefaultRenderMode
+
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">Swiss Base Map</h3>
+    </div>
+    <div class="card-body">
+        <p>
+            See <a href="https://www.swisstopo.admin.ch/de/webkarten-base-map">here</a> for more info.
+            The layers use a mapbox vector style definition as Url. The library <a href="https://github.com/openlayers/ol-mapbox-style">ol-mapbox-style</a> is required to process the styles and must be included manually.
+        </p>
+        <div class="btn-toolbar gap-1" role="toolbar">
+            <select id="styleUrl" @bind="_styleUrl">
+                <option value="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json">ch.swisstopo.basemap.vt</option>
+                <option value="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json">ch.swisstopo.lightbasemap.vt</option>
+                <option value="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.imagerybasemap.vt/style.json">ch.swisstopo.imagerybasemap.vt</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<MapboxMap @ref="_map" Style="height:800px" Class="card" 
+           OnFeatureClick="FeatureClick" 
+           InitialCenter="new Coordinate(7.45150, 46.92815)" InitialZoom="15.5" 
+           StyleUrl="@_styleUrl">
+        @* // explicitly add a single layer from a source:
+        <Layers>
+            <Layer LayerType="LayerType.MapboxVectorStyle" Url="https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json" SourceLayer="base_v1.0.0" Declutter></Layer>
+        </Layers>*@    
+    <Popup>
+        @if (context != null)
+        {
+            <div id="popup" class="ol-box">
+                <table class="table table-striped small">
+                    @foreach (var prop in context.Properties)
+                    {
+                        <tr>
+                            <td>@prop.Key</td>
+                            <td>@prop.Value</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    </Popup>
+</MapboxMap>
+
+<CodeView Source="SwissBaseMapDemo.razor" />
+
+@code {
+    private MapboxMap? _map;
+    private string _styleUrl = "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json";
+    private async Task FeatureClick(Feature feature)
+    {
+        if (!string.IsNullOrEmpty(feature.Id) && feature.Type == "Point")
+            await _map.ShowPopup(feature);
+    }
+}

@@ -420,6 +420,13 @@ public partial class Layer : ComponentBase
     [Parameter]
     public bool MultiSelect { get; set; }
 
+    [Parameter]
+    public bool Declutter
+    {
+        get => InternalLayer.Declutter;
+        set => InternalLayer.Declutter = value;
+    }
+
     /// <summary>
     ///    Gets the list of shapes in the layer.
     /// </summary>

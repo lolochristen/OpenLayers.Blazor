@@ -1,0 +1,25 @@
+﻿@page "/mapbox"
+@rendermode Components.RenderMode.DefaultRenderMode
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">Mapbox</h3>
+    </div>
+    <div class="card-body">
+        The layers use a mapbox vector style definition as Url. The library <a href="https://github.com/openlayers/ol-mapbox-style">ol-mapbox-style</a> is required to process the styles and must be included manually.
+        <p>
+            MapBox Access Token: <input @bind-value="_accessToken"/>
+        </p>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(_accessToken))
+{
+    <MapboxMap Style="height: 800px" Class="card" StyleUrl="mapbox://styles/mapbox/bright-v9" AccessToken="@_accessToken">
+    </MapboxMap>
+}
+
+<CodeView Source="MapBoxDemo.razor" />
+
+@code {
+    private string _accessToken = "";
+}

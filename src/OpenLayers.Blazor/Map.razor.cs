@@ -19,7 +19,6 @@ public partial class Map : IAsyncDisposable
     private Feature? _popupContext;
     private string _popupId;
 
-
     /// <summary>
     ///     Default Constructor
     /// </summary>
@@ -388,6 +387,18 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
+    ///     Gets or sets the default or initial center of the map.
+    /// </summary>
+    [Parameter]
+    public Coordinate InitialCenter { get; set; } = Coordinate.Empty;
+
+    /// <summary>
+    ///     Gets or sets the default or initial center of the map.
+    /// </summary>
+    [Parameter]
+    public double InitialZoom { get; set; } = 0;
+
+    /// <summary>
     ///     Gets or set the default layer for shapes.
     /// </summary>
     public Layer? ShapesLayer { get; set; }
@@ -482,6 +493,12 @@ public partial class Map : IAsyncDisposable
             if (MarkersLayer != null && MarkersList.Count > 0)
                 GetOrCreateMarkersLayer();
 
+            if (InitialCenter != Coordinate.Empty)
+                Center = InitialCenter;
+
+            if (InitialZoom != 0)
+                Zoom = InitialZoom;
+
             if (_module != null)
                 await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom, Rotation, InteractionsEnabled,
                     LayersList.Select(p => p.InternalLayer).ToArray(),
@@ -544,6 +561,18 @@ public partial class Map : IAsyncDisposable
             await OnMarkerClick.InvokeAsync(new Marker(shape));
         else
             await OnShapeClick.InvokeAsync(new Shape(shape));
+    }
+
+    [JSInvokable]
+    public async Task OnInternalFeatureClick(Internal.Feature feature, string layerId)
+    {
+#if DEBUG
+        Console.WriteLine($"OnInternalFeatureClick: {JsonSerializer.Serialize(feature)}");
+#endif
+        var f = new Feature(feature);
+        if (AutoPopup)
+            _popupContext = f;
+        await OnFeatureClick.InvokeAsync(f);
     }
 
     [JSInvokable]
@@ -1158,5 +1187,37 @@ public partial class Map : IAsyncDisposable
             return;
         
         await _module.InvokeVoidAsync("MapOLSetSelectionSettings", _mapId, layer?.Id, selectionEnabled, selectionStyle, multiSelect);
+    }
+
+    /// <summary>
+    /// Shows the popup with the context the given feature at given coordinate
+    /// </summary>
+    /// <param name="feature">If set, set the context of the popup will be this feature</param>
+    /// <param name="coordinate">Shows the popup at this location, if not set it will use the location of given the feature or the last clicked feature.</param>
+    /// <returns></returns>
+    public async Task ShowPopup(Feature? feature = null, Coordinate? coordinate = null)
+    {
+        if (_module == null)
+            return;
+
+        if (feature != null)
+            _popupContext = feature;
+
+        Coordinate popupCoordinate;
+        if (coordinate.HasValue)
+            popupCoordinate = coordinate.Value;
+        else if (_popupContext != null)
+            popupCoordinate = _popupContext.Coordinates.Point;
+        else
+            return;
+
+        await _module.InvokeVoidAsync("MapOLShowPopup", _mapId, popupCoordinate);
+    }
+
+    protected ValueTask ApplyMapboxStyle(string styleUrl, string? accessToken)
+    {
+        if (_module != null)
+            return _module.InvokeVoidAsync("MapOLApplyMapboxStyle", _mapId, styleUrl, accessToken);
+        return ValueTask.CompletedTask;
     }
 }

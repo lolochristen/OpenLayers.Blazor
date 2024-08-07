@@ -4,7 +4,7 @@
   "libraries": [
     {
       "provider": "cdnjs",
-      "library": "openlayers@7.2.2",
+      "library": "openlayers@9.2.4",
       "destination": "wwwroot/lib/openlayers/",
       "files": [
         "dist/ol.js",

@@ -9,5 +9,9 @@ public enum LayerType
     Heatmap,
     Graticule,
     VectorImage,
-    WebGLTile
+    WebGLTile,
+    /// <summary>
+    /// MapboxVectorLayer. Requires ol-mapbox-style js
+    /// </summary>
+    MapboxVectorStyle
 }

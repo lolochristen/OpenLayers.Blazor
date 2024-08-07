@@ -103,7 +103,14 @@ export function MapOLSetSelectionSettings(mapId, layerId, selectionEnabled, sele
     _MapOL[mapId].setSelectionSettings(layerId, selectionEnabled, selectionStyle, multiSelect);
 }
 
-// --- MapOL ----------------------------------------------------------------------------//
+export function MapOLShowPopup(mapId, coordinates) {
+    _MapOL[mapId].showPopup(coordinates);
+}
+
+export function MapOLApplyMapboxStyle(mapId, styleUrl, accessToken) {
+    _MapOL[mapId].applyMapboxStyle(styleUrl, accessToken);
+}
+
 function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
     this.Instance = instance;
     this.Options = options;
@@ -204,17 +211,17 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
 
     var popupElement = document.getElementById(popupId);
 
-    var popup = new ol.Overlay({
+    this.OverlayPopup = new ol.Overlay({
         element: popupElement,
         positioning: "bottom-center",
         stopEvent: false,
         offset: [0, -50]
     });
 
-    this.Map.addOverlay(popup);
+    this.Map.addOverlay(this.OverlayPopup);
 
-    this.Map.on("click", function(evt) { that.onMapClick(evt, popup, popupElement) });
-    this.Map.on("pointermove", function(evt) { that.onMapPointerMove(evt, popupElement) });
+    this.Map.on("click", function(evt) { that.onMapClick(evt, that.OverlayPopup, popupElement) });
+    this.Map.on("pointermove", function(evt) { that.onMapPointerMove(evt) });
     this.Map.on("rendercomplete", function(evt) { that.Instance.invokeMethodAsync("OnInternalRenderComplete"); });
     this.Map.getView().on("change:resolution", function(evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function(evt) { that.onMapCenterChanged(); });
@@ -363,73 +370,79 @@ MapOL.prototype.prepareLayers = function(layers) {
 
             var layer;
             switch (l.layerType) {
-            case "Image":
-                l.source = source;
-                layer = new ol.layer.Image(l);
-                break;
+                case "Image":
+                    l.source = source;
+                    layer = new ol.layer.Image(l);
+                    break;
 
-            case "Vector":
-            case "VectorTile":
-                var features;
-                if (l.useStyleCallback) {
-                    l.style = function(feature, resolution) { return that.getShapeStyle(feature, l.id); };
-                } else if (l.style) {
-                    var styleOptions = l.style;
-                    l.style = function(feature, resolution) {
-                        return that.mapStyleOptionsToStyle(styleOptions);
-                    };
-                } else if (l.flatStyle) {
-                    l.style = l.flatStyle;
-                }
-                if (l.source.data) {
-                    features = l.source.format.readFeatures(l.source.data,
-                        {
-                            featureProjection: this.Options.viewProjection ??
-                            (ollayers.length > 0
-                                ? ollayers[0].getSource().getProjection()
-                                : (that.Map ? that.Map.getView().getProjection() : "EPSG:3857")),
-                            dataProjection: l.source.projection ?? this.Options.coordinatesProjection
-                        });
-                }
-                l.source = l.layerType == "VectorTile"
-                    ? new ol.source.VectorTile(l.source)
-                    : new ol.source.Vector(l.source);
+                case "Vector":
+                case "VectorTile":
+                    var features;
+                    if (l.useStyleCallback) {
+                        l.style = function (feature, resolution) { return that.getShapeStyle(feature, l.id); };
+                    } else if (l.style) {
+                        var styleOptions = l.style;
+                        l.style = function (feature, resolution) {
+                            return that.mapStyleOptionsToStyle(styleOptions);
+                        };
+                    } else if (l.flatStyle) {
+                        l.style = l.flatStyle;
+                    }
+                    if (l.source.data) {
+                        features = l.source.format.readFeatures(l.source.data,
+                            {
+                                featureProjection: this.Options.viewProjection ??
+                                    (ollayers.length > 0
+                                        ? ollayers[0].getSource().getProjection()
+                                        : (that.Map ? that.Map.getView().getProjection() : "EPSG:3857")),
+                                dataProjection: l.source.projection ?? this.Options.coordinatesProjection
+                            });
+                    }
+                    l.source = l.layerType == "VectorTile"
+                        ? new ol.source.VectorTile(l.source)
+                        : new ol.source.Vector(l.source);
 
-                if (l.raiseShapeEvents) { // attach and sync
-                    l.source.on("addfeature", function(evt) { that.onFeatureAdded(l.id, evt.feature); });
-                    l.source.on("changefeature", function(evt) { that.onFeatureChanged(l.id, evt.feature); });
-                    l.source.on("removefeature", function(evt) { that.onFeatureRemoved(l.id, evt.feature); });
-                }
-                if (features) l.source.addFeatures(features);
-                layer = l.layerType == "VectorTile" ? new ol.layer.VectorTile(l) : new ol.layer.Vector(l);
-                break;
+                    if (l.raiseShapeEvents) { // attach and sync
+                        l.source.on("addfeature", function (evt) { that.onFeatureAdded(l.id, evt.feature); });
+                        l.source.on("changefeature", function (evt) { that.onFeatureChanged(l.id, evt.feature); });
+                        l.source.on("removefeature", function (evt) { that.onFeatureRemoved(l.id, evt.feature); });
+                    }
+                    if (features) l.source.addFeatures(features);
+                    layer = l.layerType == "VectorTile" ? new ol.layer.VectorTile(l) : new ol.layer.Vector(l);
+                    break;
 
-            case "Heatmap":
-                l.source = new ol.source.Vector(l.source);
-                layer = new ol.layer.Heatmap(l);
-                break;
+                case "Heatmap":
+                    l.source = new ol.source.Vector(l.source);
+                    layer = new ol.layer.Heatmap(l);
+                    break;
 
-            case "Graticule":
-                if (l.showLabels == undefined) l.showLabels = true;
-                if (l.wrapX == undefined) l.wrapX = false;
-                delete l.source; // remove source, graticule does not like it
-                layer = new ol.layer.Graticule(l);
-                break;
+                case "Graticule":
+                    if (l.showLabels == undefined) l.showLabels = true;
+                    if (l.wrapX == undefined) l.wrapX = false;
+                    delete l.source; // remove source, graticule does not like it
+                    layer = new ol.layer.Graticule(l);
+                    break;
 
-            case "VectorImage":
-                l.source = new ol.source.Vector(l.source);
-                layer = new ol.layer.VectorImage(l);
-                break;
+                case "VectorImage":
+                    l.source = new ol.source.Vector(l.source);
+                    layer = new ol.layer.VectorImage(l);
+                    break;
 
-            case "WebGLTile":
-                l.source = source;
-                layer = new ol.layer.WebGLTile(l);
-                break;
+                case "WebGLTile":
+                    l.source = source;
+                    layer = new ol.layer.WebGLTile(l);
+                    break;
 
-            default: // tile
-                l.source = source;
-                layer = new ol.layer.Tile(l);
-                break;
+                case "MapboxVectorStyle":
+                    l.styleUrl = l.source.url;
+                    l.source = l.source.layer;
+                    layer = new olms.MapboxVectorLayer(l);
+                    break;
+
+                default: // tile
+                    l.source = source;
+                    layer = new ol.layer.Tile(l);
+                    break;
             }
 
             ollayers.push(layer);
@@ -578,28 +591,39 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
             if (!layer)
                 return; // no layer = drawing
 
-            const shape = that.mapFeatureToShape(feature);
             const layerId = layer.get("id");
 
-            if (shape) {
-                invokeMethod = false;
-                that.Instance.invokeMethodAsync("OnInternalShapeClick", shape, layerId);
-            }
+            if (feature.getGeometryName) { // shape
+                const shape = that.mapFeatureToShape(feature);
 
-            var showPopup = false;
+                if (shape) {
+                    invokeMethod = false;
+                    that.Instance.invokeMethodAsync("OnInternalShapeClick", shape, layerId);
+                }
 
-            if (shape) {
-                showPopup = shape.properties.popup;
-            }
-            if (showPopup == undefined) {
-                showPopup = that.Options.autoPopup;
-            }
+                var showPopup = false;
 
-            if (showPopup) {
-                const coordinates = feature.getGeometry().getCoordinates();
-                popup.setPosition(coordinates);
-            }
+                if (shape) {
+                    showPopup = shape.properties.popup;
+                }
+                if (showPopup == undefined) {
+                    showPopup = that.Options.autoPopup;
+                }
 
+                if (showPopup) {
+                    const coordinates = feature.getGeometry().getCoordinates();
+                    popup.setPosition(coordinates);
+                }
+            } else if (feature.getType) {
+                const intFeature = that.mapFeatureToInternalFeature(feature);
+                if (intFeature) {
+                    invokeMethod = false;
+                    that.Instance.invokeMethodAsync("OnInternalFeatureClick", intFeature, layerId);
+                }
+                if (that.Options.autoPopup) {
+                    popup.setPosition(intFeature.coordinates);
+                }
+            }
         });
 
     if (invokeMethod) {
@@ -611,7 +635,13 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
     }
 };
 
-MapOL.prototype.onMapPointerMove = function(evt, element) {
+MapOL.prototype.showPopup = function(coordinates) {
+    this.OverlayPopup.setPosition(
+        ol.proj.transform(coordinates,
+            this.Options.coordinatesProjection,
+            this.Map.getView().getProjection()));
+}
+MapOL.prototype.onMapPointerMove = function(evt) {
     if (evt.dragging || Number.isNaN(evt.coordinate[0])) {
         return;
     }
@@ -841,18 +871,16 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
 
     if (geometry != null && !Array.isArray(geometry)) {
         switch (geometry.getType()) {
-        case "Circle":
-            coordinates = ol.proj.transform(geometry.getCenter(), viewProjection, this.Options.coordinatesProjection);
-            break;
-        default:
-            var g = geometry.getCoordinates();
-            var l = g.length;
-            if (Array.isArray(g[0])) g.forEach((g2) => l = l + g2.length);
-            if (l < this.Options.serializationCoordinatesLimit)
-                coordinates = MapOL.transformCoordinates(geometry.getCoordinates(),
-                    viewProjection,
-                    this.Options.coordinatesProjection);
-            break;
+            case "Circle":
+                coordinates = ol.proj.transform(geometry.getCenter(), viewProjection, this.Options.coordinatesProjection);
+                break;
+            default:
+                var gc = geometry.getCoordinates();
+                var l = gc.length;
+                if (Array.isArray(gc[0])) gc.forEach((g2) => l = l + g2.length);
+                if (l < this.Options.serializationCoordinatesLimit)
+                    coordinates = MapOL.transformCoordinates(gc, viewProjection, this.Options.coordinatesProjection);
+                break;
         }
     }
 
@@ -865,13 +893,6 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
     } else {
         if (style) styleOptions = [this.mapStylesToStyleOptions(style)];
     }
-
-    var stroke = style && !Array.isArray(style) ? style.getStroke() : null;
-    var fill = style && !Array.isArray(style) ? style.getFill() : null;
-    var text = style && !Array.isArray(style) ? style.getText() : null;
-    var image = style && !Array.isArray(style) ? style.getImage() : null;
-    var circle = image && image.getRadius != null ? circle = image : null;
-    var icon = image && image.getSrc != null ? icon = image : null;
 
     var id = feature.getId();
 
@@ -904,6 +925,29 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
 
     return shape;
 };
+
+MapOL.prototype.mapFeatureToInternalFeature = function (feature) {
+    if (feature == null) return null;
+
+    var viewProjection = this.Map ? this.Map.getView().getProjection() : (this.Options.viewProjection ?? "EPSG:3857");
+    var coordinates = null;
+
+    var c = feature.getFlatCoordinates();
+    var l = c.length;
+    if (Array.isArray(c[0])) c.forEach((g2) => l = l + g2.length);
+    if (l < this.Options.serializationCoordinatesLimit)
+        coordinates = MapOL.transformCoordinates(c, viewProjection, this.Options.coordinatesProjection);
+    
+    var id = feature.getId() ?? feature.getProperties().feature_id;
+    var properties = feature.getProperties();
+    properties.type = feature.getType();
+
+    return {
+        id: id ? id.toString() : null,
+        coordinates: coordinates,
+        properties: properties
+    }
+}
 
 MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoordinates = true) {
 
@@ -967,55 +1011,6 @@ MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoor
         feature.setStyle(shape.flatStyle);
 
     return feature;
-};
-
-MapOL.prototype.getDefaultStyle = function(shape) {
-
-    if (shape.geometryType == "Point") {
-        const viewProjection = this.Map.getView().getProjection();
-        const coordinates = ol.proj.transform(shape.coordinates ?? this.Map.getView().getCenter(),
-            this.Options.coordinatesProjection,
-            viewProjection);
-        let radius = 5;
-        if (shape.radius != null) {
-            radius = shape.radius;
-        }
-        if (coordinates.length > 0) {
-            radius = radius / ol.proj.getPointResolution(viewProjection, 1, coordinates);
-        }
-        return new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: radius,
-                fill: new ol.style.Fill({
-                    color: shape.backgroundColor,
-                }),
-                stroke: new ol.style.Stroke({
-                    color: shape.borderColor,
-                    width: shape.borderSize
-                })
-            }),
-            zIndex: shape.zIndex ?? Infinity
-        });
-    } else {
-        return new ol.style.Style({
-            fill: shape.backgroundColor ? new ol.style.Fill({ color: shape.backgroundColor }) : null,
-            stroke: new ol.style.Stroke({ color: shape.borderColor, width: shape.borderSize }),
-            text: shape.label
-                ? new ol.style.Text({
-                    overflow: true,
-                    text: shape.label,
-                    placement: "line",
-                    scale: shape.textScale,
-                    fill: new ol.style.Fill({ color: shape.color }),
-                    stroke: new ol.style.Stroke({ color: shape.color, width: shape.color }),
-                    offsetX: 0,
-                    offsetY: 0,
-                    rotation: 0
-                })
-                : null,
-            zIndex: shape.zIndex ?? undefined
-        });
-    }
 };
 
 MapOL.prototype.onFeatureRemoved = function(layerId, feature) {
@@ -1119,7 +1114,8 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style) {
         stroke: style.stroke ? new ol.style.Stroke(style.stroke) : undefined,
         fill: style.fill ? new ol.style.Fill(style.fill) : undefined,
         text: style.text ? new ol.style.Text(style.text) : undefined,
-        image: style.circle ? new ol.style.Circle(style.circle) : style.icon ? new ol.style.Icon(style.icon) : undefined
+        image: style.circle ? new ol.style.Circle(style.circle) : style.icon ? new ol.style.Icon(style.icon) : undefined,
+        zIndex: style.zIndex,
     });
 
     return styleObject;
@@ -1252,6 +1248,14 @@ MapOL.prototype.mapStylesToStyleOptions = function(style) {
             : undefined,
         zIndex: style.getZIndex()
     };
+};
+
+MapOL.prototype.applyMapboxStyle = function(styleUrl, accessToken) {
+    var that = this;
+    this.Map.getAllLayers().forEach((l) => { that.Map.removeLayer(l); });
+    olms.apply(this.Map, styleUrl, { accessToken: accessToken }).then(function(r) {
+        // TODO populate layer list
+    });
 };
 
 MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {

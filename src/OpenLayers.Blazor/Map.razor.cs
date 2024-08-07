@@ -19,7 +19,6 @@ public partial class Map : IAsyncDisposable
     private Feature? _popupContext;
     private string _popupId;
 
-
     /// <summary>
     ///     Default Constructor
     /// </summary>
@@ -1213,5 +1212,12 @@ public partial class Map : IAsyncDisposable
             return;
 
         await _module.InvokeVoidAsync("MapOLShowPopup", _mapId, popupCoordinate);
+    }
+
+    protected ValueTask ApplyMapboxStyle(string styleUrl, string? accessToken)
+    {
+        if (_module != null)
+            return _module.InvokeVoidAsync("MapOLApplyMapboxStyle", _mapId, styleUrl, accessToken);
+        return ValueTask.CompletedTask;
     }
 }

@@ -12,14 +12,12 @@
     </div>
 </div>
 
-    <Map Style="height:800px" Class="card">
-        <Layers>
-        @if (!string.IsNullOrEmpty(_accessToken))
-        {
-            <Layer LayerType="LayerType.MapboxVectorStyle" Url="mapbox://styles/mapbox/bright-v9" Options="@(new { AccessToken = _accessToken })" Declutter></Layer>
-        }
-        </Layers>
-    </Map>
+@if (!string.IsNullOrEmpty(_accessToken))
+{
+    <MapboxMap Style="height: 800px" Class="card" StyleUrl="mapbox://styles/mapbox/bright-v9" AccessToken="@_accessToken">
+    </MapboxMap>
+}
+
 <CodeView Source="MapBoxDemo.razor" />
 
 @code {

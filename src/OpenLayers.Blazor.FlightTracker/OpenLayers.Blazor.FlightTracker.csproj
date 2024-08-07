@@ -101,8 +101,4 @@
       <ProjectReference Include="..\OpenLayers.Blazor\OpenLayers.Blazor.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="wwwroot\lib\" />
-    </ItemGroup>
-
 </Project>

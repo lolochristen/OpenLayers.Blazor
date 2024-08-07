@@ -3,7 +3,7 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "openlayers@10.0.0",
+      "library": "openlayers@9.2.4",
       "destination": "wwwroot/lib/openlayers/",
       "files": [
         "dist/ol.js",

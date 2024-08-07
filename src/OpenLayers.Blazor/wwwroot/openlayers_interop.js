@@ -107,7 +107,10 @@ export function MapOLShowPopup(mapId, coordinates) {
     _MapOL[mapId].showPopup(coordinates);
 }
 
-// --- MapOL ----------------------------------------------------------------------------//
+export function MapOLApplyMapboxStyle(mapId, styleUrl, accessToken) {
+    _MapOL[mapId].applyMapboxStyle(styleUrl, accessToken);
+}
+
 function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
     this.Instance = instance;
     this.Options = options;
@@ -1245,6 +1248,14 @@ MapOL.prototype.mapStylesToStyleOptions = function(style) {
             : undefined,
         zIndex: style.getZIndex()
     };
+};
+
+MapOL.prototype.applyMapboxStyle = function(styleUrl, accessToken) {
+    var that = this;
+    this.Map.getAllLayers().forEach((l) => { that.Map.removeLayer(l); });
+    olms.apply(this.Map, styleUrl, { accessToken: accessToken }).then(function(r) {
+        // TODO populate layer list
+    });
 };
 
 MapOL.transformNullToUndefined = function transformNullToUndefined(obj) {

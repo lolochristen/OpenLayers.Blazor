@@ -504,7 +504,12 @@ public partial class Map : IAsyncDisposable
 
         if (firstRender)
         {
-            _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js?v={Assembly.GetExecutingAssembly().GetName().Version}");
+#if DEBUG
+            var script = $"openlayers_interop.js";
+#else
+            var script = $"openlayers_interop.min.js?v={Assembly.GetExecutingAssembly().GetName().Version}";
+#endif
+            _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/{script}");
             Instance ??= DotNetObjectReference.Create(this);
 
             if (ShapesLayer != null && ShapesList.Count > 0)
@@ -598,6 +603,9 @@ public partial class Map : IAsyncDisposable
     [JSInvokable]
     public Task OnInternalClick(Coordinate coordinate)
     {
+#if DEBUG
+        Console.WriteLine($"OnInternalClick: {coordinate}");
+#endif
         return OnClick.InvokeAsync(coordinate);
     }
 

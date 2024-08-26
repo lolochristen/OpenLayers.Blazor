@@ -21,6 +21,12 @@ jobs:
         with:
           fetch-depth: 0
           filter: tree:0
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 'latest'
+      - name: Install uglify-js
+        run: npm install uglify-js -g
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1

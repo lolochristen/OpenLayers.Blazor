@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# 
+/src/OpenLayers.Blazor/wwwroot/openlayers_interop.min.js
+/src/OpenLayers.Blazor/wwwroot/openlayers_interop.min.js.map
+
 # User-specific files
 *.rsuser
 *.suo

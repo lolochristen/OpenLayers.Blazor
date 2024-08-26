@@ -100,4 +100,8 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
+
+	<Target Name="BeforeBuildStep" BeforeTargets="Build" Condition="$(Configuration)=='Release'">
+		<Exec Command="uglifyjs ./wwwroot/openlayers_interop.js -o ./wwwroot/openlayers_interop.min.js -c -m --source-map &quot;filename='./wwwroot/openlayers_interop.min.js.map'&quot;"/>
+	</Target>
 </Project>

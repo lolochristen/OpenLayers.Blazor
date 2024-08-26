@@ -546,7 +546,7 @@ MapOL.prototype.addControls = function() {
     if (this.Options.fullScreenControl) this.Map.addControl(new ol.control.FullScreen());
     if (this.Options.zoomSliderControl) this.Map.addControl(new ol.control.ZoomSlider());
     if (this.Options.rotateControl) this.Map.addControl(new ol.control.Rotate());
-    if (this.Options.scaleLineUnit != "none") {
+    if (this.Options.scaleLineUnit != "None") {
         this.Map.addControl(new ol.control.ScaleLine({
             units: this.Options.scaleLineUnit.toLowerCase()
         }));

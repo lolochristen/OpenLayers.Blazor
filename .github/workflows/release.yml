@@ -20,8 +20,6 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '22'
-    - name: Install uglify-js
-      run: npm install uglify-js -g
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
     - name: Build

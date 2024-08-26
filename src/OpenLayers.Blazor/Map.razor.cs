@@ -399,6 +399,26 @@ public partial class Map : IAsyncDisposable
     public double InitialZoom { get; set; } = 0;
 
     /// <summary>
+    ///    Gets or sets the minimal zoom level.
+    /// </summary>
+    [Parameter]
+    public double MinZoom
+    {
+        get => Options.MinZoom;
+        set => Options.MinZoom = value;
+    }
+
+    /// <summary>
+    ///    Gets or sets the maximal zoom level.
+    /// </summary>
+    [Parameter]
+    public double MaxZoom
+    {
+        get => Options.MaxZoom;
+        set => Options.MaxZoom = value;
+    }
+
+    /// <summary>
     ///     Gets or set the default layer for shapes.
     /// </summary>
     public Layer? ShapesLayer { get; set; }
@@ -484,7 +504,12 @@ public partial class Map : IAsyncDisposable
 
         if (firstRender)
         {
-            _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js");
+#if DEBUG
+            var script = $"openlayers_interop.js";
+#else
+            var script = $"openlayers_interop.min.js?v={Assembly.GetExecutingAssembly().GetName().Version}";
+#endif
+            _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/{script}");
             Instance ??= DotNetObjectReference.Create(this);
 
             if (ShapesLayer != null && ShapesList.Count > 0)
@@ -578,6 +603,9 @@ public partial class Map : IAsyncDisposable
     [JSInvokable]
     public Task OnInternalClick(Coordinate coordinate)
     {
+#if DEBUG
+        Console.WriteLine($"OnInternalClick: {coordinate}");
+#endif
         return OnClick.InvokeAsync(coordinate);
     }
 

@@ -75,4 +75,14 @@ public class Options
     ///     Gets or sets boolean if zoom to extent control is visible
     /// </summary>
     public bool ZoomToExtentControl { get; set; }
+
+    /// <summary>
+    ///    Gets or sets the minimal zoom level.
+    /// </summary>
+    public double MinZoom { get; set; } = 0;
+
+    /// <summary>
+    ///    Gets or sets the maximal zoom level.
+    /// </summary>
+    public double MaxZoom { get; set; } = 28;
 }

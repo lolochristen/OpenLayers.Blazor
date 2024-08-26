@@ -15,7 +15,11 @@ public class MapLayerTests
     {
         using var ctx = new TestContext();
 
+        #if DEBUG
         var moduleInterop = ctx.JSInterop.SetupModule("./_content/OpenLayers.Blazor/openlayers_interop.js");
+        #else
+        var moduleInterop = ctx.JSInterop.SetupModule($"./_content/OpenLayers.Blazor/openlayers_interop.min.js?v={typeof(Map).Assembly.GetName().Version}");
+        #endif
         moduleInterop.Mode = JSRuntimeMode.Loose;
 
         var component = ctx.RenderComponent<Map>(

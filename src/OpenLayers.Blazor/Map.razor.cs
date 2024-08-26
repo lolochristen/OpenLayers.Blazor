@@ -399,6 +399,26 @@ public partial class Map : IAsyncDisposable
     public double InitialZoom { get; set; } = 0;
 
     /// <summary>
+    ///    Gets or sets the minimal zoom level.
+    /// </summary>
+    [Parameter]
+    public double MinZoom
+    {
+        get => Options.MinZoom;
+        set => Options.MinZoom = value;
+    }
+
+    /// <summary>
+    ///    Gets or sets the maximal zoom level.
+    /// </summary>
+    [Parameter]
+    public double MaxZoom
+    {
+        get => Options.MaxZoom;
+        set => Options.MaxZoom = value;
+    }
+
+    /// <summary>
     ///     Gets or set the default layer for shapes.
     /// </summary>
     public Layer? ShapesLayer { get; set; }

@@ -200,7 +200,9 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
             center: viewCenter,
             extent: viewExtent,
             zoom: zoom,
-            rotation: rotation
+            rotation: rotation,
+            maxZoom: this.Options.maxZoom,
+            minZoom: this.Options.minZoom
         }),
         interactions: ol.interaction.defaults.defaults().extend([new ol.interaction.DragRotateAndZoom()])
     });
@@ -587,13 +589,11 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
 
     this.Map.forEachFeatureAtPixel(evt.pixel,
         function(feature, layer) {
-
             if (!layer)
                 return; // no layer = drawing
-
             const layerId = layer.get("id");
 
-            if (feature.getGeometryName) { // shape
+            if (ol.Feature.prototype.isPrototypeOf(feature)) { // full feature
                 const shape = that.mapFeatureToShape(feature);
 
                 if (shape) {
@@ -614,7 +614,7 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
                     const coordinates = feature.getGeometry().getCoordinates();
                     popup.setPosition(coordinates);
                 }
-            } else if (feature.getType) {
+            } else if (ol.render.Feature.prototype.isPrototypeOf(feature)) { // render feature
                 const intFeature = that.mapFeatureToInternalFeature(feature);
                 if (intFeature) {
                     invokeMethod = false;
@@ -1064,14 +1064,13 @@ MapOL.prototype.getCoordinates = function(layerId, featureId) {
     return null;
 };
 
-// Shape Style
-MapOL.prototype.getShapeStyleAsync = async function(feature, layer_id) {
-    const shape = this.mapFeatureToShape(feature);
-    const style = await this.Instance.invokeMethodAsync("OnGetShapeStyleAsync", shape, layer_id);
-    return this.mapStyleOptionsToStyle(style);
-};
 MapOL.prototype.getShapeStyle = function(feature, layer_id) {
-    const shape = this.mapFeatureToShape(feature);
+    var shape;
+    if (ol.render.Feature.prototype.isPrototypeOf(feature))
+        shape = this.mapFeatureToInternalFeature(feature);
+    else
+        shape = this.mapFeatureToShape(feature);
+    delete shape.coordinates;
     const style = this.Instance.invokeMethod("OnGetShapeStyle", shape, layer_id);
     return this.mapStyleOptionsToStyle(style);
 };

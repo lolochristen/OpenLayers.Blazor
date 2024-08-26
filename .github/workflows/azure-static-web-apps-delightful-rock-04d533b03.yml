@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 'latest'
+          node-version: '22'
       - name: Install uglify-js
         run: npm install uglify-js -g
       - name: Build And Deploy

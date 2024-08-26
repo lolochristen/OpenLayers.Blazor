@@ -583,9 +583,11 @@ MapOL.prototype.getReducedFeature = function(feature) {
 
 MapOL.prototype.onMapClick = function(evt, popup, element) {
     popup.setPosition(0, 0);
-
     var that = this;
-    var invokeMethod = true;
+    const coordinate = ol.proj.transform(evt.coordinate,
+        this.Map.getView().getProjection(),
+        this.Options.coordinatesProjection);
+    this.Instance.invokeMethodAsync("OnInternalClick", coordinate);
 
     this.Map.forEachFeatureAtPixel(evt.pixel,
         function(feature, layer) {
@@ -597,7 +599,6 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
                 const shape = that.mapFeatureToShape(feature);
 
                 if (shape) {
-                    invokeMethod = false;
                     that.Instance.invokeMethodAsync("OnInternalShapeClick", shape, layerId);
                 }
 
@@ -617,7 +618,6 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
             } else if (ol.render.Feature.prototype.isPrototypeOf(feature)) { // render feature
                 const intFeature = that.mapFeatureToInternalFeature(feature);
                 if (intFeature) {
-                    invokeMethod = false;
                     that.Instance.invokeMethodAsync("OnInternalFeatureClick", intFeature, layerId);
                 }
                 if (that.Options.autoPopup) {
@@ -625,13 +625,6 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
                 }
             }
         });
-
-    if (invokeMethod) {
-        const coordinate = ol.proj.transform(evt.coordinate,
-            this.Map.getView().getProjection(),
-            this.Options.coordinatesProjection);
-        this.Instance.invokeMethodAsync("OnInternalClick", coordinate);
-    }
 };
 
 MapOL.prototype.showPopup = function(coordinates) {

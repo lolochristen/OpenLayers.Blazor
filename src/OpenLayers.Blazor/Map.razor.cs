@@ -504,7 +504,7 @@ public partial class Map : IAsyncDisposable
 
         if (firstRender)
         {
-            _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js");
+            _module ??= await JSRuntime!.InvokeAsync<IJSObjectReference>("import", $"./_content/{Assembly.GetExecutingAssembly().GetName().Name}/openlayers_interop.js?v={Assembly.GetExecutingAssembly().GetName().Version}");
             Instance ??= DotNetObjectReference.Create(this);
 
             if (ShapesLayer != null && ShapesList.Count > 0)

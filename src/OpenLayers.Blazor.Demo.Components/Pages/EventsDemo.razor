@@ -30,6 +30,7 @@ Pointer: @_pointer
                EnableEditShapes
                CenterChanged="@((o) => AddMessage($"CenterChanged {o}"))"
                OnClick="@((o) => AddMessage($"OnClick {o}"))"
+               OnDoubleClick="@((o) => AddMessage($"OnDoubleClick {o}"))"
                VisibleExtentChanged="@((o) => AddMessage($"VisibleExtentChanged {o}"))"
                OnPointerMove="@((o) => _pointer = o)"
                ZoomChanged="@((o) => AddMessage($"ZoomChanged {o}"))"
@@ -39,7 +40,8 @@ Pointer: @_pointer
                OnShapeAdded="@((o) => AddMessage($"OnShapeAdded {o}"))"
                OnShapeHover="@((o) => AddMessage($"OnShapeHover {o}"))"
                OnLayerAdded="@((o) => AddMessage($"OnLayerAdded {o}"))"
-               OnLayerRemoved="@((o) => AddMessage($"OnLayerRemoved {o}"))">
+               OnLayerRemoved="@((o) => AddMessage($"OnLayerRemoved {o}"))"
+               ConfigureJsMethod="myComponent.configureMap">
     <Layers>
         <Layer @ref="_layer" LayerType="LayerType.Vector" SourceType="SourceType.Vector" SelectionEnabled SelectionChanged="@((o) => AddMessage($"SelectionChanged {o}"))">
             <Shapes>

@@ -1,7 +1,7 @@
 ﻿var _MapOL = new Array();
 
-export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
-    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance);
+export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod) {
+    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod);
 }
 
 export function MapOLDispose(mapId) {
@@ -111,7 +111,7 @@ export function MapOLApplyMapboxStyle(mapId, styleUrl, accessToken) {
     _MapOL[mapId].applyMapboxStyle(styleUrl, accessToken);
 }
 
-function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance) {
+function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod) {
     this.Instance = instance;
     this.Options = options;
 
@@ -222,16 +222,31 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
 
     this.Map.addOverlay(this.OverlayPopup);
 
+    this.setInteractions(interactions);
+    this.setSelectionSettings(true);
+
+    if (configureJsMethod) {
+        try {
+            const namespaces = configureJsMethod.split(".");
+            const func = namespaces.pop();
+            var context = window;
+            for (let i = 0; i < namespaces.length; i++) {
+                context = context[namespaces[i]];
+            }
+            context[func].apply(context, [this.Map]);
+        //    configure(configureJsMethod, window, [options]);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     this.Map.on("click", function(evt) { that.onMapClick(evt, that.OverlayPopup, popupElement) });
+    this.Map.on("dblclick", function(evt) { that.onMapDblClick(evt) });
     this.Map.on("pointermove", function(evt) { that.onMapPointerMove(evt) });
     this.Map.on("rendercomplete", function(evt) { that.Instance.invokeMethodAsync("OnInternalRenderComplete"); });
     this.Map.getView().on("change:resolution", function(evt) { that.onMapResolutionChanged(); });
     this.Map.getView().on("change:center", function(evt) { that.onMapCenterChanged(); });
     this.Map.getView().on("change:rotation", function(evt) { that.onMapRotationChanged(); });
-
-    this.setInteractions(interactions);
-
-    this.setSelectionSettings(true);
 
     this.onMapCenterChanged();
 }
@@ -626,6 +641,13 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
             }
         });
 };
+
+MapOL.prototype.onMapDblClick = function(evt) {
+    const coordinate = ol.proj.transform(evt.coordinate,
+        this.Map.getView().getProjection(),
+        this.Options.coordinatesProjection);
+    this.Instance.invokeMethodAsync("OnInternalDoubleClick", coordinate);
+}
 
 MapOL.prototype.showPopup = function(coordinates) {
     this.OverlayPopup.setPosition(

@@ -32,13 +32,26 @@
     <a class="dismiss">🗙</a>
 </div>
 
+<script>
+    window.myComponent = {
+        configureMap: (map) => {
+            // remove double click zoom 
+            map.getInteractions().forEach(function (interaction) {
+                if (interaction instanceof ol.interaction.DoubleClickZoom) {
+                    interaction.setActive(false);
+                }
+            });
+        }
+    }
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/highlightjs-cshtml-razor/dist/cshtml-razor.min.js"></script>
 <script src="_framework/blazor.webassembly.js"></script>
 <script>
-        window.highlightSnippet = function () {
-            hljs.highlightAll();
-        }
-    </script>
+    window.highlightSnippet = function () {
+        hljs.highlightAll();
+    }
+</script>
 </body>
 </html>

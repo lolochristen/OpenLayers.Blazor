@@ -124,6 +124,12 @@ public partial class Map : IAsyncDisposable
     public EventCallback<Coordinate> OnClick { get; set; }
 
     /// <summary>
+    ///     Event when a point in the map gets double clicked. Event returns current coordinates
+    /// </summary>
+    [Parameter]
+    public EventCallback<Coordinate> OnDoubleClick { get; set; }
+
+    /// <summary>
     ///     Event when the pointer gets moved
     /// </summary>
     [Parameter]
@@ -419,6 +425,24 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
+    ///     Gets or sets a javascript which gets call after initialization of the map to do customizations. First argument is the map object.
+    /// </summary>
+    /// <example>
+    ///     _map.ConfigureJsMethod = "myComponent.configureMap";
+    /// 
+    ///     <script>
+    ///         window.myComponent = {
+    ///         configureMap: (map) => {
+    ///                 map.getInteractions().forEach(function (interaction) {
+    ///                     if (interaction instanceof ol.interaction.DoubleClickZoom) { interaction.setActive(false); }
+    ///                 });
+    ///         }}
+    ///     </script>
+    /// </example>
+    [Parameter]
+    public string? ConfigureJsMethod { get; set; }
+
+    /// <summary>
     ///     Gets or set the default layer for shapes.
     /// </summary>
     public Layer? ShapesLayer { get; set; }
@@ -527,7 +551,7 @@ public partial class Map : IAsyncDisposable
             if (_module != null)
                 await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom, Rotation, InteractionsEnabled,
                     LayersList.Select(p => p.InternalLayer).ToArray(),
-                    Instance);
+                    Instance, ConfigureJsMethod);
 
             foreach (var layer in LayersList)
             {
@@ -607,6 +631,15 @@ public partial class Map : IAsyncDisposable
         Console.WriteLine($"OnInternalClick: {coordinate}");
 #endif
         return OnClick.InvokeAsync(coordinate);
+    }
+
+    [JSInvokable]
+    public Task OnInternalDoubleClick(Coordinate coordinate)
+    {
+#if DEBUG
+        Console.WriteLine($"OnInternalDoubleClick: {coordinate}");
+#endif
+        return OnDoubleClick.InvokeAsync(coordinate);
     }
 
     [JSInvokable]

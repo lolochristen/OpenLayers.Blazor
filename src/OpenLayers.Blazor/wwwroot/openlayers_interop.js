@@ -1078,6 +1078,17 @@ MapOL.prototype.getCoordinates = function(layerId, featureId) {
     return null;
 };
 
+MapOL.prototype.getShapeStyleAsync = async function(feature, layer_id) {
+    var shape;
+    if (ol.render.Feature.prototype.isPrototypeOf(feature))
+        shape = this.mapFeatureToInternalFeature(feature);
+    else
+        shape = this.mapFeatureToShape(feature);
+    delete shape.coordinates;
+    const style = await this.Instance.invokeMethodAsync("OnGetShapeStyleAsync", shape, layer_id);
+    return this.mapStyleOptionsToStyle(style, shape.geometryType);
+};
+
 MapOL.prototype.getShapeStyle = function(feature, layer_id) {
     var shape;
     if (ol.render.Feature.prototype.isPrototypeOf(feature))
@@ -1085,11 +1096,11 @@ MapOL.prototype.getShapeStyle = function(feature, layer_id) {
     else
         shape = this.mapFeatureToShape(feature);
     delete shape.coordinates;
-    const style = this.Instance.invokeMethod("OnGetShapeStyle", shape, layer_id);
-    return this.mapStyleOptionsToStyle(style);
+    const style = this.Instance.invokeMethod("OnGetShapeStyle", shape, layer_id); // will fail on blazor server
+    return this.mapStyleOptionsToStyle(style, shape.geometryType);
 };
 
-MapOL.prototype.mapStyleOptionsToStyle = function(style) {
+MapOL.prototype.mapStyleOptionsToStyle = function(style, geometryType = null) {
 
     style = MapOL.transformNullToUndefined(style);
 
@@ -1121,6 +1132,15 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style) {
         if (style.text.stroke) style.text.stroke = new ol.style.Stroke(style.text.stroke);
         if (style.text.backgroundFill) style.text.backgroundFill = new ol.style.Fill(style.text.backgroundFill);
         if (style.text.backgroundStroke) style.text.backgroundStroke = new ol.style.Stroke(style.text.backgroundStroke);
+    }
+
+    // fix point style if circle not set
+    if (geometryType == 'Point' && !style.circle) {
+        style.circle = {
+            fill: new ol.style.Fill(style.fill),
+            stroke: new ol.style.Stroke(style.stroke),
+            radius: style.stroke.width * 2
+        };
     }
 
     const styleObject = new ol.style.Style({

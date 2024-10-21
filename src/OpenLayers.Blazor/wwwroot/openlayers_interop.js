@@ -381,7 +381,10 @@ MapOL.prototype.prepareLayers = function(layers) {
                 case "VectorTile":
                     var features;
                     if (l.useStyleCallback) {
-                        l.style = function (feature, resolution) { return that.getShapeStyle(feature, l.id); };
+                        l.style = function (feature, resolution) {
+                            that.getShapeStyleAsync(feature, l.id)
+                            .then(style => feature.setStyle(style));
+                        };
                     } else if (l.style) {
                         var styleOptions = l.style;
                         l.style = function (feature, resolution) {

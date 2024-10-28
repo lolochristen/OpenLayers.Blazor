@@ -172,7 +172,7 @@ public class StyleOptions
         [JsonConverter(typeof(JsonStringEnumKebabLowerConverter))]
         public IconAnchorUnits AnchorYUnits { get; set; }
 
-        public string Color { get; set; }
+        public int[] Color { get; set; }
 
         public string CrossOrigin { get; set; }
         public double? Width { get; set; }

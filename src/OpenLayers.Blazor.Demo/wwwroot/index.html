@@ -11,7 +11,7 @@
     <link href="OpenLayers.Blazor.Demo.styles.css" rel="stylesheet" />
     <link href="lib/openlayers/ol.css" rel="stylesheet" />
     <link href="_content/OpenLayers.Blazor/OpenLayers.Blazor.css" rel="stylesheet" />
-    <script src="lib/openlayers/dist/ol.min.js"></script>
+    <script src="lib/openlayers/dist/ol.js"></script>
     <script src="lib/ol-mapbox-style/dist/olms.min.js"></script>
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/gradient-dark.min.css" rel="stylesheet" />
@@ -32,13 +32,26 @@
     <a class="dismiss">🗙</a>
 </div>
 
+<script>
+    window.myComponent = {
+        configureMap: (map) => {
+            // remove double click zoom 
+            map.getInteractions().forEach(function (interaction) {
+                if (interaction instanceof ol.interaction.DoubleClickZoom) {
+                    interaction.setActive(false);
+                }
+            });
+        }
+    }
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/highlightjs-cshtml-razor/dist/cshtml-razor.min.js"></script>
 <script src="_framework/blazor.webassembly.js"></script>
 <script>
-        window.highlightSnippet = function () {
-            hljs.highlightAll();
-        }
-    </script>
+    window.highlightSnippet = function () {
+        hljs.highlightAll();
+    }
+</script>
 </body>
 </html>

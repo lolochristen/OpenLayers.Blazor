@@ -1030,6 +1030,22 @@ public partial class Map : IAsyncDisposable
     }
 
     /// <summary>
+    ///     Sets coordinates of an existing shape
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
+    public ValueTask SetCoordinates(Shape shape, Coordinates coordinates)
+    {
+#if DEBUG
+        Console.WriteLine($"SetCoordinates: {shape.Id} {coordinates}");
+#endif
+        if (shape.Layer == null)
+            throw new InvalidOperationException("Shape must be assigned to a layer");
+
+        return _module?.InvokeVoidAsync("MapOLSetCoordinates", _mapId, shape.Layer.Id, shape.Id, coordinates) ?? ValueTask.CompletedTask;
+    }
+
+    /// <summary>
     ///     Default Style Callback
     /// </summary>
     /// <param name="shape"></param>

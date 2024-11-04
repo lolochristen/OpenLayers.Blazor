@@ -24,7 +24,7 @@ public class Circle : Shape
     public override Task SetParametersAsync(ParameterView parameters)
     {
         if (parameters.TryGetValue(nameof(Center), out Coordinate coordinate) && !coordinate.Equals(Center))
-            _updateableParametersChanged = true;
+            _coordinatesParametersChanged = true;
 
         return base.SetParametersAsync(parameters);
     }

@@ -21,7 +21,7 @@
 
 <SwissMap @ref="_map" OnClick="OnMapClicked" OnFeatureClick="OnFeatureClicked" Style="height:800px;" Class="card">
     <Features>
-        <Circle Center="new Coordinate(2770557.824138796, 1197279.0774135895)" Radius="5000" Fill="#2222AA66" Stroke="red" StrokeThickness="8"></Circle>
+        <Circle Center="@_circleCenter" Radius="5000" Fill="#2222AA66" Stroke="red" StrokeThickness="8"></Circle>
         <Point Coordinate="@_pos" StrokeThickness="4" Stroke="red" Fill="cyan" Radius="5"></Point>
         <Polygon Points="new []{new Coordinate(2604900, 1207650), new Coordinate(2634200, 1177650), new Coordinate(2621200, 1177950), new Coordinate(2551200, 1207650)}" Stroke="green" StrokeThickness="4" Fill="#2222AA66" Text="Ugly polygon" Font="20px sans-serif" TextColor="yellow"></Polygon>
         <Line Points="new []{new Coordinate(2734200, 1197650), new Coordinate(2754200, 1177650)}" Styles="new() { _lineStyle }"></Line>
@@ -34,6 +34,17 @@
     private SwissMap _map = null!;
     private string _featureInfo;
     private Coordinate _pos = new (2604200, 1197650);
+    private Coordinate _circleCenter = new Coordinate(2770557.824138796, 1197279.0774135895);
+    private Point _manualPoint;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _manualPoint = new Point(new Coordinate(2608200, 1167650)) { StrokeThickness = 4, Stroke = "blue", Fill = "cyan", Radius = 5 };
+            _map.ShapesLayer.ShapesList.Add(_manualPoint);
+        }
+    }
 
     private StyleOptions _lineStyle = new StyleOptions()
     {
@@ -72,9 +83,19 @@
         }
     }
 
-    private void MovePoint()
+    private async Task MovePoint()
     {
-        _pos = new Coordinate(_pos.X + 1000, _pos.Y); // set new coordinate to trigger refresh
+        _pos = new Coordinate(_pos.X + 2000, _pos.Y); // set new coordinate to trigger refresh
+
+        for(int i = 0; i < 100; i++)
+        {
+            _circleCenter = new Coordinate(_circleCenter.X - 1000, _circleCenter.Y);
+            StateHasChanged();
+            await Task.Delay(1);
+
+            _manualPoint.Coordinate = new Coordinate(_manualPoint.Coordinate.X + 500, _manualPoint.Coordinate.Y);
+            await _manualPoint.UpdateCoordinates(); // manual created shapes require explicit update
+        }
     }
 
     private async Task RemoveShape()

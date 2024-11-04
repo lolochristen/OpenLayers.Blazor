@@ -95,6 +95,10 @@ export function MapOLGetCoordinates(mapId, layerId, shapeId) {
     return _MapOL[mapId].getCoordinates(layerId, shapeId);
 }
 
+export function MapOLSetCoordinates(mapId, layerId, shapeId, coordinates) {
+    return _MapOL[mapId].setCoordinates(layerId, shapeId, coordinates);
+}
+
 export function MapOLSetInteractions(mapId, active) {
     _MapOL[mapId].setInteractions(active);
 }
@@ -1079,6 +1083,22 @@ MapOL.prototype.getCoordinates = function(layerId, featureId) {
         return coord;
     }
     return null;
+};
+
+MapOL.prototype.setCoordinates = function (layerId, featureId, coordinates) {
+    const feature = this.getLayer(layerId).getSource().getFeatureById(featureId);
+    if (feature == null)
+        return;
+    const geometry = feature.getGeometry();
+    const viewProjection = this.Map.getView().getProjection();
+    const sourceProjection = this.getLayer(layerId).getSource().getProjection();
+    const coordinatesTransformed = MapOL.transformCoordinates(coordinates,
+        sourceProjection ?? this.Options.coordinatesProjection,
+        viewProjection);
+    if (geometry.getType() == "Circle")
+        geometry.setCenter(coordinatesTransformed);
+    else
+        geometry.setCoordinates(coordinatesTransformed);
 };
 
 MapOL.prototype.getShapeStyleAsync = async function(feature, layer_id) {

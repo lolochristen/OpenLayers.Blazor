@@ -9,6 +9,7 @@ namespace OpenLayers.Blazor;
 public class Shape : Feature, IDisposable
 {
     internal bool _updateableParametersChanged;
+    internal bool _coordinatesParametersChanged;
 
     /// <summary>
     ///     Initializes a new instance of <see cref="Shape" />.
@@ -390,7 +391,9 @@ public class Shape : Feature, IDisposable
         if (parameters.TryGetValue(nameof(Font), out string? font) && font != Font)
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c != Coordinates)
-            _updateableParametersChanged = true;
+            _coordinatesParametersChanged = true;
+
+        Console.WriteLine($"{_updateableParametersChanged} {_coordinatesParametersChanged} { string.Join(";", parameters.ToDictionary().Select(p => p.Key + "=" + p.Value)) }");
 
         return base.SetParametersAsync(parameters);
     }
@@ -401,6 +404,12 @@ public class Shape : Feature, IDisposable
         {
             await UpdateShape();
             _updateableParametersChanged = false;
+            _coordinatesParametersChanged = false;
+        }
+        else if (_coordinatesParametersChanged)
+        {
+            await UpdateCoordinates();
+            _coordinatesParametersChanged = false;
         }
     }
 
@@ -412,5 +421,15 @@ public class Shape : Feature, IDisposable
     {
         if (Map != null && Layer != null)
             await Map.UpdateShape(this);
+    }
+
+    /// <summary>
+    ///     Update the coordinates of the shape on the parent layer.
+    /// </summary>
+    /// <returns></returns>
+    public async Task UpdateCoordinates()
+    {
+        if (Map != null && Layer != null)
+            await Map.SetCoordinates(this, Coordinates);
     }
 }

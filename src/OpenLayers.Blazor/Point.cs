@@ -58,7 +58,7 @@ public class Point : Shape
     public override Task SetParametersAsync(ParameterView parameters)
     {
         if (parameters.TryGetValue(nameof(Coordinate), out Coordinate coordinate) && !coordinate.Equals(Coordinate))
-            _updateableParametersChanged = true;
+            _coordinatesParametersChanged = true;
 
         return base.SetParametersAsync(parameters);
     }

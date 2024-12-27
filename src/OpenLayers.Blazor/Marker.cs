@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using OpenLayers.Blazor.Internal;
 using System.Drawing;
 
@@ -12,6 +13,7 @@ public class Marker : Shape
     /// <summary>
     ///     Default Constructor
     /// </summary>
+    [ActivatorUtilitiesConstructor]
     public Marker()
     {
         InternalFeature.GeometryType = GeometryTypes.Point;

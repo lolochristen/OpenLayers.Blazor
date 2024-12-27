@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using System.Drawing;
 
 namespace OpenLayers.Blazor;
 
 public class Point : Shape
 {
+    [ActivatorUtilitiesConstructor]
+
     public Point() : base(ShapeType.Point)
     {
         Radius = 10;

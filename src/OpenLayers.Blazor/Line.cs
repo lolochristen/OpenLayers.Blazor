@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OpenLayers.Blazor;
 
@@ -10,6 +11,7 @@ public class Line : Shape
     /// <summary>
     ///     Initializes a new instance of <see cref="Line" />.
     /// </summary>
+    [ActivatorUtilitiesConstructor]
     public Line() : base(ShapeType.LineString)
     {
     }

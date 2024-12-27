@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using OpenLayers.Blazor.Internal;
 
 namespace OpenLayers.Blazor;
@@ -12,6 +13,8 @@ public class Feature : ComponentBase
     /// <summary>
     ///     Initializes a new instance of <see cref="Feature" />.
     /// </summary>
+    [ActivatorUtilitiesConstructor]
+
     public Feature()
     {
         InternalFeature = new Internal.Feature();

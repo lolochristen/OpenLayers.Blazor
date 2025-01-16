@@ -1297,4 +1297,16 @@ public partial class Map : IAsyncDisposable
             return _module.InvokeVoidAsync("MapOLApplyMapboxStyle", _mapId, styleUrl, accessToken);
         return ValueTask.CompletedTask;
     }
+
+    /// <summary>
+    ///     Get the current resolution.
+    /// </summary>
+    /// <returns>Current resolution</returns>
+    public async Task<double> GetResolution()
+    {
+        if (_module == null)
+            return 0;
+
+        return await _module.InvokeAsync<double>("MapOLGetResolution", _mapId);
+    }
 }

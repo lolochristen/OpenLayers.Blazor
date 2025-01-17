@@ -262,6 +262,17 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
+    ///     Set credentials of query only for TileWMS (set header Authorization Basic)
+    ///     It should be the Base64 value of "user:password"
+    /// </summary>
+    [Parameter]
+    public string? Credentials
+    {
+        get => _internalLayer.Credentials;
+        set => _internalLayer.Credentials = value;
+    }
+
+    /// <summary>
     ///     Gets or sets the layers the layer parameter for the source tile layers
     /// </summary>
     [Parameter]

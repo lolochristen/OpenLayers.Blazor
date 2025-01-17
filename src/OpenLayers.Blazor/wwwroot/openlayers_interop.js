@@ -302,6 +302,23 @@ MapOL.prototype.prepareLayers = function(layers) {
                 break;
             case "TileWMS":
                 source = new ol.source.TileWMS(l.source);
+                if (l.credentials) {
+                    source.tileLoadFunction = function (tile, src) {
+                        var client = new XMLHttpRequest();
+                        client.responseType = 'blob';
+                        client.open('GET', src);
+                        client.setRequestHeader("Authorization", "Basic " + l.credentials);
+                        client.onload = function() {
+                            const url = URL.createObjectURL(client.response);
+                            const img = tile.getImage();
+                            img.addEventListener('load', function() {
+                                URL.revokeObjectURL(url);
+                            });
+                           img.src = url;
+                        };
+                        client.send();
+                    };
+                }
                 break;
             case "WMTS":
                 source = new ol.source.WMTS(l.source);

@@ -84,7 +84,7 @@ export function MapOLUpdateShape(mapId, layerId, shape) {
 }
 
 export function MapOLRemoveShape(mapId, layerId, shape) {
-    _MapOL[mapId].removeShape(layerId, shape);
+    _MapOL[mapId]?.removeShape(layerId, shape);
 }
 
 export function MapOLAddShape(mapId, layerId, shape) {
@@ -877,10 +877,6 @@ MapOL.prototype.setSelectionSettings = function(layerId, enableSelection, style,
         }
     }
 };
-MapOL.prototype.onFeatureAdded = function(layerId, feature) {
-    const shape = this.mapFeatureToShape(feature);
-    this.Instance.invokeMethodAsync("OnInternalShapeAdded", layerId, shape);
-};
 
 MapOL.prototype.mapFeatureToShape = function(feature) {
 
@@ -1032,6 +1028,11 @@ MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoor
         feature.setStyle(shape.flatStyle);
 
     return feature;
+};
+
+MapOL.prototype.onFeatureAdded = function (layerId, feature) {
+    const shape = this.mapFeatureToShape(feature);
+    this.Instance.invokeMethodAsync("OnInternalShapeAdded", layerId, shape);
 };
 
 MapOL.prototype.onFeatureRemoved = function(layerId, feature) {

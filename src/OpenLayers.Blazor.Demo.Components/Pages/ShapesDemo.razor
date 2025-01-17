@@ -72,15 +72,17 @@
     {
         var random = new Random((int)DateTime.Now.Ticks);
         var extent = _map.LayersList[0].Extent;
+        var shapes = new List<Shape>();
         for (var i = 0; i < 50; i++)
         {
-            _map.ShapesList.Add(
+            shapes.Add(
                 new Point(new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]))
                 {
                     Stroke = $"#{random.Next(0, 255):x2}{random.Next(0, 255):x2}{random.Next(0, 255):x2}",
                     StrokeThickness = 4
                 });
         }
+        _map.ShapesList.AddRange(shapes);
     }
 
     private async Task MovePoint()

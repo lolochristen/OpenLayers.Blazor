@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OpenLayers.Blazor;
 
 public class Circle : Shape
 {
+    [ActivatorUtilitiesConstructor]
+
     public Circle() : base(ShapeType.Circle)
     {
     }

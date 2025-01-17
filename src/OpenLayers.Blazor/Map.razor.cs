@@ -74,7 +74,7 @@ public partial class Map : IAsyncDisposable
     /// <summary>
     ///     Collection of attached markers
     /// </summary>
-    public ObservableCollection<Shape> MarkersList
+    public ObservableRangeCollection<Shape> MarkersList
     {
         get
         {
@@ -88,7 +88,7 @@ public partial class Map : IAsyncDisposable
     /// <summary>
     ///     Collection of attached shapes
     /// </summary>
-    public ObservableCollection<Shape> ShapesList
+    public ObservableRangeCollection<Shape> ShapesList
     {
         get
         {
@@ -1136,14 +1136,14 @@ public partial class Map : IAsyncDisposable
         return _module?.InvokeVoidAsync("MapOLSetShapes", _mapId, layer.Id, shapes?.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
     }
 
-    internal ValueTask RemoveShapeInternal(Layer layer, Shape shape)
+    internal ValueTask RemoveShapesInternal(Layer layer, IEnumerable<Shape> shapes)
     {
-        return _module?.InvokeVoidAsync("MapOLRemoveShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+        return _module?.InvokeVoidAsync("MapOLRemoveShape", _mapId, layer.Id, shapes?.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
     }
 
-    internal ValueTask AddShapeInternal(Layer layer, Shape shape)
+    internal ValueTask AddShapesInternal(Layer layer, IEnumerable<Shape> shapes)
     {
-        return _module?.InvokeVoidAsync("MapOLAddShape", _mapId, layer.Id, shape.InternalFeature) ?? ValueTask.CompletedTask;
+        return _module?.InvokeVoidAsync("MapOLAddShape", _mapId, layer.Id, shapes.Select(p => p.InternalFeature).ToArray()) ?? ValueTask.CompletedTask;
     }
 
     internal Layer GetOrCreateShapesLayer()

@@ -430,7 +430,7 @@ public partial class Layer : ComponentBase
     /// <summary>
     ///    Gets the list of shapes in the layer.
     /// </summary>
-    public ObservableCollection<Shape> ShapesList { get; } = new();
+    public ObservableRangeCollection<Shape> ShapesList { get; } = new();
 
     internal void Initialize(Map map)
     {
@@ -459,20 +459,24 @@ public partial class Layer : ComponentBase
         else
         {
             if (e.OldItems != null)
+            {
+                _ = Map.RemoveShapesInternal(this, e.OldItems.OfType<Shape>());
                 foreach (Shape oldShape in e.OldItems)
                 {
-                    _ = Map.RemoveShapeInternal(this, oldShape);
                     oldShape.Layer = null;
                     oldShape.Map = null;
                 }
+            }
 
             if (e.NewItems != null)
+            {
                 foreach (Shape newShape in e.NewItems)
                 {
                     newShape.Layer = this;
                     newShape.Map = Map;
-                    _ = Map.AddShapeInternal(this, newShape);
                 }
+                _ = Map.AddShapesInternal(this, e.NewItems.OfType<Shape>());
+            }
         }
     }
 

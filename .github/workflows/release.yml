@@ -16,6 +16,11 @@ jobs:
       with:
         fetch-depth: 0
         filter: tree:0
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'npm'        
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:

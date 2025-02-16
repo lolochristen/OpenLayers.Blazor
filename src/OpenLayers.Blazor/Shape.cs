@@ -393,8 +393,6 @@ public class Shape : Feature, IDisposable
         if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c != Coordinates)
             _coordinatesParametersChanged = true;
 
-        Console.WriteLine($"{_updateableParametersChanged} {_coordinatesParametersChanged} { string.Join(";", parameters.ToDictionary().Select(p => p.Key + "=" + p.Value)) }");
-
         return base.SetParametersAsync(parameters);
     }
 

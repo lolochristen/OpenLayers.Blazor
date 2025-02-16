@@ -277,10 +277,10 @@ MapOL.prototype.prepareLayers = function(layers) {
             l = MapOL.transformNullToUndefined(l);
 
             if (l.extent && this.Options.coordinatesProjection) {
-                let projection = that.Options.viewProjection ??
+                let projection = that.Options.viewProjection ? that.Options.viewProjection :
                     (ollayers.length > 0 ? ollayers[0].getSource().getProjection() : "EPSG:3857");
                 l.extent = ol.proj.transformExtent(l.extent,
-                    l.source.projection ?? that.Options.coordinatesProjection,
+                    l.source.projection ? l.source.projection : that.Options.coordinatesProjection,
                     projection);
             }
 
@@ -415,11 +415,11 @@ MapOL.prototype.prepareLayers = function(layers) {
                     if (l.source.data) {
                         features = l.source.format.readFeatures(l.source.data,
                             {
-                                featureProjection: this.Options.viewProjection ??
+                                featureProjection: this.Options.viewProjection ? this.Options.viewProjection :
                                     (ollayers.length > 0
                                         ? ollayers[0].getSource().getProjection()
                                         : (that.Map ? that.Map.getView().getProjection() : "EPSG:3857")),
-                                dataProjection: l.source.projection ?? this.Options.coordinatesProjection
+                                dataProjection: l.source.projection ? l.source.projection : this.Options.coordinatesProjection
                             });
                     }
                     l.source = l.layerType == "VectorTile"
@@ -570,15 +570,19 @@ MapOL.prototype.addControls = function() {
     if (this.Options.zoomToExtentControl) this.Map.addControl(new ol.control.ZoomToExtent());
 };
 
+MapOL.objectWithoutKey = function objectWithoutKey(object, key) {
+    const newObject = {};
+    for (let prop in object) {
+        if (prop !== key) {
+            newObject[prop] = object[prop];
+        }
+    }
+    return newObject;
+}
+
 MapOL.prototype.getReducedFeature = function(feature) {
     const type = feature.getGeometry().getType();
-
-    const objectWithoutKey = (object, key) => {
-        const { [key]: deletedKey, ...otherKeys } = object;
-        return otherKeys;
-    };
-
-    const properties = objectWithoutKey(feature.getProperties(), "geometry");
+    const properties = MapOL.objectWithoutKey(feature.getProperties(), "geometry");
 
     const reduced = {
         type: "Feature",
@@ -872,7 +876,7 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
     if (feature == null) return null;
 
     var geometry = feature.getGeometry();
-    var viewProjection = this.Map ? this.Map.getView().getProjection() : (this.Options.viewProjection ?? "EPSG:3857");
+    var viewProjection = this.Map ? this.Map.getView().getProjection() : (this.Options.viewProjection ? this.Options.viewProjection : "EPSG:3857");
     var coordinates = null;
 
     if (geometry != null && !Array.isArray(geometry)) {
@@ -909,11 +913,7 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
         id = id.toString();
     }
 
-    var objectWithoutKey = (object, key) => {
-        const { [key]: deletedKey, ...otherKeys } = object;
-        return otherKeys;
-    };
-    var properties = objectWithoutKey(feature.getProperties(), "geometry");
+    var properties = MapOL.objectWithoutKey(feature.getProperties(), "geometry");
 
     if (!properties.type) properties.type = "Shape";
 
@@ -935,7 +935,7 @@ MapOL.prototype.mapFeatureToShape = function(feature) {
 MapOL.prototype.mapFeatureToInternalFeature = function (feature) {
     if (feature == null) return null;
 
-    var viewProjection = this.Map ? this.Map.getView().getProjection() : (this.Options.viewProjection ?? "EPSG:3857");
+    var viewProjection = this.Map ? this.Map.getView().getProjection() : (this.Options.viewProjection ? this.Options.viewProjection : "EPSG:3857");
     var coordinates = null;
 
     var c = feature.getFlatCoordinates();
@@ -944,7 +944,7 @@ MapOL.prototype.mapFeatureToInternalFeature = function (feature) {
     if (l < this.Options.serializationCoordinatesLimit)
         coordinates = MapOL.transformCoordinates(c, viewProjection, this.Options.coordinatesProjection);
     
-    var id = feature.getId() ?? feature.getProperties().feature_id;
+    var id = feature.getId() ? feature.getId() : feature.getProperties().feature_id;
     var properties = feature.getProperties();
     properties.type = feature.getType();
 
@@ -963,7 +963,7 @@ MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoor
     if (shape.coordinates) {
         const coordinates = transformCoordinates
             ? MapOL.transformCoordinates(shape.coordinates,
-                sourceProjection ?? this.Options.coordinatesProjection,
+                sourceProjection ? sourceProjection : this.Options.coordinatesProjection,
                 viewProjection)
             : shape.coordinates;
 
@@ -1098,7 +1098,7 @@ MapOL.prototype.setCoordinates = function (layerId, featureId, coordinates) {
     const viewProjection = this.Map.getView().getProjection();
     const sourceProjection = this.getLayer(layerId).getSource().getProjection();
     const coordinatesTransformed = MapOL.transformCoordinates(coordinates,
-        sourceProjection ?? this.Options.coordinatesProjection,
+        sourceProjection ? sourceProjection : this.Options.coordinatesProjection,
         viewProjection);
     if (geometry.getType() == "Circle")
         geometry.setCenter(coordinatesTransformed);
@@ -1257,11 +1257,6 @@ MapOL.prototype.mapStylesToStyleOptions = function(style) {
                         lineDashOffset: text.getBackgroundStroke().getLineDashOffset(),
                         miterLimit: text.getBackgroundStroke().getMiterLimit(),
                         width: text.getBackgroundStroke().getWidth(),
-                    }
-                    : undefined,
-                backgroundFill: text.getBackgroundFill()
-                    ? {
-                        color: text.getBackgroundFill().getColor()
                     }
                     : undefined,
                 padding: text.getPadding(),

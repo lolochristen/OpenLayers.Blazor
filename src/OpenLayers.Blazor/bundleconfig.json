@@ -1,0 +1,17 @@
+// Configure bundling and minification for the project.
+// More info at https://go.microsoft.com/fwlink/?LinkId=808241
+[
+  {
+    "outputFileName": "wwwroot/openlayers_interop.min.js",
+    "inputFiles": [
+      "wwwroot/openlayers_interop.js"
+    ],
+    // Optionally specify minification options
+    "minify": {
+      "enabled": true,
+      "renameLocals": false
+    },
+    // Optinally generate .map file
+    "sourceMap": false
+  }
+]

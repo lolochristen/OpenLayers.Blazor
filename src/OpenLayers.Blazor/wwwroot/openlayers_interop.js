@@ -1,4 +1,4 @@
-﻿var _MapOL = new Array();
+var _MapOL = new Array();
 
 export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod) {
     _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod);
@@ -84,7 +84,7 @@ export function MapOLSetShapes(mapId, layerId, shapes) {
 }
 
 export function MapOLRemoveShape(mapId, layerId, shape) {
-    _MapOL[mapId]?.removeShape(layerId, shape);
+    _MapOL[mapId].removeShapes(layerId, shape);
 }
 
 export function MapOLAddShape(mapId, layerId, shapes) {

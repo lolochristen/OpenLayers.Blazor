@@ -22,9 +22,10 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<SourceLinkCreate>true</SourceLinkCreate>
 		<SourceLinkOriginUrl>https://github.com/lolochristen/OpenLayers.Blazor</SourceLinkOriginUrl>
-	</PropertyGroup>
+    <PrepareForBuildDependsOn>BundleMinify;$(PrepareForBuildDependsOn)</PrepareForBuildDependsOn>
+  </PropertyGroup>
 
-	<ItemGroup>
+  <ItemGroup>
 		<None Include="..\..\LICENSE" Link="LICENSE">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
@@ -108,7 +109,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />-->
+    <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" PrivateAssets="all" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

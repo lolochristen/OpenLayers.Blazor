@@ -1,11 +1,8 @@
 name: Release to NuGet
 
 on:
-  # release:
-  #   types: [published]
-  push:
-    branches:    
-      - feature/*
+  release:
+    types: [published]
     
 jobs:
   build:
@@ -33,5 +30,5 @@ jobs:
       run: dotnet test -c Release --no-build
     - name: Pack nugets
       run: dotnet pack -c Release --no-build --output .
-    # - name: Push to NuGet
-    #   run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
+    - name: Push to NuGet
+      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json

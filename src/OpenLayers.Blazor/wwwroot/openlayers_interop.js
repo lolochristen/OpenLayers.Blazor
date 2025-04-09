@@ -628,6 +628,9 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
 
                 if (showPopup) {
                     const coordinates = feature.getGeometry().getCoordinates();
+                    if (shape.geometryType == "Polygon") {
+                        popup.setPosition(evt.coordinate);
+                    }
                     popup.setPosition(coordinates);
                 }
             } else if (ol.render.Feature.prototype.isPrototypeOf(feature)) { // render feature

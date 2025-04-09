@@ -35,7 +35,7 @@
 
 @if (MapType == "osm")
 {
-    <OpenStreetMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
+    <OpenStreetMap @ref="_map" Style="height:800px;" Class="card" OnShapeAdded="OnShapeAdded" OnShapeDrawn="OnShapeDrawn" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
     </OpenStreetMap>
 }
 else
@@ -51,25 +51,25 @@ else
 
 @if (_map != null)
 {
- <div class="card mt-2 mb-2">
-    <div class="card-header">
-        <h5 class="card-title">Shapes</h5>
-    </div>
-    <div class="card-body">
-        @foreach (var shape in _map.ShapesList)
-        {
-            <p>
-                <strong>@shape.Id @shape.Type @shape.GeometryType</strong>
-                <ul>
-                    @if (shape.Coordinates != null)
-                    {
+    <div class="card mt-2 mb-2">
+        <div class="card-header">
+            <h5 class="card-title">Shapes</h5>
+        </div>
+        <div class="card-body">
+            @foreach (var shape in _map.ShapesList)
+            {
+                <p>
+                    <strong>@shape.Id @shape.Type @shape.GeometryType</strong>
+                    <ul>
+                        @if (shape.Coordinates != null)
+                        {
                             @JsonSerializer.Serialize(shape.Coordinates)
-                    }
-                </ul>
-            </p>
-        }
+                        }
+                    </ul>
+                </p>
+            }
+        </div>
     </div>
-</div>
 }
 
 <CodeView Source="DrawDemo.razor" />
@@ -93,6 +93,17 @@ else
             Color = "#563d7c"
         }
     };
+
+    private void OnShapeAdded(Shape shape)
+    {
+        Console.WriteLine($"Shape {shape.Id}");
+        StateHasChanged();
+    }
+
+    private void OnShapeDrawn(Shape shape)
+    {
+        Console.WriteLine($"Shape {shape.Id}");
+    }
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {

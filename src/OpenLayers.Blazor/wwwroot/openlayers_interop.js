@@ -427,7 +427,7 @@ MapOL.prototype.prepareLayers = function(layers) {
                         : new ol.source.Vector(l.source);
 
                     if (l.raiseShapeEvents) { // attach and sync
-                        l.source.on("addfeature", function (evt) { that.onFeatureAdded(l.id, evt.feature); });
+                        l.source.on("addfeature", function (evt) { that.onFeatureAdded(l.id, evt.feature, false); });
                         l.source.on("changefeature", function (evt) { that.onFeatureChanged(l.id, evt.feature); });
                         l.source.on("removefeature", function (evt) { that.onFeatureRemoved(l.id, evt.feature); });
                     }
@@ -628,6 +628,9 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
 
                 if (showPopup) {
                     const coordinates = feature.getGeometry().getCoordinates();
+                    if (shape.geometryType == "Polygon") {
+                        popup.setPosition(evt.coordinate);
+                    }
                     popup.setPosition(coordinates);
                 }
             } else if (ol.render.Feature.prototype.isPrototypeOf(feature)) { // render feature
@@ -791,7 +794,7 @@ MapOL.prototype.setDrawingSettings = function(drawingLayerId,
             function(evt) {
                 that.getShapeStyleAsync(evt.feature, "geometries")
                     .then(style => evt.feature.setStyle(style));
-                that.onFeatureAdded(drawingLayerId, evt.feature);
+                that.onFeatureAdded(drawingLayerId, evt.feature, true);
             });
 
         this.Map.addInteraction(this.currentDraw);
@@ -1019,9 +1022,9 @@ MapOL.prototype.mapShapeToFeature = function(shape, source = null, transformCoor
     return feature;
 };
 
-MapOL.prototype.onFeatureAdded = function (layerId, feature) {
+MapOL.prototype.onFeatureAdded = function (layerId, feature, isDrawn) {
     const shape = this.mapFeatureToShape(feature);
-    this.Instance.invokeMethodAsync("OnInternalShapeAdded", layerId, shape);
+    this.Instance.invokeMethodAsync("OnInternalShapeAdded", layerId, shape, isDrawn);
 };
 
 MapOL.prototype.onFeatureRemoved = function(layerId, feature) {

@@ -154,6 +154,12 @@ public partial class Map : IAsyncDisposable
     public RenderFragment<Feature?>? Popup { get; set; }
 
     /// <summary>
+    ///     Content to show as a popup when a shape or marker gets clicked and <see cref="Shape.Popup" /> is set to true
+    /// </summary>
+    [Parameter]
+    public bool PopupCloseOnClick { get; set; } = true;
+
+    /// <summary>
     ///     Definition of Layers to show in the map. Only items of <see cref="Layer" /> are considered.
     /// </summary>
     /// <example>
@@ -549,7 +555,7 @@ public partial class Map : IAsyncDisposable
                 Zoom = InitialZoom;
 
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, Options, Center, Zoom, Rotation, InteractionsEnabled,
+                await _module.InvokeVoidAsync("MapOLInit", _mapId, _popupId, PopupCloseOnClick, Options, Center, Zoom, Rotation, InteractionsEnabled,
                     LayersList.Select(p => p.InternalLayer).ToArray(),
                     Instance, ConfigureJsMethod);
 

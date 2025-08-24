@@ -630,7 +630,13 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
                     const coordinates = feature.getGeometry().getCoordinates();
                     if (shape.geometryType == "Polygon") {
                         popup.setPosition(evt.coordinate);
-                    } else {
+                    } else if (shape.geometryType == "LineString") {
+                        popup.setPosition(evt.coordinate);
+                    }
+                    else if (shape.geometryType == "Circle") {
+                        popup.setPosition(evt.coordinate);
+                    }
+                    else {
                         popup.setPosition(coordinates);
                     }
                 }

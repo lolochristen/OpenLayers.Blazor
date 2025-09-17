@@ -85,4 +85,14 @@ public class Options
     ///    Gets or sets the maximal zoom level.
     /// </summary>
     public double MaxZoom { get; set; } = 28;
+
+    /// <summary>
+    ///    Gets or sets whenever popups shall allow events like click forward to the map. Defaults to false.
+    /// </summary>
+    public bool PopupAllowMapEvents { get; set; } = false;
+
+    /// <summary>
+    ///   Gets or set the Offset of the popup. Default is [0, -50] (to appear above the feature location).
+    /// </summary>
+    public double[] PopupOffset { get; set; } = new double[] { 0, -50 };
 }

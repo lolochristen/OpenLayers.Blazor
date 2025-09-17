@@ -42,10 +42,30 @@ else
 {
     <SwissMap @ref="_map" Style="height: 800px;" Class="card" OnShapeAdded="StateHasChanged" EnableEditShapes="_enableedit" EnableNewShapes="_enabledraw" EnableShapeSnap="_snap" ShapeStyleCallback="(shape) => _styleOptions" NewShapeType="_shapeType" Freehand="_freehand">
         <Features>
-            <Line Points="new[] { new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650) }" Stroke="red" StrokeThickness="2"></Line>
-            <Circle Center="_center" Radius="2000" StrokeThickness="3" Stroke="blue" Fill="#55229933"></Circle>
-            <Point Coordinate="new Coordinate(2683276.620804008, 1247123.8311215444)" Fill="green" Radius="20"></Point>
+            <Line Points="new[] { new Coordinate(2604200, 1197650), new Coordinate(2624200, 1177650) }" Stroke="red" StrokeThickness="2" Popup="true"></Line>
+            <Circle Center="_center" Radius="2000" StrokeThickness="3" Stroke="blue" Fill="#55229933" Popup="true"></Circle>
+            <Point Coordinate="new Coordinate(2683276.620804008, 1247123.8311215444)" Fill="green" Radius="20" Popup="true"></Point>
         </Features>
+        <Popup>
+            <div id="popup" class="ol-box">
+                @if (context is Polygon polygon)
+                {
+                   <h5>This is a popup of a polygon</h5>
+                }
+                else if (context is Line line)
+                {
+                    <h5>This is a popup of a line</h5>
+                }
+                else if (context is Circle circle)
+                {
+                    <h5>This is a popup of a circle</h5>
+                }
+                else if (context is Point point)
+                {
+                    <h5>This is a popup of a point</h5>
+                }
+            </div>
+        </Popup>
     </SwissMap>
 }
 

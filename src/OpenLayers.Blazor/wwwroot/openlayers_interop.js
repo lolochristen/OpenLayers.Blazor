@@ -628,7 +628,17 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
 
                 if (showPopup) {
                     const coordinates = feature.getGeometry().getCoordinates();
-                    popup.setPosition(coordinates);
+                    if (shape.geometryType == "Polygon") {
+                        popup.setPosition(evt.coordinate);
+                    } else if (shape.geometryType == "LineString") {
+                        popup.setPosition(evt.coordinate);
+                    }
+                    else if (shape.geometryType == "Circle") {
+                        popup.setPosition(evt.coordinate);
+                    }
+                    else {
+                        popup.setPosition(coordinates);
+                    }
                 }
             } else if (ol.render.Feature.prototype.isPrototypeOf(feature)) { // render feature
                 const intFeature = that.mapFeatureToInternalFeature(feature);

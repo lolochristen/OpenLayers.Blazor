@@ -3,7 +3,7 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "openlayers@10.3.1",
+      "library": "openlayers@10.6.0",
       "destination": "wwwroot/lib/openlayers/",
       "files": [
         "dist/ol.js",
@@ -77,7 +77,7 @@
     },
     {
       "provider": "jsdelivr",
-      "library": "ol-mapbox-style@12.4.0",
+      "library": "ol-mapbox-style@13.1.0",
       "destination": "wwwroot/lib/ol-mapbox-style/",
       "files": [
         "dist/olms.js",

@@ -398,6 +398,7 @@ MapOL.prototype.prepareLayers = function(layers) {
 
                 case "Vector":
                 case "VectorTile":
+                case "VectorCluster":
                     var features;
                     if (l.useStyleCallback) {
                         l.style = function (feature, resolution) {
@@ -432,6 +433,49 @@ MapOL.prototype.prepareLayers = function(layers) {
                         l.source.on("removefeature", function (evt) { that.onFeatureRemoved(l.id, evt.feature); });
                     }
                     if (features) l.source.addFeatures(features);
+
+                    //const styleCache = {};
+                    //l.source = new ol.source.Cluster({
+                    //    distance: 50,
+                    //    //minDistance: 10,
+                    //    source: l.source,
+                    //});
+
+                    //l.style = function (feature) {
+                    //    const size = feature.get('features').length;
+                    //    let style = styleCache[size];
+                    //    if (!style) {
+                    //        style = new ol.style.Style({
+                    //            image: new ol.style.Circle({
+                    //                radius: 20,
+                    //                stroke: new ol.style.Stroke({
+                    //                    color: '#fff',
+                    //                    width: 1,
+                    //                }),
+                    //                fill: new ol.style.Fill({
+                    //                    color: '#3399CC',
+                    //                }),
+                    //            }),
+                    //            text: new ol.style.Text({
+                    //                text: size.toString(),
+                    //                fill: new ol.style.Fill({
+                    //                    color: '#fff',
+                    //                }),
+                    //            }),
+                    //        });
+                    //        styleCache[size] = style;
+                    //    }
+                    //    return style;
+                    //};
+
+                    if (l.layerType == "VectorCluster") {
+                        l.source = new ol.source.Cluster({
+                            distance: 50,
+                            //minDistance: 10,
+                            source: l.source,
+                        });
+                    }
+
                     layer = l.layerType == "VectorTile" ? new ol.layer.VectorTile(l) : new ol.layer.Vector(l);
                     break;
 
@@ -1050,6 +1094,7 @@ MapOL.prototype.updateShape = function(layerId, shape) {
 
 MapOL.prototype.setShapes = function(layerId, shapes) {
     var source = this.getLayer(layerId).getSource();
+    if (ol.source.Cluster.prototype.isPrototypeOf(source)) source = source.source;
     source.clear();
     if (shapes) {
         shapes.forEach((shape) => {

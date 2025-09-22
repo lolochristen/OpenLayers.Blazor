@@ -13,5 +13,6 @@ public enum LayerType
     /// <summary>
     /// MapboxVectorLayer. Requires ol-mapbox-style js
     /// </summary>
-    MapboxVectorStyle
+    MapboxVectorStyle,
+    VectorCluster
 }

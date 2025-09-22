@@ -1,0 +1,59 @@
+﻿@page "/clustersdemo"
+@rendermode Components.RenderMode.DefaultRenderMode
+
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">Clusters</h3>
+    </div>
+    <div class="card-body">
+    </div>
+</div>
+
+<SwissMap @ref="_map" Style="height:800px;" Class="card">
+    <Layers>
+        <Layer @ref="vectorLayer" LayerType="LayerType.VectorCluster" SourceType="SourceType.Vector" Id="baseLayer" Style="style"></Layer>
+
+        @*         <Layer @ref="clusterLayer" LayerType="LayerType.Vector" SourceType="SourceType.Clusters" Id="clustersLayer"></Layer>
+        <Layer LayerType="LayerType.Vector" SourceType="SourceType.Vector" Id="circleLayer"></Layer>
+ *@    </Layers>
+</SwissMap>
+
+<CodeView Source="ClustersDemo.razor" />
+
+@code {
+    private SwissMap _map = null!;
+    private Layer vectorLayer = null!;
+    private Layer clusterLayer = null!;
+
+    private StyleOptions style = new StyleOptions()
+        {
+            Circle = new StyleOptions.CircleStyleOptions
+            {
+                Radius = 20,
+                Fill = new StyleOptions.FillOptions() { Color = "#3399CC" },
+                Stroke = new StyleOptions.StrokeOptions() { Color = "#fff", Width = 1}
+            },
+            Text = new StyleOptions.TextOptions {
+                Fill = new StyleOptions.FillOptions() {Color = "#fff"}
+            }
+        };
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var random = new Random((int)DateTime.Now.Ticks);
+            var extent = new[] { 2485071.58, 1074261.72, 2837119.8, 1299941.79 };
+            for (var i = 0; i < 500; i++)
+            {
+                vectorLayer.ShapesList.Add(
+                    new Point(new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]))
+                );
+                // new Marker(MarkerType.MarkerPin,
+                //         new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]),
+                //         i.ToString(),
+                //         (PinColor)(i % 3)));
+            }
+        }
+    }
+}

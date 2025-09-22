@@ -544,7 +544,7 @@ MapOL.prototype.updateLayer = function(layer) {
     if (olayer != undefined) {
         olayer.setVisible(layer.visibility);
         olayer.setOpacity(layer.opacity);
-        olayer.setZIndex(layer.zindex);
+        olayer.setZIndex(layer.zIndex);
         olayer.setExtent(layer.extent);
     }
 };

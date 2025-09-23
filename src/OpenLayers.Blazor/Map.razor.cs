@@ -286,6 +286,12 @@ public partial class Map : IAsyncDisposable
     public EventCallback<Shape> OnShapeAdded { get; set; }
 
     /// <summary>
+    ///     Get or sets an event callback when a new feature is drawn.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Shape> OnShapeDrawn { get; set; }
+
+    /// <summary>
     ///     Get or sets an event callback when a feature is changed on the map.
     /// </summary>
     [Parameter]
@@ -688,7 +694,7 @@ public partial class Map : IAsyncDisposable
     }
 
     [JSInvokable]
-    public async Task OnInternalShapeAdded(string layerId, Internal.Shape shape)
+    public async Task OnInternalShapeAdded(string layerId, Internal.Shape shape, bool isDrawn)
     {
 #if DEBUG
         Console.WriteLine($"OnInternalShapeAdded: {JsonSerializer.Serialize(shape)}");
@@ -705,6 +711,10 @@ public partial class Map : IAsyncDisposable
         if (layer.ShapesList.All(p => p.Id != shape.Id))
         {
             var newShape = await layer.OnInternalShapeAdded(shape);
+            if (isDrawn)
+            {
+                await OnShapeDrawn.InvokeAsync(newShape);
+            }
             await OnShapeAdded.InvokeAsync(newShape);
         }
     }
@@ -729,7 +739,7 @@ public partial class Map : IAsyncDisposable
 
         if (existingShape == null)
         {
-            await OnInternalShapeAdded(layerId, shape);
+            await OnInternalShapeAdded(layerId, shape, false);
             return;
         }
 

@@ -3,14 +3,15 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "openlayers@10.3.1",
-      "destination": "wwwroot/lib/openlayers/",
+      "provider": "unpkg",
+      "library": "ol@10.8.0",
+      "destination": "wwwroot/lib/ol/",
       "files": [
-        "dist/ol.js",
-        "dist/ol.js.map",
-        "dist/ol.min.js",
         "ol.css",
-        "ol.min.css"
+        "dist/ol.d.ts",
+        "dist/ol.d.ts.map",
+        "dist/ol.js",
+        "dist/ol.js.map"
       ]
     },
     {

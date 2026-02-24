@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="icon.png" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/OpenLayers.Blazor.Demo.Components/OpenLayers.Blazor.Demo.Components.csproj" />
+    <Project Path="src/OpenLayers.Blazor.Demo.Maui/OpenLayers.Blazor.Demo.Maui.csproj">
+      <Build Project="false" />
+    </Project>
+    <Project Path="src/OpenLayers.Blazor.Demo.Server/OpenLayers.Blazor.Demo.Server.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="src/OpenLayers.Blazor.Demo/OpenLayers.Blazor.Demo.csproj" />
+    <Project Path="src/OpenLayers.Blazor.FlightTracker/OpenLayers.Blazor.FlightTracker.csproj">
+      <Build Project="false" />
+      <Deploy Solution="Release|*" />
+    </Project>
+    <Project Path="src/OpenLayers.Blazor/OpenLayers.Blazor.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="test/OpenLayers.Blazor.Tests/OpenLayers.Blazor.Tests.csproj" />
+  </Folder>
+</Solution>

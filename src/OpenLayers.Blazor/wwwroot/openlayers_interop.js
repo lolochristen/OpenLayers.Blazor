@@ -437,7 +437,7 @@ MapOL.prototype.prepareLayers = function(layers) {
                     if (l.layerType == "VectorCluster") {
                         var defaultStyle = l.style;
                         l.source = new ol.source.Cluster({
-                            distance: l.clusterDistance ?? 50,
+                            distance: l.clusterDistance != null ? l.clusterDistance : 50,
                             minDistance: 0,
                             source: l.source,
                         });

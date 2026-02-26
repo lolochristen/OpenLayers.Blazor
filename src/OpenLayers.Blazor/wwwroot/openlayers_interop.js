@@ -397,20 +397,20 @@ MapOL.prototype.prepareLayers = function(layers) {
 
                 case "Vector":
                 case "VectorTile":
+                case "VectorCluster":
                     var features;
+
                     if (l.useStyleCallback) {
                         l.style = function (feature, resolution) {
                             that.getShapeStyleAsync(feature, l.id)
                             .then(style => feature.setStyle(style));
                         };
                     } else if (l.style) {
-                        var styleOptions = l.style;
-                        l.style = function (feature, resolution) {
-                            return that.mapStyleOptionsToStyle(styleOptions);
-                        };
+                        l.style = that.mapStyleOptionsToStyle(l.style);
                     } else if (l.flatStyle) {
                         l.style = l.flatStyle;
-                    }
+                        }
+
                     if (l.source.data) {
                         features = l.source.format.readFeatures(l.source.data,
                             {
@@ -431,6 +431,57 @@ MapOL.prototype.prepareLayers = function(layers) {
                         l.source.on("removefeature", function (evt) { that.onFeatureRemoved(l.id, evt.feature); });
                     }
                     if (features) l.source.addFeatures(features);
+
+                    const styleCache = {};
+
+                    if (l.layerType == "VectorCluster") {
+                        var defaultStyle = l.style;
+                        l.source = new ol.source.Cluster({
+                            distance: l.clusterDistance != null ? l.clusterDistance : 50,
+                            minDistance: 0,
+                            source: l.source,
+                        });
+                        l.style = function (feature) {
+                            const size = feature.get('features').length;
+                            if (size > 1) {
+                                let style = styleCache[size];
+                                if (!style) {
+                                    if (defaultStyle) {
+                                        if (typeof (defaultStyle) == "function") style = defaultStyle(feature, that.Map.getView().getResolution());
+                                        if (defaultStyle.clone) style = defaultStyle.clone();
+                                        let txt = style.getText();
+                                        if (txt && txt.getText() == null) txt.setText(size.toString());
+                                        let img = style.getImage();
+                                        if (img && img.setRadius && size > 3) img.setRadius(5 * size);
+                                    } else {
+                                        style = new ol.style.Style({
+                                            image: new ol.style.Circle({
+                                                radius: size > 3 ? 5 * size : 10,
+                                                stroke: new ol.style.Stroke({
+                                                    color: '#fff',
+                                                    width: 1,
+                                                }),
+                                                fill: new ol.style.Fill({
+                                                    color: '#3399CC',
+                                                }),
+                                            }),
+                                            text: new ol.style.Text({
+                                                text: size.toString(),
+                                                fill: new ol.style.Fill({
+                                                    color: '#fff',
+                                                }),
+                                            }),
+                                        });
+                                    }
+                                    styleCache[size] = style;
+                                }
+                                return style;
+                            }
+                            const originalFeature = feature.get('features')[0];
+                            return originalFeature.getStyle();
+                        };
+                    }
+
                     layer = l.layerType == "VectorTile" ? new ol.layer.VectorTile(l) : new ol.layer.Vector(l);
                     break;
 
@@ -1049,6 +1100,7 @@ MapOL.prototype.updateShape = function(layerId, shape) {
 
 MapOL.prototype.setShapes = function(layerId, shapes) {
     var source = this.getLayer(layerId).getSource();
+    if (ol.source.Cluster.prototype.isPrototypeOf(source)) source = source.source;
     source.clear();
     if (shapes) {
         shapes.forEach((shape) => {
@@ -1177,6 +1229,8 @@ MapOL.prototype.mapStyleOptionsToStyle = function(style, geometryType = null) {
         image: style.circle ? new ol.style.Circle(style.circle) : style.icon ? new ol.style.Icon(style.icon) : undefined,
         zIndex: style.zIndex,
     });
+
+    if (style.circle) styleObject.getImage().setOpacity(style.circle.opacity); // fix opacity
 
     return styleObject;
 };

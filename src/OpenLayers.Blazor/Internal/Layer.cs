@@ -28,4 +28,5 @@ public class Layer
     public bool RaiseShapeEvents { get; set; }
     public bool UseStyleCallback { get; set; }
     public bool Declutter { get; set; }
+    public double? ClusterDistance { get; set; }
 }

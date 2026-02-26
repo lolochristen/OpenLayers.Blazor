@@ -379,8 +379,7 @@ public partial class Layer : ComponentBase
         set
         {
             _styleCallback = value;
-            if (_styleCallback != null)
-                _internalLayer.UseStyleCallback = true;
+            _internalLayer.UseStyleCallback = _styleCallback != null;
         }
     }
 
@@ -425,6 +424,16 @@ public partial class Layer : ComponentBase
     {
         get => InternalLayer.Declutter;
         set => InternalLayer.Declutter = value;
+    }
+
+    /// <summary>
+    /// Distance in pixels within which features will be clustered together. Applies only for VectorCluster Layers
+    /// </summary>
+    [Parameter]
+    public double? ClusterDistance
+    {
+        get => _internalLayer.ClusterDistance;
+        set => _internalLayer.ClusterDistance = value;
     }
 
     /// <summary>

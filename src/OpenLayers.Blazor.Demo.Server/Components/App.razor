@@ -27,5 +27,17 @@
             hljs.highlightAll();
         }
     </script>
+    <script>
+    window.myComponent = {
+        configureMap: (map) => {
+            // remove double click zoom 
+            map.getInteractions().forEach(function (interaction) {
+                if (interaction instanceof ol.interaction.DoubleClickZoom) {
+                    interaction.setActive(false);
+                }
+            });
+        }
+    }
+    </script>
 </body>
 </html>

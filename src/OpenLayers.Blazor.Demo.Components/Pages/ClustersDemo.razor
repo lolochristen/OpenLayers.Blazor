@@ -11,32 +11,30 @@
 
 <SwissMap @ref="_map" Style="height:800px;" Class="card">
     <Layers>
-        <Layer @ref="vectorLayer" LayerType="LayerType.VectorCluster" SourceType="SourceType.Vector" Id="baseLayer" Style="style" StyleCallback="StyleCallback"></Layer>
-
-        @*         <Layer @ref="clusterLayer" LayerType="LayerType.Vector" SourceType="SourceType.Clusters" Id="clustersLayer"></Layer>
-        <Layer LayerType="LayerType.Vector" SourceType="SourceType.Vector" Id="circleLayer"></Layer>
- *@    </Layers>
+        <Layer @ref="_vectorLayer" LayerType="LayerType.VectorCluster" SourceType="SourceType.Vector" Id="baseLayer" Style="_style" ClusterDistance="50"></Layer>
+    </Layers>
 </SwissMap>
 
 <CodeView Source="ClustersDemo.razor" />
 
 @code {
     private SwissMap _map = null!;
-    private Layer vectorLayer = null!;
-    private Layer clusterLayer = null!;
+    private Layer _vectorLayer = null!;
 
-    private StyleOptions style = new StyleOptions()
+    private readonly StyleOptions _style = new StyleOptions()
+    {
+        Circle = new StyleOptions.CircleStyleOptions
         {
-            Circle = new StyleOptions.CircleStyleOptions
-            {
-                Radius = 20,
-                Fill = new StyleOptions.FillOptions() { Color = "#3399CC" },
-                Stroke = new StyleOptions.StrokeOptions() { Color = "#fff", Width = 1}
-            },
-            Text = new StyleOptions.TextOptions {
-                Fill = new StyleOptions.FillOptions() {Color = "#fff"}
-            }
-        };
+            Radius = 15,
+            Fill = new StyleOptions.FillOptions() { Color = "#8844CC" },
+            Stroke = new StyleOptions.StrokeOptions() { Color = "#fff", Width = 1 },
+            Opacity = 0.8
+        },
+        Text = new StyleOptions.TextOptions
+        {
+            Fill = new StyleOptions.FillOptions() { Color = "#fff" }
+        }
+    };
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -46,31 +44,13 @@
             var extent = new[] { 2485071.58, 1074261.72, 2837119.8, 1299941.79 };
             for (var i = 0; i < 500; i++)
             {
-                vectorLayer.ShapesList.Add(
-                    new Point(new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]))
+                _vectorLayer.ShapesList.Add(
+                new Marker(MarkerType.MarkerPin,
+                        new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]),
+                        i.ToString(),
+                        (PinColor)(i % 3))
                 );
-                // new Marker(MarkerType.MarkerPin,
-                //         new Coordinate(random.NextDouble() * (extent[2] - extent[0]) + extent[0], random.NextDouble() * (extent[3] - extent[1]) + extent[1]),
-                //         i.ToString(),
-                //         (PinColor)(i % 3)));
             }
         }
-    }
-    private StyleOptions? StyleCallback(Shape shape)
-    {
-        return new StyleOptions()
-        {
-            Circle = new StyleOptions.CircleStyleOptions
-            {
-                Radius = 50,
-                Fill = new StyleOptions.FillOptions() { Color = "#3399CC" },
-                Stroke = new StyleOptions.StrokeOptions() { Color = "#fff", Width = 1 }
-            },
-            Text = new StyleOptions.TextOptions
-            {
-                Text = "1",
-                Fill = new StyleOptions.FillOptions() { Color = "#fff" }
-            }
-        };
     }
 }

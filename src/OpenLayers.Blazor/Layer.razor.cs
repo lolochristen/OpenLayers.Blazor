@@ -427,6 +427,16 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
+    /// Distance in pixels within which features will be clustered together. Applies only for VectorCluster Layers
+    /// </summary>
+    [Parameter]
+    public double? ClusterDistance
+    {
+        get => _internalLayer.ClusterDistance;
+        set => _internalLayer.ClusterDistance = value;
+    }
+
+    /// <summary>
     ///    Gets the list of shapes in the layer.
     /// </summary>
     public ObservableRangeCollection<Shape> ShapesList { get; } = new();

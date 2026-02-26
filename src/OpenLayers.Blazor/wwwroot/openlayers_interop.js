@@ -115,6 +115,10 @@ export function MapOLApplyMapboxStyle(mapId, styleUrl, accessToken) {
     _MapOL[mapId].applyMapboxStyle(styleUrl, accessToken);
 }
 
+export function MapOLGetResolution(mapId) {
+    return _MapOL[mapId].getResolution();
+}
+
 function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod) {
     this.Instance = instance;
     this.Options = options;
@@ -1482,4 +1486,9 @@ MapOL.LV95toWGSlng = function LV95toWGSlng(y, x) {
         0.1306 * y1 * x2 -
         0.0436 * y3;
     return (longitude * 100 / 36);
+};
+
+MapOL.prototype.getResolution = function () {
+    var that = this;
+    return this.Map.getView().getResolution();
 };

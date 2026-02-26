@@ -434,7 +434,7 @@ MapOL.prototype.prepareLayers = function(layers) {
                     }
                     if (features) l.source.addFeatures(features);
 
-                    //const styleCache = {};
+                    const styleCache = {};
                     //l.source = new ol.source.Cluster({
                     //    distance: 50,
                     //    //minDistance: 10,
@@ -447,7 +447,7 @@ MapOL.prototype.prepareLayers = function(layers) {
                     //    if (!style) {
                     //        style = new ol.style.Style({
                     //            image: new ol.style.Circle({
-                    //                radius: 20,
+                    //                radius: size > 3 ? 5 * size : 10,
                     //                stroke: new ol.style.Stroke({
                     //                    color: '#fff',
                     //                    width: 1,
@@ -471,7 +471,7 @@ MapOL.prototype.prepareLayers = function(layers) {
                     if (l.layerType == "VectorCluster") {
                         l.source = new ol.source.Cluster({
                             distance: 50,
-                            //minDistance: 10,
+                            minDistance: 10,
                             source: l.source,
                         });
                     }

@@ -379,8 +379,7 @@ public partial class Layer : ComponentBase
         set
         {
             _styleCallback = value;
-            if (_styleCallback != null)
-                _internalLayer.UseStyleCallback = true;
+            _internalLayer.UseStyleCallback = _styleCallback != null;
         }
     }
 

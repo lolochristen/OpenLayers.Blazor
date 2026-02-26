@@ -11,7 +11,7 @@
 
 <SwissMap @ref="_map" Style="height:800px;" Class="card">
     <Layers>
-        <Layer @ref="vectorLayer" LayerType="LayerType.VectorCluster" SourceType="SourceType.Vector" Id="baseLayer" Style="style"></Layer>
+        <Layer @ref="vectorLayer" LayerType="LayerType.VectorCluster" SourceType="SourceType.Vector" Id="baseLayer" Style="style" StyleCallback="StyleCallback"></Layer>
 
         @*         <Layer @ref="clusterLayer" LayerType="LayerType.Vector" SourceType="SourceType.Clusters" Id="clustersLayer"></Layer>
         <Layer LayerType="LayerType.Vector" SourceType="SourceType.Vector" Id="circleLayer"></Layer>
@@ -55,5 +55,22 @@
                 //         (PinColor)(i % 3)));
             }
         }
+    }
+    private StyleOptions? StyleCallback(Shape shape)
+    {
+        return new StyleOptions()
+        {
+            Circle = new StyleOptions.CircleStyleOptions
+            {
+                Radius = 50,
+                Fill = new StyleOptions.FillOptions() { Color = "#3399CC" },
+                Stroke = new StyleOptions.StrokeOptions() { Color = "#fff", Width = 1 }
+            },
+            Text = new StyleOptions.TextOptions
+            {
+                Text = "1",
+                Fill = new StyleOptions.FillOptions() { Color = "#fff" }
+            }
+        };
     }
 }

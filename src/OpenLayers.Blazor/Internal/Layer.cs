@@ -20,6 +20,7 @@ public class Layer
     public double? MaxZoom { get; set; }
     public double Preload { get; set; } = 0;
     public Source Source { get; set; } = new();
+    public string? Credentials { get; set; }
     public bool UseInterimTilesOnError { get; set; } = true;
     public Dictionary<string, object>? Properties { get; set; } = new();
     public dynamic? Options { get; set; }

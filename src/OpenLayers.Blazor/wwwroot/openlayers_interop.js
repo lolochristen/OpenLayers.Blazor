@@ -220,8 +220,8 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
     this.OverlayPopup = new ol.Overlay({
         element: popupElement,
         positioning: "bottom-center",
-        stopEvent: false,
-        offset: [0, -50]
+        stopEvent: !this.Options.popupAllowMapEvents,
+        offset: this.Options.popupOffset
     });
 
     this.Map.addOverlay(this.OverlayPopup);
@@ -238,7 +238,6 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
                 context = context[namespaces[i]];
             }
             context[func].apply(context, [this.Map]);
-        //    configure(configureJsMethod, window, [options]);
         } catch (err) {
             console.error(err);
         }
@@ -653,6 +652,7 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
             if (!layer)
                 return; // no layer = drawing
             const layerId = layer.get("id");
+            const center = ol.extent.getCenter(feature.getGeometry().getExtent());
 
             if (ol.Feature.prototype.isPrototypeOf(feature)) { // full feature
                 const shape = that.mapFeatureToShape(feature);
@@ -671,8 +671,7 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
                 }
 
                 if (showPopup) {
-                    const coordinates = feature.getGeometry().getCoordinates();
-                    popup.setPosition(coordinates);
+                    popup.setPosition(center);
                 }
             } else if (ol.render.Feature.prototype.isPrototypeOf(feature)) { // render feature
                 const intFeature = that.mapFeatureToInternalFeature(feature);
@@ -680,7 +679,7 @@ MapOL.prototype.onMapClick = function(evt, popup, element) {
                     that.Instance.invokeMethodAsync("OnInternalFeatureClick", intFeature, layerId);
                 }
                 if (that.Options.autoPopup) {
-                    popup.setPosition(intFeature.coordinates);
+                    popup.setPosition(center);
                 }
             }
         });

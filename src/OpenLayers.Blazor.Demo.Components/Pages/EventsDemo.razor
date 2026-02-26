@@ -1,6 +1,5 @@
 ﻿@page "/events"
-@using OpenLayers.Blazor.Internal
-@using Layer = OpenLayers.Blazor.Layer
+@rendermode Components.RenderMode.DefaultRenderMode
 
 <div class="card mt-2 mb-2">
     <div class="card-header">
@@ -55,7 +54,7 @@ Pointer: @_pointer
 
 @code {
     private OpenStreetMap? _map;
-    private Layer? _layer;
+    private OpenLayers.Blazor.Layer? _layer;
     private Coordinate? _pointer;
     private readonly List<string> _msg = [];
 

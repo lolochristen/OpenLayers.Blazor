@@ -7,11 +7,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="Pages\ClustersDemo.razor" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Include="Pages\BingMapDemo.razor" />
+		<EmbeddedResource Include="Pages\ClustersDemo.razor" />
 		<EmbeddedResource Include="Pages\CustomWMTSMap.razor" />
 		<EmbeddedResource Include="Pages\GeoJsonDemo.razor" />
 		<EmbeddedResource Include="Pages\Index.razor" />

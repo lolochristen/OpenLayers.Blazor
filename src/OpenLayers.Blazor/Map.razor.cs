@@ -521,7 +521,7 @@ public partial class Map : IAsyncDisposable
         if (parameters.TryGetValue(nameof(Rotation), out double rotation) && !rotation.Equals(Rotation))
             _ = SetRotation(rotation);
 
-        if (parameters.TryGetValue(nameof(VisibleExtent), out Extent? extent) && !extent!.Equals(VisibleExtent))
+        if (parameters.TryGetValue(nameof(VisibleExtent), out Extent? extent) && !extent.Equals(VisibleExtent))
             _ = SetVisibleExtent(extent);
 
         if (parameters.TryGetValue(nameof(InteractionsEnabled), out bool interactionsEnabled) && interactionsEnabled != InteractionsEnabled)
@@ -854,10 +854,10 @@ public partial class Map : IAsyncDisposable
         }
 
         var selectedShapes = selected.Select(p => layer.ShapesList.FirstOrDefault(s => s.Id == p.Id))
-            .Where(p => p != null).ToList();
+            .Where(p => p != null).OfType<Shape>().ToList();
 
         var unselectedShapes = unselected.Select(p => layer.ShapesList.FirstOrDefault(s => s.Id == p.Id))
-            .Where(p => p != null).ToList();
+            .Where(p => p != null).OfType<Shape>().ToList();
 
         if (selectedShapes.Count > 0)
             layer.SelectedShape = selectedShapes[0];

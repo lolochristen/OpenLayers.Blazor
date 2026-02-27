@@ -46,7 +46,8 @@ public class MapboxMap : Map
 
         if (firstRender)
         {
-            await ApplyMapboxStyle(StyleUrl, AccessToken);
+            if (StyleUrl != null)
+                await ApplyMapboxStyle(StyleUrl, AccessToken);
         }
     }
 }

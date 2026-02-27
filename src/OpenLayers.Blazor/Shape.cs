@@ -168,7 +168,7 @@ public class Shape : Feature, IDisposable
     public double? Radius
     {
         get => GetRadius();
-        set => SetRadius((double)value);
+        set => SetRadius(value ?? 0);
     }
 
     /// <summary>
@@ -196,7 +196,11 @@ public class Shape : Feature, IDisposable
     public string? Stroke
     {
         get => GetStroke();
-        set => SetStroke(value);
+        set
+        {
+            if (value != null)
+                SetStroke(value);
+        }
     }
 
     /// <summary>
@@ -226,7 +230,7 @@ public class Shape : Feature, IDisposable
     public double? StrokeThickness
     {
         get => GetStrokeThickness();
-        set => SetStrokeThickness((double)value);
+        set => SetStrokeThickness(value ?? 0);
     }
 
     /// <summary>
@@ -256,7 +260,7 @@ public class Shape : Feature, IDisposable
     public string? Fill
     {
         get => GetFill();
-        set => SetFill(value);
+        set => SetFill(value!);
     }
 
     /// <summary>
@@ -349,7 +353,14 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.Styles = value;
     }
 
-    protected T? GetOrCreateStyleOptions<T>(int? index = null) where T : class
+    /// <summary>
+    /// GetOrCreateStyleOptions
+    /// </summary>
+    /// <param name="index"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    protected T GetOrCreateStyleOptions<T>(int? index = null) where T : class
     {
         if (Styles == null)
             Styles = new List<StyleOptions>();
@@ -368,36 +379,36 @@ public class Shape : Feature, IDisposable
         if (typeof(T) == typeof(StyleOptions.StrokeOptions))
         {
             style.Stroke ??= new StyleOptions.StrokeOptions();
-            return style.Stroke as T;
+            return (style.Stroke as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.FillOptions))
         {
             style.Fill ??= new StyleOptions.FillOptions();
-            return style.Fill as T;
+            return (style.Fill as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.TextOptions))
         {
             style.Text ??= new StyleOptions.TextOptions();
-            return style.Text as T;
+            return (style.Text as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.CircleStyleOptions))
         {
             style.Circle ??= new StyleOptions.CircleStyleOptions();
-            return style.Circle as T;
+            return (style.Circle as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.TextOptions))
         {
             style.Text ??= new StyleOptions.TextOptions();
-            return style.Text as T;
+            return (style.Text as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.IconStyleOptions))
         {
             style.Icon ??= new StyleOptions.IconStyleOptions();
-            return style.Icon as T;
+            return (style.Icon as T)!;
         }
         if (typeof(T) == typeof(StyleOptions))
         {
-            return style as T;
+            return (style as T)!;
         }
         throw new ArgumentException("Invalid style option type");
     }
@@ -492,7 +503,7 @@ public class Shape : Feature, IDisposable
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(Font), out string? font) && font != Font)
             _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c != Coordinates)
+        if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c! != Coordinates)
             _coordinatesParametersChanged = true;
 
         return base.SetParametersAsync(parameters);

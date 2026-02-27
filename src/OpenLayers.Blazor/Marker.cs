@@ -192,7 +192,7 @@ public class Marker : Shape
     protected override void SetStroke(string color)
     {
         if (Type == MarkerType.MarkerAwesome)
-            GetOrCreateStyleOptions<StyleOptions.TextOptions>(1).Stroke.Color = color;
+            GetOrCreateStyleOptions<StyleOptions.TextOptions>(1).Stroke!.Color = color;
         else
             base.SetStroke(color);
     }
@@ -201,7 +201,7 @@ public class Marker : Shape
     protected override string? GetStroke()
     {
         if (Type == MarkerType.MarkerAwesome)
-            return GetOrCreateStyleOptions<StyleOptions.TextOptions>(1).Stroke.Color;
+            return GetOrCreateStyleOptions<StyleOptions.TextOptions>(1).Stroke!.Color;
         return base.GetStroke();
     }
 

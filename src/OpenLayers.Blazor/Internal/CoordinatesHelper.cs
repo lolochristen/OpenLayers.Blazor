@@ -17,11 +17,11 @@ internal static class CoordinatesHelper
         switch (level)
         {
             case 1:
-                return element.Deserialize<double[]>();
+                return element.Deserialize<double[]>() ?? throw new InvalidOperationException();
             case 2:
-                return element.Deserialize<double[][]>();
+                return element.Deserialize<double[][]>() ?? throw new InvalidOperationException();
             case 3:
-                return element.Deserialize<double[][][]>();
+                return element.Deserialize<double[][][]>() ?? throw new InvalidOperationException();
             default:
                 return null;
         }

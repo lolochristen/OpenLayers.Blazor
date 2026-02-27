@@ -19,7 +19,7 @@ public class Feature
     public string? Type
     {
         get => GetProperty<string>("type");
-        set => Properties["type"] = value;
+        set => Properties["type"] = value!;
     }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]

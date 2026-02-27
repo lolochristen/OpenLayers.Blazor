@@ -521,7 +521,7 @@ public partial class Map : IAsyncDisposable
         if (parameters.TryGetValue(nameof(Rotation), out double rotation) && !rotation.Equals(Rotation))
             _ = SetRotation(rotation);
 
-        if (parameters.TryGetValue(nameof(VisibleExtent), out Extent extent) && !extent.Equals(VisibleExtent))
+        if (parameters.TryGetValue(nameof(VisibleExtent), out Extent? extent) && !extent!.Equals(VisibleExtent))
             _ = SetVisibleExtent(extent);
 
         if (parameters.TryGetValue(nameof(InteractionsEnabled), out bool interactionsEnabled) && interactionsEnabled != InteractionsEnabled)

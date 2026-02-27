@@ -32,6 +32,7 @@ public class Marker : Shape
     /// <param name="type"></param>
     /// <param name="coordinate"></param>
     /// <param name="title"></param>
+    /// <param name="pinColor"></param>
     public Marker(MarkerType type, Coordinate coordinate, string? title = null, PinColor pinColor = PinColor.Red) : this()
     {
         Type = type;
@@ -76,7 +77,7 @@ public class Marker : Shape
     [Parameter]
     public new MarkerType Type
     {
-        get => InternalFeature.GetProperty<string>("markerstyle") != null ? Enum.Parse<MarkerType>(InternalFeature.GetProperty<string>("markerstyle")) : MarkerType.MarkerPin;
+        get => InternalFeature.GetProperty<string>("markerstyle") != null ? Enum.Parse<MarkerType>(InternalFeature.GetProperty<string>("markerstyle") ?? nameof(MarkerType.MarkerPin)) : MarkerType.MarkerPin;
         set
         {
             switch (value)

@@ -349,7 +349,11 @@ public class StyleOptions
         /// Gets or sets the rotation angle of the text in radians.
         /// </summary>
         public double? Rotation { get; set; }
-        public string Text { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the text.
+        /// </summary>
+        public string? Text { get; set; }
 
         /// <summary>
         /// Gets or sets the horizontal text alignment.
@@ -392,7 +396,7 @@ public class StyleOptions
         /// <summary>
         /// Gets or sets the padding around the text in pixels [top, right, bottom, left].
         /// </summary>
-        public double[] Padding { get; set; }
+        public double[]? Padding { get; set; }
     }
 
     /// <summary>
@@ -464,12 +468,12 @@ public class StyleOptions
         /// <summary>
         /// Gets or sets the icon color as RGBA [r, g, b, a] (0-255 for RGB, 0.0-1.0 for alpha).
         /// </summary>
-        public int[] Color { get; set; }
+        public int[]? Color { get; set; }
 
         /// <summary>
         /// Gets or sets the cross-origin attribute for loading images.
         /// </summary>
-        public string CrossOrigin { get; set; }
+        public string? CrossOrigin { get; set; }
         
         /// <summary>
         /// Gets or sets the icon width in pixels.

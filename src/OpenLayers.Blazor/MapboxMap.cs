@@ -12,7 +12,7 @@ public class MapboxMap : Map
     /// Gets or sets the Mapbox style URL (e.g., "mapbox://styles/mapbox/streets-v11").
     /// </summary>
     [Parameter]
-    public string StyleUrl { get; set; }
+    public string? StyleUrl { get; set; }
 
     /// <summary>
     /// Gets or sets the Mapbox access token for authenticated requests.

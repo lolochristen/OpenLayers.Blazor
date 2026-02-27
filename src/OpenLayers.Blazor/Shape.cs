@@ -349,7 +349,7 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.Styles = value;
     }
 
-    protected T GetOrCreateStyleOptions<T>(int? index = null) where T : class
+    protected T? GetOrCreateStyleOptions<T>(int? index = null) where T : class
     {
         if (Styles == null)
             Styles = new List<StyleOptions>();

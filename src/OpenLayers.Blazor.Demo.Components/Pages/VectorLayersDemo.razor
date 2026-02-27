@@ -7,21 +7,22 @@
         <h3 class="card-title">Vector Layers</h3>
     </div>
     <div class="card-body">
-        Different vector layers with different sources
+        <p>Different vector layers with different sources</p>
+        <button class="btn btn-primary" @onclick="AddLayer">Add some shapes</button>
     </div>
 </div>
 
 <OpenStreetMap @ref="_map" Style="height:800px" class="card">
     <Layers>
-        <Layer LayerType="LayerType.VectorImage" SourceType="SourceType.VectorGeoJson" Url="https://openlayers.org/data/vector/ecoregions.json" Opacity=".5" Options="@_vectorImageOptions" ></Layer>
-        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorWKT" Data="@_wkt" FlatStyle="@_wktStyle" />
-        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorKML" Url="https://openlayers.org/en/latest/examples/data/kml/2012-02-10.kml" FormatOptions="@_kmlOptions"></Layer>
-        <Layer LayerType="LayerType.Heatmap" SourceType="SourceType.VectorKML" 
+        <Layer LayerType="LayerType.VectorImage" SourceType="SourceType.VectorGeoJson" Url="https://openlayers.org/data/vector/ecoregions.json" ZIndex="10" Opacity=".5" Options="@_vectorImageOptions" ></Layer>
+        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorWKT" Data="@_wkt" FlatStyle="@_wktStyle"  ZIndex="20"/>
+        <Layer LayerType="LayerType.Vector" SourceType="SourceType.VectorKML" ZIndex="25" Url="https://openlayers.org/en/latest/examples/data/kml/2012-02-10.kml" FormatOptions="@_kmlOptions"></Layer>
+        <Layer LayerType="LayerType.Heatmap" SourceType="SourceType.VectorKML" ZIndex="30" 
                Url="https://openlayers.org/en/latest/examples/data/kml/2012_Earthquakes_Mag5.kml" 
                FormatOptions="@((dynamic) new { extractStyles = false})" 
                Options="@((dynamic) new { blur = 15, radius = 5, weight = ".3" })"></Layer>
-        <Layer LayerType="LayerType.Image" SourceType="SourceType.ImageStatic" Url="https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Logo_Arosa.svg/480px-Logo_Arosa.svg.png" CrossOrigin="anonymous" Extent="new double[] {9.237235, 46.533206, 11.703873, 46.846104}"></Layer>
-        <Layer LayerType="LayerType.Vector" SourceType="SourceType.Vector">
+        <Layer LayerType="LayerType.Image" SourceType="SourceType.ImageStatic" ZIndex="40" Url="https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Logo_Arosa.svg/480px-Logo_Arosa.svg.png" CrossOrigin="anonymous" Extent="new double[] {9.237235, 46.533206, 11.703873, 46.846104}"></Layer>
+        <Layer LayerType="LayerType.Vector" SourceType="SourceType.Vector" ZIndex="50">
             <Shapes>
                 <Circle Center="new(9.674681, 46.778543)" Radius="10000" Stroke="red" Fill="transparent" StrokeThickness="5"></Circle>
             </Shapes>
@@ -48,4 +49,19 @@
         if (firstRender)
             _map.Zoom = 3;
     }
+
+    private void AddLayer()
+    {
+        var layer = new Layer()
+        {
+            Id = $"layer9",
+            LayerType = LayerType.Tile,
+            SourceType = SourceType.XYZ,
+            Url = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            Opacity = .7,
+            ZIndex = 21,
+        };
+        _map.LayersList.Add(layer);
+    }
+
 }

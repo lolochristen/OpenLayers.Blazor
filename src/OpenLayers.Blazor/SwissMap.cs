@@ -2,8 +2,15 @@
 
 namespace OpenLayers.Blazor;
 
+/// <summary>
+/// Map component configured for Swiss Federal Office of Topography (swisstopo) WMS layers.
+/// Uses EPSG:2056 (LV95) coordinate system by default.
+/// </summary>
 public class SwissMap : Map
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SwissMap"/> class with swisstopo base layer.
+    /// </summary>
     public SwissMap()
     {
         LayerId = "ch.swisstopo.pixelkarte-farbe";
@@ -14,9 +21,13 @@ public class SwissMap : Map
         Zoom = 2.4;
     }
 
+    /// <summary>
+    /// Gets or sets the swisstopo layer identifier (e.g., "ch.swisstopo.pixelkarte-farbe").
+    /// </summary>
+    [Parameter] 
+    public string LayerId { get; set; }
 
-    [Parameter] public string LayerId { get; set; }
-
+    /// <inheritdoc/>
     protected override Task OnParametersSetAsync()
     {
         if (LayersList.Count > 0 && LayersList[0].SourceParameters["LAYERS"] != LayerId)
@@ -24,6 +35,10 @@ public class SwissMap : Map
         return base.OnParametersSetAsync();
     }
 
+    /// <summary>
+    /// Configures the base layer with the specified swisstopo layer identifier.
+    /// </summary>
+    /// <param name="layerId">The swisstopo WMS layer identifier.</param>
     protected void SetBaseLayer(string layerId)
     {
 #if DEBUG
@@ -48,10 +63,12 @@ public class SwissMap : Map
     }
 
     /// <summary>
-    ///     e.g. ch.astra.wanderland-sperrungen_umleitungen
-    ///     https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities
+    /// Adds a Swiss geo.admin.ch WMS overlay layer to the map.
     /// </summary>
-    /// <param name="layerId"></param>
+    /// <param name="layerId">The WMS layer identifier (e.g., "ch.astra.wanderland-sperrungen_umleitungen"). 
+    /// See https://wms.geo.admin.ch/?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities for available layers.</param>
+    /// <param name="opacity">The layer opacity (0.0 to 1.0). Default is 1.0.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task AddSwissGeoLayer(string layerId, double opacity = 1)
     {
         LayersList.Add(new Layer

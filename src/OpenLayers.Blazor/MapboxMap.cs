@@ -2,14 +2,25 @@
 
 namespace OpenLayers.Blazor;
 
+/// <summary>
+/// Map component configured for Mapbox vector tile layers.
+/// Requires the ol-mapbox-style JavaScript library.
+/// </summary>
 public class MapboxMap : Map
 {
+    /// <summary>
+    /// Gets or sets the Mapbox style URL (e.g., "mapbox://styles/mapbox/streets-v11").
+    /// </summary>
     [Parameter]
     public string StyleUrl { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Mapbox access token for authenticated requests.
+    /// </summary>
     [Parameter]
     public string? AccessToken { get; set; }
 
+    /// <inheritdoc/>
     public override Task SetParametersAsync(ParameterView parameters)
     {
         bool applyStyle = false;
@@ -28,7 +39,7 @@ public class MapboxMap : Map
         return base.SetParametersAsync(parameters);
     }
 
-
+    /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);

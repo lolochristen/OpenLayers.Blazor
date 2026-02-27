@@ -1,61 +1,239 @@
-var _MapOL = new Array();
+const _MapOL = new Array();
 
+/**
+ * Initializes a new OpenLayers map instance.
+ * @param {string} mapId - The HTML element ID for the map container
+ * @param {string} popupId - The HTML element ID for the popup overlay
+ * @param {object} options - Map configuration options
+ * @param {Array<number>} center - Initial center coordinates [x, y]
+ * @param {number} zoom - Initial zoom level
+ * @param {number} rotation - Initial rotation in radians
+ * @param {boolean} interactions - Whether interactions are enabled
+ * @param {Array<object>} layers - Array of layer configurations
+ * @param {object} instance - DotNet object reference for callbacks
+ * @param {string} configureJsMethod - Optional JavaScript method name to call for additional configuration
+ */
 export function MapOLInit(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod) {
-    _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod);
+    try {
+        if (!mapId || !instance) {
+            console.error('MapOLInit: mapId and instance are required');
+            return;
+        }
+        _MapOL[mapId] = new MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod);
+    } catch (error) {
+        console.error('MapOLInit failed:', error);
+    }
 }
 
+/**
+ * Disposes a map instance and cleans up resources.
+ * @param {string} mapId - The map ID to dispose
+ */
 export function MapOLDispose(mapId) {
-    _MapOL[mapId] = undefined;
+    try {
+        if (_MapOL[mapId]) {
+            if (_MapOL[mapId].dispose) {
+                _MapOL[mapId].dispose();
+            }
+            _MapOL[mapId] = undefined;
+        }
+    } catch (error) {
+        console.error('MapOLDispose failed:', error);
+    }
 }
 
+/**
+ * Sets the center coordinate of the map.
+ * @param {string} mapId - The map ID
+ * @param {Array<number>} point - Center coordinates [x, y]
+ */
 export function MapOLCenter(mapId, point) {
-    _MapOL[mapId].setCenter(point);
+    try {
+        if (_MapOL[mapId] && point) {
+            _MapOL[mapId].setCenter(point);
+        }
+    } catch (error) {
+        console.error('MapOLCenter failed:', error);
+    }
 }
 
+/**
+ * Sets the rotation of the map.
+ * @param {string} mapId - The map ID
+ * @param {number} rotation - Rotation in radians
+ */
 export function MapOLRotate(mapId, rotation) {
-    _MapOL[mapId].setRotation(rotation);
+    try {
+        if (_MapOL[mapId] && typeof rotation === 'number') {
+            _MapOL[mapId].setRotation(rotation);
+        }
+    } catch (error) {
+        console.error('MapOLRotate failed:', error);
+    }
 }
 
+/**
+ * Sets the zoom level of the map.
+ * @param {string} mapId - The map ID
+ * @param {number} zoom - Zoom level
+ */
 export function MapOLZoom(mapId, zoom) {
-    _MapOL[mapId].setZoom(zoom);
+    try {
+        if (_MapOL[mapId] && typeof zoom === 'number') {
+            _MapOL[mapId].setZoom(zoom);
+        }
+    } catch (error) {
+        console.error('MapOLZoom failed:', error);
+    }
 }
 
+/**
+ * Updates map options.
+ * @param {string} mapId - The map ID
+ * @param {object} options - New options to apply
+ */
 export function MapOLSetOptions(mapId, options) {
-    _MapOL[mapId].setOptions(options);
+    try {
+        if (_MapOL[mapId] && options) {
+            _MapOL[mapId].setOptions(options);
+        }
+    } catch (error) {
+        console.error('MapOLSetOptions failed:', error);
+    }
 }
 
+/**
+ * Zooms the map to fit a layer's extent.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID to zoom to
+ * @param {Array<number>} padding - Padding around the extent [top, right, bottom, left]
+ */
 export function MapOLZoomToExtent(mapId, layerId, padding) {
-    _MapOL[mapId].setZoomToExtent(layerId, padding);
+    try {
+        if (_MapOL[mapId]) {
+            _MapOL[mapId].setZoomToExtent(layerId, padding);
+        }
+    } catch (error) {
+        console.error('MapOLZoomToExtent failed:', error);
+    }
 }
 
+/**
+ * Centers the map on the current geolocation.
+ * @param {string} mapId - The map ID
+ */
 export function MapOLCenterToCurrentGeoLocation(mapId) {
-    _MapOL[mapId].centerToCurrentGeoLocation();
+    try {
+        if (_MapOL[mapId]) {
+            _MapOL[mapId].centerToCurrentGeoLocation();
+        }
+    } catch (error) {
+        console.error('MapOLCenterToCurrentGeoLocation failed:', error);
+    }
 }
 
+/**
+ * Gets the current geolocation.
+ * @param {string} mapId - The map ID
+ * @returns {Promise<Array<number>>} Promise resolving to coordinates [longitude, latitude]
+ */
 export function MapOLGetCurrentGeoLocation(mapId) {
-    return _MapOL[mapId].getCurrentGeoLocation();
+    try {
+        if (_MapOL[mapId]) {
+            return _MapOL[mapId].getCurrentGeoLocation();
+        }
+        return Promise.reject('Map not found');
+    } catch (error) {
+        console.error('MapOLGetCurrentGeoLocation failed:', error);
+        return Promise.reject(error);
+    }
 }
 
+/**
+ * Sets all layers on the map.
+ * @param {string} mapId - The map ID
+ * @param {Array<object>} layers - Array of layer configurations
+ */
 export function MapOLSetLayers(mapId, layers) {
-    _MapOL[mapId].setLayers(layers);
+    try {
+        if (_MapOL[mapId] && Array.isArray(layers)) {
+            _MapOL[mapId].setLayers(layers);
+        }
+    } catch (error) {
+        console.error('MapOLSetLayers failed:', error);
+    }
 }
 
+/**
+ * Removes a layer from the map.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID to remove
+ */
 export function MapOLRemoveLayer(mapId, layerId) {
-    _MapOL[mapId].removeLayer(layerId);
+    try {
+        if (_MapOL[mapId] && layerId) {
+            _MapOL[mapId].removeLayer(layerId);
+        }
+    } catch (error) {
+        console.error('MapOLRemoveLayer failed:', error);
+    }
 }
 
+/**
+ * Adds a layer to the map.
+ * @param {string} mapId - The map ID
+ * @param {object} layer - The layer configuration
+ */
 export function MapOLAddLayer(mapId, layer) {
-    _MapOL[mapId].addLayer(layer);
+    try {
+        if (_MapOL[mapId] && layer) {
+            _MapOL[mapId].addLayer(layer);
+        }
+    } catch (error) {
+        console.error('MapOLAddLayer failed:', error);
+    }
 }
 
+/**
+ * Updates a layer on the map.
+ * @param {string} mapId - The map ID
+ * @param {object} layer - The layer configuration with updated properties
+ */
 export function MapOLUpdateLayer(mapId, layer) {
-    _MapOL[mapId].updateLayer(layer);
+    try {
+        if (_MapOL[mapId] && layer) {
+            _MapOL[mapId].updateLayer(layer);
+        }
+    } catch (error) {
+        console.error('MapOLUpdateLayer failed:', error);
+    }
 }
 
+/**
+ * Sets the visible extent of the map.
+ * @param {string} mapId - The map ID
+ * @param {Array<number>} extent - The extent [minX, minY, maxX, maxY]
+ */
 export function MapOLSetVisibleExtent(mapId, extent) {
-    _MapOL[mapId].setVisibleExtent(extent);
+    try {
+        if (_MapOL[mapId] && extent) {
+            _MapOL[mapId].setVisibleExtent(extent);
+        }
+    } catch (error) {
+        console.error('MapOLSetVisibleExtent failed:', error);
+    }
 }
 
+/**
+ * Configures drawing settings for shape creation and editing.
+ * @param {string} mapId - The map ID
+ * @param {string} drawingLayerId - The layer ID for drawing
+ * @param {boolean} enableNewShapes - Whether new shape drawing is enabled
+ * @param {boolean} enableEditShapes - Whether shape editing is enabled
+ * @param {boolean} enableShapeSnap - Whether snapping is enabled
+ * @param {string} geometryType - The geometry type for new shapes
+ * @param {boolean} freehand - Whether freehand drawing is enabled
+ */
 export function MapOLSetDrawingSettings(mapId,
     drawingLayerId,
     enableNewShapes,
@@ -63,63 +241,216 @@ export function MapOLSetDrawingSettings(mapId,
     enableShapeSnap,
     geometryType,
     freehand) {
-    _MapOL[mapId].setDrawingSettings(drawingLayerId,
-        enableNewShapes,
-        enableEditShapes,
-        enableShapeSnap,
-        geometryType,
-        freehand);
+    try {
+        if (_MapOL[mapId]) {
+            _MapOL[mapId].setDrawingSettings(drawingLayerId,
+                enableNewShapes,
+                enableEditShapes,
+                enableShapeSnap,
+                geometryType,
+                freehand);
+        }
+    } catch (error) {
+        console.error('MapOLSetDrawingSettings failed:', error);
+    }
 }
 
+/**
+ * Undoes the last drawing operation.
+ * @param {string} mapId - The map ID
+ */
 export function MapOLUndoDrawing(mapId) {
-    _MapOL[mapId].undoDrawing();
+    try {
+        if (_MapOL[mapId]) {
+            _MapOL[mapId].undoDrawing();
+        }
+    } catch (error) {
+        console.error('MapOLUndoDrawing failed:', error);
+    }
 }
 
+/**
+ * Updates a shape on a layer.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID
+ * @param {object} shape - The shape configuration
+ */
 export function MapOLUpdateShape(mapId, layerId, shape) {
-    _MapOL[mapId].updateShape(layerId, shape);
+    try {
+        if (_MapOL[mapId] && layerId && shape) {
+            _MapOL[mapId].updateShape(layerId, shape);
+        }
+    } catch (error) {
+        console.error('MapOLUpdateShape failed:', error);
+    }
 }
 
+/**
+ * Sets all shapes on a layer.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID
+ * @param {Array<object>} shapes - Array of shape configurations
+ */
 export function MapOLSetShapes(mapId, layerId, shapes) {
-    _MapOL[mapId].setShapes(layerId, shapes);
+    try {
+        if (_MapOL[mapId] && layerId) {
+            _MapOL[mapId].setShapes(layerId, shapes);
+        }
+    } catch (error) {
+        console.error('MapOLSetShapes failed:', error);
+    }
 }
 
+/**
+ * Removes a shape from a layer.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID
+ * @param {object} shape - The shape to remove
+ */
 export function MapOLRemoveShape(mapId, layerId, shape) {
-    _MapOL[mapId].removeShapes(layerId, shape);
+    try {
+        if (_MapOL[mapId] && layerId && shape) {
+            _MapOL[mapId].removeShapes(layerId, shape);
+        }
+    } catch (error) {
+        console.error('MapOLRemoveShape failed:', error);
+    }
 }
 
+/**
+ * Adds shapes to a layer.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID
+ * @param {Array<object>} shapes - Array of shapes to add
+ */
 export function MapOLAddShape(mapId, layerId, shapes) {
-    _MapOL[mapId].addShapes(layerId, shapes);
+    try {
+        if (_MapOL[mapId] && layerId) {
+            _MapOL[mapId].addShapes(layerId, shapes);
+        }
+    } catch (error) {
+        console.error('MapOLAddShape failed:', error);
+    }
 }
 
+/**
+ * Gets the coordinates of a shape.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID
+ * @param {string} shapeId - The shape ID
+ * @returns {Array} The shape's coordinates
+ */
 export function MapOLGetCoordinates(mapId, layerId, shapeId) {
-    return _MapOL[mapId].getCoordinates(layerId, shapeId);
+    try {
+        if (_MapOL[mapId] && layerId && shapeId) {
+            return _MapOL[mapId].getCoordinates(layerId, shapeId);
+        }
+        return null;
+    } catch (error) {
+        console.error('MapOLGetCoordinates failed:', error);
+        return null;
+    }
 }
 
+/**
+ * Sets the coordinates of a shape.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID
+ * @param {string} shapeId - The shape ID
+ * @param {Array} coordinates - The new coordinates
+ */
 export function MapOLSetCoordinates(mapId, layerId, shapeId, coordinates) {
-    return _MapOL[mapId].setCoordinates(layerId, shapeId, coordinates);
+    try {
+        if (_MapOL[mapId] && layerId && shapeId && coordinates) {
+            return _MapOL[mapId].setCoordinates(layerId, shapeId, coordinates);
+        }
+    } catch (error) {
+        console.error('MapOLSetCoordinates failed:', error);
+    }
 }
 
+/**
+ * Sets whether map interactions are enabled.
+ * @param {string} mapId - The map ID
+ * @param {boolean} active - Whether interactions should be active
+ */
 export function MapOLSetInteractions(mapId, active) {
-    _MapOL[mapId].setInteractions(active);
+    try {
+        if (_MapOL[mapId] && typeof active === 'boolean') {
+            _MapOL[mapId].setInteractions(active);
+        }
+    } catch (error) {
+        console.error('MapOLSetInteractions failed:', error);
+    }
 }
 
+/**
+ * Configures selection settings for a layer.
+ * @param {string} mapId - The map ID
+ * @param {string} layerId - The layer ID
+ * @param {boolean} selectionEnabled - Whether selection is enabled
+ * @param {object} selectionStyle - Style for selected features
+ * @param {boolean} multiSelect - Whether multi-selection is enabled
+ */
 export function MapOLSetSelectionSettings(mapId, layerId, selectionEnabled, selectionStyle, multiSelect) {
-    _MapOL[mapId].setSelectionSettings(layerId, selectionEnabled, selectionStyle, multiSelect);
+    try {
+        if (_MapOL[mapId] && layerId) {
+            _MapOL[mapId].setSelectionSettings(layerId, selectionEnabled, selectionStyle, multiSelect);
+        }
+    } catch (error) {
+        console.error('MapOLSetSelectionSettings failed:', error);
+    }
 }
 
+/**
+ * Shows a popup at the specified coordinates.
+ * @param {string} mapId - The map ID
+ * @param {Array<number>} coordinates - The coordinates [x, y]
+ */
 export function MapOLShowPopup(mapId, coordinates) {
-    _MapOL[mapId].showPopup(coordinates);
+    try {
+        if (_MapOL[mapId] && coordinates) {
+            _MapOL[mapId].showPopup(coordinates);
+        }
+    } catch (error) {
+        console.error('MapOLShowPopup failed:', error);
+    }
 }
 
+/**
+ * Applies a Mapbox style to the map.
+ * @param {string} mapId - The map ID
+ * @param {string} styleUrl - The Mapbox style URL
+ * @param {string} accessToken - The Mapbox access token
+ */
 export function MapOLApplyMapboxStyle(mapId, styleUrl, accessToken) {
-    _MapOL[mapId].applyMapboxStyle(styleUrl, accessToken);
+    try {
+        if (_MapOL[mapId] && styleUrl) {
+            _MapOL[mapId].applyMapboxStyle(styleUrl, accessToken);
+        }
+    } catch (error) {
+        console.error('MapOLApplyMapboxStyle failed:', error);
+    }
 }
 
+/**
+ * MapOL constructor - Creates a new OpenLayers map instance
+ * @param {string} mapId - HTML element ID for map container
+ * @param {string} popupId - HTML element ID for popup overlay
+ * @param {object} options - Map configuration options
+ * @param {Array<number>} center - Initial center coordinates
+ * @param {number} zoom - Initial zoom level
+ * @param {number} rotation - Initial rotation
+ * @param {boolean} interactions - Whether interactions are enabled
+ * @param {Array<object>} layers - Layer configurations
+ * @param {object} instance - DotNet object reference
+ * @param {string} configureJsMethod - Optional JS method for customization
+ */
 function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, layers, instance, configureJsMethod) {
     this.Instance = instance;
-    this.Options = options;
+    this.Options = options || {};
 
-    //LV03
+    // Swiss LV03 projection
     const projectionLV03 = new ol.proj.Projection({
         code: "EPSG:21781",
         extent: [485869.5728, 76443.1884, 837076.5648, 299941.7864],
@@ -127,7 +458,7 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
     });
     ol.proj.addProjection(projectionLV03);
 
-    // LV95
+    // Swiss LV95 projection
     const projectionLV95 = new ol.proj.Projection({
         code: "EPSG:2056",
         extent: [2485071.58, 1074261.72, 2837119.8, 1299941.79],
@@ -135,48 +466,41 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
     });
     ol.proj.addProjection(projectionLV95);
 
+    // Add coordinate transforms for Swiss projections
     ol.proj.addCoordinateTransforms(
         "EPSG:4326",
         projectionLV03,
-        function(coordinate) {
-            return [
-                MapOL.WGStoLV03y(coordinate[1], coordinate[0]),
-                MapOL.WGStoLV03x(coordinate[1], coordinate[0])
-            ];
-        },
-        function(coordinate) {
-            return [
-                MapOL.CHtoLV03lng(coordinate[0], coordinate[1]),
-                MapOL.CHtoLV03lat(coordinate[0], coordinate[1])
-            ];
-        }
+        (coordinate) => [
+            MapOL.WGStoLV03y(coordinate[1], coordinate[0]),
+            MapOL.WGStoLV03x(coordinate[1], coordinate[0])
+        ],
+        (coordinate) => [
+            MapOL.CHtoLV03lng(coordinate[0], coordinate[1]),
+            MapOL.CHtoLV03lat(coordinate[0], coordinate[1])
+        ]
     );
 
     ol.proj.addCoordinateTransforms(
         "EPSG:4326",
         projectionLV95,
-        function(coordinate) {
-            return [
-                MapOL.WGStoLV95y(coordinate[1], coordinate[0]),
-                MapOL.WGStoLV95x(coordinate[1], coordinate[0])
-            ];
-        },
-        function(coordinate) {
-            return [
-                MapOL.LV95toWGSlng(coordinate[0], coordinate[1]),
-                MapOL.LV95toWGSlat(coordinate[0], coordinate[1])
-            ];
-        }
+        (coordinate) => [
+            MapOL.WGStoLV95y(coordinate[1], coordinate[0]),
+            MapOL.WGStoLV95x(coordinate[1], coordinate[0])
+        ],
+        (coordinate) => [
+            MapOL.LV95toWGSlng(coordinate[0], coordinate[1]),
+            MapOL.LV95toWGSlat(coordinate[0], coordinate[1])
+        ]
     );
 
     if (!this.Options.coordinatesProjection)
-        this.Options.coordinatesProjection = "EPSG:4326"; // default coordinates
+        this.Options.coordinatesProjection = "EPSG:4326";
 
-    const ollayers = this.prepareLayers(layers);
+    const ollayers = this.prepareLayers(layers || []);
 
     let viewProjection = (ollayers.length > 0) ? ollayers[0].getSource().getProjection() : undefined;
     let viewExtent = (ollayers.length > 0) ? ollayers[0].getExtent() : undefined;
-    let viewCenter = (center && center) ? center : undefined;
+    let viewCenter = center || undefined;
 
     if (this.Options.viewProjection) {
         viewProjection = this.Options.viewProjection;
@@ -213,9 +537,9 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
 
     this.addControls();
 
-    var that = this;
+    const that = this;
 
-    var popupElement = document.getElementById(popupId);
+    const popupElement = document.getElementById(popupId);
 
     this.OverlayPopup = new ol.Overlay({
         element: popupElement,
@@ -233,26 +557,73 @@ function MapOL(mapId, popupId, options, center, zoom, rotation, interactions, la
         try {
             const namespaces = configureJsMethod.split(".");
             const func = namespaces.pop();
-            var context = window;
+            let context = window;
             for (let i = 0; i < namespaces.length; i++) {
                 context = context[namespaces[i]];
             }
             context[func].apply(context, [this.Map]);
         } catch (err) {
-            console.error(err);
+            console.error('ConfigureJsMethod failed:', err);
         }
     }
 
-    this.Map.on("click", function(evt) { that.onMapClick(evt, that.OverlayPopup, popupElement) });
-    this.Map.on("dblclick", function(evt) { that.onMapDblClick(evt) });
-    this.Map.on("pointermove", function(evt) { that.onMapPointerMove(evt) });
-    this.Map.on("rendercomplete", function(evt) { that.Instance.invokeMethodAsync("OnInternalRenderComplete"); });
-    this.Map.getView().on("change:resolution", function(evt) { that.onMapResolutionChanged(); });
-    this.Map.getView().on("change:center", function(evt) { that.onMapCenterChanged(); });
-    this.Map.getView().on("change:rotation", function(evt) { that.onMapRotationChanged(); });
+    // Store event handlers for proper cleanup
+    this._eventHandlers = {
+        click: (evt) => that.onMapClick(evt, that.OverlayPopup, popupElement),
+        dblclick: (evt) => that.onMapDblClick(evt),
+        pointermove: (evt) => that.onMapPointerMove(evt),
+        rendercomplete: (evt) => that.Instance.invokeMethodAsync("OnInternalRenderComplete"),
+        viewResolution: (evt) => that.onMapResolutionChanged(),
+        viewCenter: (evt) => that.onMapCenterChanged(),
+        viewRotation: (evt) => that.onMapRotationChanged()
+    };
+
+    this.Map.on("click", this._eventHandlers.click);
+    this.Map.on("dblclick", this._eventHandlers.dblclick);
+    this.Map.on("pointermove", this._eventHandlers.pointermove);
+    this.Map.on("rendercomplete", this._eventHandlers.rendercomplete);
+    this.Map.getView().on("change:resolution", this._eventHandlers.viewResolution);
+    this.Map.getView().on("change:center", this._eventHandlers.viewCenter);
+    this.Map.getView().on("change:rotation", this._eventHandlers.viewRotation);
 
     this.onMapCenterChanged();
 }
+
+/**
+ * Disposes the map and cleans up all resources.
+ */
+MapOL.prototype.dispose = function() {
+    try {
+        // Remove event listeners
+        if (this.Map && this._eventHandlers) {
+            this.Map.un("click", this._eventHandlers.click);
+            this.Map.un("dblclick", this._eventHandlers.dblclick);
+            this.Map.un("pointermove", this._eventHandlers.pointermove);
+            this.Map.un("rendercomplete", this._eventHandlers.rendercomplete);
+            
+            const view = this.Map.getView();
+            if (view) {
+                view.un("change:resolution", this._eventHandlers.viewResolution);
+                view.un("change:center", this._eventHandlers.viewCenter);
+                view.un("change:rotation", this._eventHandlers.viewRotation);
+            }
+        }
+
+        // Dispose map
+        if (this.Map) {
+            this.Map.setTarget(null);
+            this.Map = null;
+        }
+
+        // Clear references
+        this.Instance = null;
+        this.Options = null;
+        this.OverlayPopup = null;
+        this._eventHandlers = null;
+    } catch (error) {
+        console.error('MapOL dispose failed:', error);
+    }
+};
 
 MapOL.prototype.prepareLayers = function(layers) {
     const ollayers = new Array();

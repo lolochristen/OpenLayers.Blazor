@@ -69,6 +69,9 @@ public partial class Map : IAsyncDisposable
     [Parameter]
     public EventCallback<double> ZoomChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets the callback that is invoked when the visible extent of the map changes.
+    /// </summary>
     [Parameter] public EventCallback<Extent> VisibleExtentChanged { get; set; }
 
     /// <summary>
@@ -214,8 +217,11 @@ public partial class Map : IAsyncDisposable
         set => Options.CoordinatesProjection = value;
     }
 
+    /// <summary>
+    /// Gets or sets the view projection system (e.g., "EPSG:3857", "EPSG:4326").
+    /// </summary>
     [Parameter]
-    public string ViewProjection
+    public string? ViewProjection
     {
         get => Options.ViewProjection;
         set => Options.ViewProjection = value;
@@ -463,16 +469,47 @@ public partial class Map : IAsyncDisposable
     /// <returns>ValueTask</returns>
     public async ValueTask DisposeAsync()
     {
-        LayersList.CollectionChanged -= LayersOnCollectionChanged;
-
-        if (_module != null)
+        try
         {
-            await _module.InvokeVoidAsync("MapOLDispose", _mapId);
-            await _module.DisposeAsync();
-            _module = null;
+            LayersList.CollectionChanged -= LayersOnCollectionChanged;
+
+            if (_module != null)
+            {
+                try
+                {
+                    await _module.InvokeVoidAsync("MapOLDispose", _mapId);
+                }
+                catch (JSDisconnectedException)
+                {
+                    // Circuit disconnected, cannot communicate with JavaScript
+                }
+                catch (TaskCanceledException)
+                {
+                    // Task was cancelled, likely due to navigation
+                }
+                
+                await _module.DisposeAsync();
+                _module = null;
+            }
+
+            if (Instance != null)
+            {
+                Instance.Dispose();
+                Instance = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't throw during disposal
+            Console.Error.WriteLine($"Error during Map disposal: {ex.Message}");
         }
     }
 
+    /// <summary>
+    /// Sets the component's parameters and synchronizes map state when key properties change.
+    /// </summary>
+    /// <param name="parameters">The parameter collection.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public override Task SetParametersAsync(ParameterView parameters)
     {
         if (parameters.TryGetValue(nameof(Zoom), out double zoom) && zoom != Zoom)
@@ -522,6 +559,7 @@ public partial class Map : IAsyncDisposable
         return base.SetParametersAsync(parameters);
     }
 
+    /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -570,48 +608,48 @@ public partial class Map : IAsyncDisposable
         }
     }
 
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
         EnableShapeSnap = true;
         InteractionsEnabled = true;
     }
 
+    /// <summary>
+    ///     Internal callback invoked from JavaScript when a shape is clicked.
+    /// </summary>
     [JSInvokable]
-    public async Task OnInternalShapeClick(Internal.Shape shape, string layerId)
+    public async Task OnInternalShapeClick(Internal.Shape? shape, string? layerId)
     {
+        if (shape == null || string.IsNullOrEmpty(layerId))
+            return;
+
 #if DEBUG
         Console.WriteLine($"OnInternalShapeClick: {JsonSerializer.Serialize(shape)}");
 #endif
         var layer = LayersList.FirstOrDefault(p => p.Id == layerId);
-        if (layer != null)
-        {
-            var existingShape = layer.ShapesList.FirstOrDefault(p => p.Id == shape.Id);
+        if (layer == null)
+            return;
 
-            if (existingShape != null)
-            {
-                _popupContext = existingShape;
+        var existingShape = layer.ShapesList.FirstOrDefault(p => p.Id == shape.Id);
+        if (existingShape == null)
+            return;
 
-                await OnFeatureClick.InvokeAsync(existingShape);
+        _popupContext = existingShape;
 
-                if (existingShape is Marker marker)
-                    await OnMarkerClick.InvokeAsync(marker);
-                else
-                    await OnShapeClick.InvokeAsync(existingShape);
-                await existingShape.OnClick.InvokeAsync();
-                StateHasChanged();
-                return;
-            }
-        }
+        await OnFeatureClick.InvokeAsync(existingShape);
 
-        // unknown layer or shape
-        await OnFeatureClick.InvokeAsync(new Feature(shape));
-
-        if (shape.Type == nameof(Marker))
-            await OnMarkerClick.InvokeAsync(new Marker(shape));
+        if (existingShape is Marker marker)
+            await OnMarkerClick.InvokeAsync(marker);
         else
-            await OnShapeClick.InvokeAsync(new Shape(shape));
+            await OnShapeClick.InvokeAsync(existingShape);
+        await existingShape.OnClick.InvokeAsync();
+        StateHasChanged();
     }
 
+    /// <summary>
+    ///     Internal callback invoked from JavaScript when a feature is clicked.
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalFeatureClick(Internal.Feature feature, string layerId)
     {
@@ -624,6 +662,9 @@ public partial class Map : IAsyncDisposable
         await OnFeatureClick.InvokeAsync(f);
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public Task OnInternalClick(Coordinate coordinate)
     {
@@ -633,6 +674,9 @@ public partial class Map : IAsyncDisposable
         return OnClick.InvokeAsync(coordinate);
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public Task OnInternalDoubleClick(Coordinate coordinate)
     {
@@ -642,12 +686,18 @@ public partial class Map : IAsyncDisposable
         return OnDoubleClick.InvokeAsync(coordinate);
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public Task OnInternalPointerMove(Coordinate coordinate)
     {
         return OnPointerMove.InvokeAsync(coordinate);
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public Task OnInternalShapeHover(string? layerId, string? shapeId)
     {
@@ -660,6 +710,9 @@ public partial class Map : IAsyncDisposable
         return OnShapeHover.InvokeAsync(null);
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalCenterChanged(Coordinate coordinate)
     {
@@ -670,6 +723,9 @@ public partial class Map : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalRotationChanged(double rotation)
     {
@@ -677,6 +733,9 @@ public partial class Map : IAsyncDisposable
         await RotationChanged.InvokeAsync(rotation);
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalVisibleExtentChanged(Extent visibleExtent)
     {
@@ -687,6 +746,9 @@ public partial class Map : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalShapeAdded(string layerId, Internal.Shape shape)
     {
@@ -709,6 +771,9 @@ public partial class Map : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalShapeChanged(string layerId, Internal.Shape shape)
     {
@@ -741,6 +806,9 @@ public partial class Map : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalShapeRemoved(string layerId, Internal.Shape shape)
     {
@@ -766,6 +834,9 @@ public partial class Map : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalSelectionChanged(string layerId, Internal.Shape[] selected, Internal.Shape[] unselected)
     {
@@ -798,6 +869,9 @@ public partial class Map : IAsyncDisposable
         await layer.SelectionChanged.InvokeAsync(new SelectionChangedArgs() { SelectedShapes = selectedShapes, UnselectedShapes = unselectedShapes });
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalRenderComplete()
     {
@@ -824,6 +898,9 @@ public partial class Map : IAsyncDisposable
         if (_module != null) await _module.InvokeVoidAsync("MapOLRotate", _mapId, rotation);
     }
 
+    /// <summary>
+    /// Internal
+    /// </summary>
     [JSInvokable]
     public async Task OnInternalZoomChanged(double zoom)
     {
@@ -960,6 +1037,12 @@ public partial class Map : IAsyncDisposable
         if (_module != null) await _module.InvokeVoidAsync("MapOLSetInteractions", _mapId, active);
     }
 
+    /// <summary>
+    /// JavaScript callback that retrieves the style for a shape. Invoked by OpenLayers interop.
+    /// </summary>
+    /// <param name="shape">The internal shape object from JavaScript.</param>
+    /// <param name="layer_id">The layer identifier containing the shape.</param>
+    /// <returns>The style options to apply to the shape.</returns>
     [JSInvokable]
     public StyleOptions OnGetShapeStyle(Internal.Shape shape, string layer_id)
     {
@@ -973,6 +1056,12 @@ public partial class Map : IAsyncDisposable
         return style;
     }
 
+    /// <summary>
+    /// Asynchronous JavaScript callback that retrieves the style for a shape. Invoked by OpenLayers interop.
+    /// </summary>
+    /// <param name="shape">The internal shape object from JavaScript.</param>
+    /// <param name="layer_id">The layer identifier containing the shape.</param>
+    /// <returns>A task containing the style options to apply to the shape.</returns>
     [JSInvokable]
     public Task<StyleOptions> OnGetShapeStyleAsync(Internal.Shape shape, string layer_id)
     {
@@ -996,7 +1085,7 @@ public partial class Map : IAsyncDisposable
                 GetOrCreateShapesLayer();
 
             if (_module != null)
-                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, ShapesLayer.Id, newShapes, editShapes, shapeSnap, shapeType, freehand);
+                await _module.InvokeVoidAsync("MapOLSetDrawingSettings", _mapId, ShapesLayer!.Id, newShapes, editShapes, shapeSnap, shapeType, freehand);
         }
         catch (Exception exp)
         {
@@ -1033,6 +1122,7 @@ public partial class Map : IAsyncDisposable
     ///     Sets coordinates of an existing shape
     /// </summary>
     /// <param name="shape"></param>
+    /// <param name="coordinates"></param>
     /// <returns></returns>
     public ValueTask SetCoordinates(Shape shape, Coordinates coordinates)
     {
@@ -1084,7 +1174,7 @@ public partial class Map : IAsyncDisposable
     /// <summary>
     ///     Reads and updates the coordinates of a shape.
     /// </summary>
-    /// <param name="shape"></param>
+    /// <param name="feature"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     public async Task ReadCoordinates(Feature feature)
@@ -1098,7 +1188,7 @@ public partial class Map : IAsyncDisposable
         var c = await _module.InvokeAsync<dynamic>("MapOLGetCoordinates", _mapId, feature.Layer.Id, feature.Id);
 
         if (c is JsonElement)
-            feature.InternalFeature.Coordinates = CoordinatesHelper.DeserializeCoordinates((JsonElement)c);
+            feature.InternalFeature.Coordinates = CoordinatesHelper.DeserializeCoordinates((JsonElement)c) ?? throw new InvalidOperationException("Deserialization failed");
         else
             feature.InternalFeature.Coordinates = c;
     }
@@ -1257,6 +1347,7 @@ public partial class Map : IAsyncDisposable
     /// <param name="layer"></param>
     /// <param name="selectionEnabled"></param>
     /// <param name="selectionStyle"></param>
+    /// <param name="multiSelect"></param>
     /// <returns></returns>
     public async Task SetSelectionSettings(Layer? layer, bool selectionEnabled, StyleOptions? selectionStyle, bool multiSelect)
     {
@@ -1291,6 +1382,12 @@ public partial class Map : IAsyncDisposable
         await _module.InvokeVoidAsync("MapOLShowPopup", _mapId, popupCoordinate);
     }
 
+    /// <summary>
+    /// Applies a Mapbox style to the map.
+    /// </summary>
+    /// <param name="styleUrl">The Mapbox style URL.</param>
+    /// <param name="accessToken">The Mapbox access token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     protected ValueTask ApplyMapboxStyle(string styleUrl, string? accessToken)
     {
         if (_module != null)

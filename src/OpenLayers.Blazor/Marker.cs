@@ -53,14 +53,14 @@ public class Marker : Shape
     }
 
     /// <summary>
-    ///     Extended consturctor.
+    ///     Extended constructor for custom image markers.
     /// </summary>
-    /// <param name="coordinate"></param>
-    /// <param name="imageSource"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <param name="anchorX"></param>
-    /// <param name="anchorY"></param>
+    /// <param name="coordinate">The coordinate where the marker should be placed.</param>
+    /// <param name="imageSource">The source URL or path to the marker image.</param>
+    /// <param name="width">The width of the marker image.</param>
+    /// <param name="height">The height of the marker image.</param>
+    /// <param name="anchorX">The X anchor point for the marker.</param>
+    /// <param name="anchorY">The Y anchor point for the marker.</param>
     public Marker(Coordinate coordinate, string imageSource, double width, double height, double anchorX, double anchorY) : this()
     {
         Type = MarkerType.MarkerCustomImage;
@@ -129,7 +129,7 @@ public class Marker : Shape
     }
 
     /// <summary>
-    ///     Icon Rotation in radiant
+    ///     Gets or sets the icon rotation in radians.
     /// </summary>
     [Parameter]
     public double? Rotation
@@ -138,6 +138,9 @@ public class Marker : Shape
         set => GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>().Rotation = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the source URL or path for the marker icon image.
+    /// </summary>
     [Parameter]
     public string? Source
     {
@@ -147,6 +150,9 @@ public class Marker : Shape
 
     private PinColor _pinColor = PinColor.Red;
 
+    /// <summary>
+    ///     Gets or sets the color of the pin marker.
+    /// </summary>
     [Parameter]
     public PinColor PinColor
     {
@@ -163,6 +169,7 @@ public class Marker : Shape
         }
     }
 
+    /// <inheritdoc/>
     protected override void SetText(string value)
     {
         if (Type == MarkerType.MarkerAwesome)
@@ -171,6 +178,7 @@ public class Marker : Shape
             base.SetText(value);
     }
 
+    /// <inheritdoc/>
     protected override string? GetText()
     {
         if (Type == MarkerType.MarkerAwesome)
@@ -179,6 +187,7 @@ public class Marker : Shape
             return base.GetText();
     }
 
+    /// <inheritdoc/>
     protected override void SetStroke(string color)
     {
         if (Type == MarkerType.MarkerAwesome)
@@ -187,6 +196,7 @@ public class Marker : Shape
             base.SetStroke(color);
     }
 
+    /// <inheritdoc/>
     protected override string? GetStroke()
     {
         if (Type == MarkerType.MarkerAwesome)
@@ -194,6 +204,7 @@ public class Marker : Shape
         return base.GetStroke();
     }
 
+    /// <inheritdoc/>
     protected override void SetScale(double? value)
     {
         if (Type == MarkerType.MarkerPin)
@@ -205,6 +216,7 @@ public class Marker : Shape
             base.SetScale(value);
     }
 
+    /// <inheritdoc/>
     public override Task SetParametersAsync(ParameterView parameters)
     {
         if (parameters.TryGetValue(nameof(Rotation), out double? rotation) && rotation != Rotation)
@@ -216,6 +228,9 @@ public class Marker : Shape
         return base.SetParametersAsync(parameters);
     }
 
+    /// <summary>
+    /// Configures the pin marker style based on the current marker type and pin color.
+    /// </summary>
     protected void SetPinStyle()
     {
         var scale = 0.2; // is small
@@ -243,6 +258,9 @@ public class Marker : Shape
         icon2.Source = $"./_content/OpenLayers.Blazor/img/marker-pin-{_pinColor.ToString().ToLowerInvariant()}.png";
     }
 
+    /// <summary>
+    /// Configures the custom image marker style using the Source, Anchor, and Size properties.
+    /// </summary>
     protected void SetCustomImageStyle()
     {
         var icon = GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>();
@@ -254,6 +272,7 @@ public class Marker : Shape
         icon.Source = Source;
     }
 
+    /// <inheritdoc/>
     protected override void SetFill(string color)
     {
         if (Type == MarkerType.MarkerAwesome)
@@ -268,6 +287,7 @@ public class Marker : Shape
             base.SetFill(color);
     }
 
+    /// <inheritdoc/>
     protected override string? GetFill()
     {
         if (Type == MarkerType.MarkerAwesome)
@@ -280,6 +300,9 @@ public class Marker : Shape
         return base.GetFill();
     }
 
+    /// <summary>
+    /// Configures the Font Awesome marker style with icon and text layers.
+    /// </summary>
     protected void SetAwesomeStyle()
     {
         var icon1 = GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>(0);
@@ -308,6 +331,9 @@ public class Marker : Shape
         text2.Fill = new StyleOptions.FillOptions() { Color = TextColor ?? Options.DefaultStroke };
     }
 
+    /// <summary>
+    /// Configures the flag marker style with background and shape layers.
+    /// </summary>
     protected void SetFlagStyle()
     {
         var padBottom = 2;

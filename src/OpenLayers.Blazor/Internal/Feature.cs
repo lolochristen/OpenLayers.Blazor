@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Components;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace OpenLayers.Blazor.Internal;
 

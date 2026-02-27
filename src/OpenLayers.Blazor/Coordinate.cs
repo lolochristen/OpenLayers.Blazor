@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor;
@@ -11,6 +12,10 @@ public struct Coordinate : IEquatable<Coordinate>
 {
     private static readonly char[] _separatorsAlt = { '/', ':' };
     private static readonly char[] _separators = { ',', '/', ':' };
+    
+    /// <summary>
+    /// Gets an empty coordinate (0, 0).
+    /// </summary>
     public static Coordinate Empty => new();
 
     /// <summary>
@@ -35,7 +40,8 @@ public struct Coordinate : IEquatable<Coordinate>
     /// <summary>
     ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
-    /// <param name="coordinates">X/Longitude, Y/Latitude</param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
     public Coordinate(double x, double y)
     {
         X = x;
@@ -78,7 +84,15 @@ public struct Coordinate : IEquatable<Coordinate>
     public double Longitude => X;
 
     /// <inheritdoc />
-    public bool Equals(Coordinate other)
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+        if (obj is Coordinate other)
+            return Equals(other);
+        return base.Equals(obj);
+    }
+
+    /// <inheritdoc />
+    public  bool Equals(Coordinate other)
     {
         var precision = 0.0000001;
         return Math.Abs(X - other.X) < precision && Math.Abs(Y - other.Y) < precision;
@@ -179,12 +193,16 @@ public struct Coordinate : IEquatable<Coordinate>
     }
 
     /// <summary>
-    ///     Calculates distance in kilometers
+    ///     Calculates distance to another coordinate in kilometers.
     /// </summary>
-    /// <param name="target"></param>
-    /// <returns></returns>
+    /// <param name="target">The target coordinate.</param>
+    /// <param name="decimals">Number of decimal places to round to.</param>
+    /// <returns>Distance in kilometers.</returns>
     public double DistanceTo(Coordinate target, int decimals = 2)
     {
+        if (decimals < 0)
+            throw new ArgumentOutOfRangeException(nameof(decimals), "Decimals must be non-negative");
+
         var baseRad = Math.PI * Y / 180;
         var targetRad = Math.PI * target.Y / 180;
         var theta = X - target.X;

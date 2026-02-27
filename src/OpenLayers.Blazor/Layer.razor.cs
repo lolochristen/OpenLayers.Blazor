@@ -4,16 +4,22 @@ using Microsoft.AspNetCore.Components;
 
 namespace OpenLayers.Blazor;
 
+/// <summary>
+/// Represents a map layer component that can display various types of data sources.
+/// </summary>
 public partial class Layer : ComponentBase
 {
     internal Internal.Layer _internalLayer = new() { LayerType = LayerType.Tile };
 
-    private Func<Shape, StyleOptions?> _styleCallback;
+    private Func<Shape, StyleOptions?>? _styleCallback;
 
     private bool _updateableParametersChanged = false;
 
     internal Internal.Layer InternalLayer => _internalLayer;
 
+    /// <summary>
+    /// Parent Map
+    /// </summary>
     [CascadingParameter] public Map? Map { get; set; }
 
     /// <summary>
@@ -38,13 +44,18 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    ///     Gets or sets the opacity of the layer. value must be between 0 and 1.
+    ///     Gets or sets the opacity of the layer. Value must be between 0 and 1.
     /// </summary>
     [Parameter]
     public double Opacity
     {
         get => _internalLayer.Opacity;
-        set => _internalLayer.Opacity = value;
+        set
+        {
+            if (value < 0 || value > 1)
+                throw new ArgumentOutOfRangeException(nameof(value), "Opacity must be between 0 and 1");
+            _internalLayer.Opacity = value;
+        }
     }
 
     /// <summary>
@@ -64,9 +75,16 @@ public partial class Layer : ComponentBase
     public Extent? Extent
     {
         get => _internalLayer.Extent;
-        set => _internalLayer.Extent = value;
+        set
+        {
+            if (value != null)
+                _internalLayer.Extent = value;
+        }
     }
 
+    /// <summary>
+    ///     Gets or sets the z-index for layer ordering.
+    /// </summary>
     [Parameter]
     public int? ZIndex
     {
@@ -74,6 +92,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.ZIndex = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the minimum resolution at which the layer is visible.
+    /// </summary>
     [Parameter]
     public double? MinResolution
     {
@@ -81,6 +102,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.MinResolution = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the maximum resolution at which the layer is visible.
+    /// </summary>
     [Parameter]
     public double? MaxResolution
     {
@@ -88,6 +112,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.MaxResolution = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the minimum zoom level at which the layer is visible.
+    /// </summary>
     [Parameter]
     public double? MinZoom
     {
@@ -95,6 +122,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.MinZoom = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the maximum zoom level at which the layer is visible.
+    /// </summary>
     [Parameter]
     public double? MaxZoom
     {
@@ -102,6 +132,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.MaxZoom = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the CSS class name for the layer.
+    /// </summary>
     [Parameter]
     public string? Class
     {
@@ -164,6 +197,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Attributions = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the cross-origin attribute for loading images.
+    /// </summary>
     [Parameter]
     public string? CrossOrigin
     {
@@ -171,6 +207,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.CrossOrigin = value;
     }
 
+    /// <summary>
+    ///     Gets or sets additional source parameters.
+    /// </summary>
     [Parameter]
     public Dictionary<string, object> SourceParameters
     {
@@ -178,6 +217,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Params = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the API key for the layer source.
+    /// </summary>
     [Parameter]
     public string? Key
     {
@@ -185,6 +227,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Key = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the Bing Maps imagery set (Aerial, Road, etc.).
+    /// </summary>
     [Parameter]
     public BingMapImagerySet? ImagerySet
     {
@@ -192,6 +237,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.ImagerySet = value.ToString();
     }
 
+    /// <summary>
+    ///     Gets or sets the gutter size in pixels.
+    /// </summary>
     [Parameter]
     public double Gutter
     {
@@ -199,6 +247,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Gutter = value;
     }
 
+    /// <summary>
+    ///     Gets or sets whether to wrap the world horizontally.
+    /// </summary>
     [Parameter]
     public bool WrapX
     {
@@ -206,6 +257,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.WrapX = value;
     }
 
+    /// <summary>
+    ///     Gets or sets whether to use transition effects when loading tiles.
+    /// </summary>
     [Parameter]
     public bool Transition
     {
@@ -213,6 +267,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Transition = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the z-direction for tile loading (1 or -1).
+    /// </summary>
     [Parameter]
     public double ZDirection
     {
@@ -220,6 +277,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.ZDirection = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the source layer name for vector tile layers.
+    /// </summary>
     [Parameter]
     public string? SourceLayer
     {
@@ -227,6 +287,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Layer = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the WMTS matrix set identifier.
+    /// </summary>
     [Parameter]
     public string? MatrixSet
     {
@@ -244,6 +307,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Format = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the preload level (number of zoom levels to preload tiles).
+    /// </summary>
     [Parameter]
     public double Preload
     {
@@ -268,7 +334,7 @@ public partial class Layer : ComponentBase
     public string? Layers
     {
         get => _internalLayer.Source.Params.ContainsKey("LAYERS") ? _internalLayer.Source.Params["LAYERS"].ToString() : null;
-        set => _internalLayer.Source.Params["LAYERS"] = value;
+        set => _internalLayer.Source.Params["LAYERS"] = value!;
     }
 
     /// <summary>
@@ -278,7 +344,7 @@ public partial class Layer : ComponentBase
     public string? Styles
     {
         get => _internalLayer.Source.Params.ContainsKey("STYLES") ? _internalLayer.Source.Params["STYLES"].ToString() : null;
-        set => _internalLayer.Source.Params["STYLES"] = value;
+        set => _internalLayer.Source.Params["STYLES"] = value!;
     }
 
     /// <summary>
@@ -309,7 +375,7 @@ public partial class Layer : ComponentBase
     public string? Title
     {
         get => _internalLayer.Properties.ContainsKey("TITLE") ? _internalLayer.Properties["TITLE"].ToString() : null;
-        set => _internalLayer.Properties["TITLE"] = value;
+        set => _internalLayer.Properties["TITLE"] = value!;
     }
 
     /// <summary>
@@ -332,6 +398,9 @@ public partial class Layer : ComponentBase
         set => _internalLayer.Source.Data = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the data projection for vector layers.
+    /// </summary>
     [Parameter]
     public string? Projection
     {
@@ -373,7 +442,7 @@ public partial class Layer : ComponentBase
     ///     Gets or sets a callback to set styles as <see cref="StyleOptions" /> for the given shape.
     /// </summary>
     [Parameter]
-    public Func<Shape, StyleOptions?> StyleCallback
+    public Func<Shape, StyleOptions?>? StyleCallback
     {
         get => _styleCallback;
         set
@@ -401,24 +470,45 @@ public partial class Layer : ComponentBase
     [Parameter]
     public EventCallback<Shape> OnShapeRemoved { get; set; }
 
+    /// <summary>
+    ///     Gets or sets whether shape selection is enabled for this layer.
+    /// </summary>
     [Parameter]
     public bool SelectionEnabled { get; set; }
 
+    /// <summary>
+    ///     Gets or sets the style to apply to selected shapes.
+    /// </summary>
     [Parameter]
     public StyleOptions? SelectionStyle { get; set; }
 
+    /// <summary>
+    ///     Gets or sets the event callback when the selection changes.
+    /// </summary>
     [Parameter]
     public EventCallback<SelectionChangedArgs> SelectionChanged { get; set; }
 
+    /// <summary>
+    ///     Gets or sets the currently selected shape.
+    /// </summary>
     [Parameter]
-    public Shape SelectedShape { get; set; }
+    public Shape? SelectedShape { get; set; }
 
+    /// <summary>
+    ///     Gets or sets the event callback when the selected shape changes.
+    /// </summary>
     [Parameter]
     public EventCallback<Shape> SelectedShapeChanged { get; set; }
 
+    /// <summary>
+    ///     Gets or sets whether to enable multi-selection of shapes.
+    /// </summary>
     [Parameter]
     public bool MultiSelect { get; set; }
 
+    /// <summary>
+    ///     Gets or sets whether decluttering should be applied to vector features.
+    /// </summary>
     [Parameter]
     public bool Declutter
     {
@@ -427,7 +517,7 @@ public partial class Layer : ComponentBase
     }
 
     /// <summary>
-    /// Distance in pixels within which features will be clustered together. Applies only for VectorCluster Layers
+    ///     Gets or sets the clustering distance in pixels for VectorCluster layers.
     /// </summary>
     [Parameter]
     public double? ClusterDistance
@@ -463,13 +553,13 @@ public partial class Layer : ComponentBase
 
         if (e.Action == NotifyCollectionChangedAction.Reset)
         {
-            _ = Map.SetShapesInternal(this, null);
+            _ = Map?.SetShapesInternal(this, null);
         }
         else
         {
             if (e.OldItems != null)
             {
-                _ = Map.RemoveShapesInternal(this, e.OldItems.OfType<Shape>());
+                _ = Map?.RemoveShapesInternal(this, e.OldItems.OfType<Shape>());
                 foreach (Shape oldShape in e.OldItems)
                 {
                     oldShape.Layer = null;
@@ -484,11 +574,12 @@ public partial class Layer : ComponentBase
                     newShape.Layer = this;
                     newShape.Map = Map;
                 }
-                _ = Map.AddShapesInternal(this, e.NewItems.OfType<Shape>());
+                _ = Map?.AddShapesInternal(this, e.NewItems.OfType<Shape>());
             }
         }
     }
 
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
         if (Map != null)
@@ -497,6 +588,7 @@ public partial class Layer : ComponentBase
         base.OnInitialized();
     }
 
+    /// <inheritdoc/>
     public override Task SetParametersAsync(ParameterView parameters)
     {
         if (parameters.TryGetValue(nameof(Visibility), out bool visibility) && visibility != Visibility)
@@ -530,6 +622,7 @@ public partial class Layer : ComponentBase
         return base.SetParametersAsync(parameters);
     }
 
+    /// <inheritdoc/>
     protected override async Task OnParametersSetAsync()
     {
         if (_updateableParametersChanged)
@@ -549,6 +642,11 @@ public partial class Layer : ComponentBase
             await Map.UpdateLayer(this);
     }
 
+    /// <summary>
+    /// Internal method for interop.
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
     public async Task<Shape> OnInternalShapeAdded(Internal.Shape shape)
     {
         var newShape = new Shape(shape)
@@ -565,6 +663,11 @@ public partial class Layer : ComponentBase
         return newShape;
     }
 
+    /// <summary>
+    /// Internal method for interop.
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
     public async Task OnInternalShapeRemoved(Shape shape)
     {
         if (!ShapesList.Contains(shape))
@@ -577,6 +680,11 @@ public partial class Layer : ComponentBase
         await OnShapeRemoved.InvokeAsync(shape);
     }
 
+    /// <summary>
+    /// Internal method for interop.
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <returns></returns>
     public async Task OnInternalShapeChanged(Shape shape)
     {
         await OnShapeChanged.InvokeAsync(shape);

@@ -2,7 +2,7 @@
 
 internal class CoordinatesEqualityComparer : IEqualityComparer<IList<Coordinate>>
 {
-    public bool Equals(IList<Coordinate> x, IList<Coordinate> y)
+    public bool Equals(IList<Coordinate>? x, IList<Coordinate>? y)
     {
         if (ReferenceEquals(x, y)) return true;
         if (ReferenceEquals(x, null)) return false;

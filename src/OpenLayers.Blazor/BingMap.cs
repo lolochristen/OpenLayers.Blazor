@@ -3,22 +3,44 @@
 namespace OpenLayers.Blazor;
 
 /// <summary>
-///     Imagery Set for Bing
+/// Defines the imagery set options for Bing Maps.
 /// </summary>
 public enum BingMapImagerySet
 {
+    /// <summary>
+    /// Road map imagery.
+    /// </summary>
     RoadOnDemand,
+    
+    /// <summary>
+    /// Aerial satellite imagery.
+    /// </summary>
     Aerial,
+    
+    /// <summary>
+    /// Aerial imagery with road labels overlay.
+    /// </summary>
     AerialWithLabelsOnDemand,
+    
+    /// <summary>
+    /// Dark themed canvas map.
+    /// </summary>
     CanvasDark,
+    
+    /// <summary>
+    /// Ordnance Survey map (UK).
+    /// </summary>
     OrdnanceSurvey
 }
 
 /// <summary>
-///     Bing Map
+/// Map component configured for Bing Maps tile layers.
 /// </summary>
 public class BingMap : Map
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BingMap"/> class with default settings.
+    /// </summary>
     public BingMap()
     {
         ImagerySet = BingMapImagerySet.RoadOnDemand;
@@ -27,13 +49,18 @@ public class BingMap : Map
     }
 
     /// <summary>
-    ///     Your Bing Maps Key from https://www.bingmapsportal.com/
+    /// Gets or sets the Bing Maps API key. Obtain from https://www.bingmapsportal.com/.
     /// </summary>
     [Parameter]
     public string? Key { get; set; }
 
-    [Parameter] public BingMapImagerySet ImagerySet { get; set; }
+    /// <summary>
+    /// Gets or sets the imagery set type for Bing Maps tiles.
+    /// </summary>
+    [Parameter] 
+    public BingMapImagerySet ImagerySet { get; set; }
 
+    /// <inheritdoc/>
     protected override async Task OnParametersSetAsync()
     {
         if (LayersList.Count > 0 && LayersList[0].ImagerySet != ImagerySet)
@@ -43,6 +70,7 @@ public class BingMap : Map
         }
     }
 
+    /// <inheritdoc/>
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

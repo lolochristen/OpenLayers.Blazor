@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace OpenLayers.Blazor.Internal;
 
@@ -21,7 +22,7 @@ public class Layer
     public double Preload { get; set; } = 0;
     public Source Source { get; set; } = new();
     public bool UseInterimTilesOnError { get; set; } = true;
-    public Dictionary<string, object>? Properties { get; set; } = new();
+    public Dictionary<string, object> Properties { get; set; } = new();
     public dynamic? Options { get; set; }
     public Dictionary<string, object>? FlatStyle { get; set; }
     public StyleOptions? Style { get; set; }

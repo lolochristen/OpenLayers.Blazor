@@ -11,7 +11,8 @@ internal class CoordinateConverter : JsonConverter<Coordinate>
         if (reader.TokenType == JsonTokenType.String)
         {
             var val = reader.GetString();
-            return Coordinate.Parse(val, CultureInfo.InvariantCulture);
+            if (val != null)
+                return Coordinate.Parse(val, CultureInfo.InvariantCulture);
         }
 
         if (reader.TokenType == JsonTokenType.StartObject)

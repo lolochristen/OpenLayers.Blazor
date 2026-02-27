@@ -5,15 +5,18 @@ using System.Text.Json.Serialization;
 namespace OpenLayers.Blazor;
 
 /// <summary>
-///     JsonConverter for <see cref="Coordinates" />
+/// JSON converter for serializing and deserializing <see cref="Coordinates"/> objects.
 /// </summary>
 internal class CoordinatesConverter : JsonConverter<Coordinates>
 {
     private readonly CoordinateConverter _coordinateConverter = new();
 
+    /// <summary>
+    /// Reads and converts JSON to <see cref="Coordinates"/>.
+    /// </summary>
     public override Coordinates Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.String) return new Coordinates(Coordinate.Parse(reader.GetString(), CultureInfo.InvariantCulture)) { Type = CoordinatesType.Point };
+        if (reader.TokenType == JsonTokenType.String) return new Coordinates(Coordinate.Parse(reader.GetString() ?? throw new NullReferenceException(), CultureInfo.InvariantCulture)) { Type = CoordinatesType.Point };
 
         if (reader.TokenType == JsonTokenType.StartArray)
         {
@@ -74,6 +77,9 @@ internal class CoordinatesConverter : JsonConverter<Coordinates>
         throw new InvalidOperationException();
     }
 
+    /// <summary>
+    /// Writes <see cref="Coordinates"/> as JSON.
+    /// </summary>
     public override void Write(Utf8JsonWriter writer, Coordinates value, JsonSerializerOptions options)
     {
         switch (value.Type)

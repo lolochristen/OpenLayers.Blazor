@@ -95,8 +95,15 @@ public class Shape : Feature, IDisposable
         }
     }
 
-    [Parameter] public EventCallback<Shape> OnChanged { get; set; }
+    /// <summary>
+    ///     Gets or sets the event callback when a shape parameter changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Shape> OnChanged { get; set; }
 
+    /// <summary>
+    ///     Gets or sets the font definition for text labels.
+    /// </summary>
     [Parameter]
     public string? Font
     {
@@ -104,18 +111,29 @@ public class Shape : Feature, IDisposable
         set => GetOrCreateStyleOptions<StyleOptions.TextOptions>().Font = value;
     }
 
+    /// <summary>
+    /// Gets or sets the text label for the shape.
+    /// </summary>
     [Parameter]
     public string? Text
     {
         get => GetText();
-        set => SetText(value);
+        set => SetText(value ?? "");
     }
 
+    /// <summary>
+    /// Sets the text label for the shape.
+    /// </summary>
+    /// <param name="value">The text value to display.</param>
     protected virtual void SetText(string value)
     {
         GetOrCreateStyleOptions<StyleOptions.TextOptions>().Text = value;
     }
 
+    /// <summary>
+    /// Gets the current text label of the shape.
+    /// </summary>
+    /// <returns>The text value, or null if no text is set.</returns>
     protected virtual string? GetText()
     {
         if (HasStyleOptions<StyleOptions.TextOptions>())
@@ -123,6 +141,9 @@ public class Shape : Feature, IDisposable
         return null;
     }
 
+    /// <summary>
+    ///     Gets or sets the text color for labels.
+    /// </summary>
     [Parameter]
     public string? TextColor
     {
@@ -130,6 +151,9 @@ public class Shape : Feature, IDisposable
         set => GetOrCreateStyleOptions<StyleOptions.TextOptions>().Fill = new StyleOptions.FillOptions() { Color = value };
     }
 
+    /// <summary>
+    ///     Gets or sets whether to show a popup for this shape when clicked.
+    /// </summary>
     [Parameter]
     public bool Popup
     {
@@ -137,35 +161,61 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.Popup = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the radius for circular shapes.
+    /// </summary>
     [Parameter]
     public double? Radius
     {
         get => GetRadius();
-        set => SetRadius((double)value);
+        set => SetRadius(value ?? 0);
     }
 
+    /// <summary>
+    /// Sets the radius for circular shapes.
+    /// </summary>
+    /// <param name="value">The radius value in pixels.</param>
     protected virtual void SetRadius(double value)
     {
         InternalFeature.Radius = value;
     }
 
+    /// <summary>
+    /// Gets the current radius of circular shapes.
+    /// </summary>
+    /// <returns>The radius value, or null if not applicable.</returns>
     protected virtual double? GetRadius()
     {
         return InternalFeature.Radius;
     }
 
+    /// <summary>
+    ///     Gets or sets the stroke color for the shape outline.
+    /// </summary>
     [Parameter]
     public string? Stroke
     {
         get => GetStroke();
-        set => SetStroke(value);
+        set
+        {
+            if (value != null)
+                SetStroke(value);
+        }
     }
 
+    /// <summary>
+    /// Sets the stroke color for the shape outline.
+    /// </summary>
+    /// <param name="color">The color value (e.g., "red", "#FF0000", "rgba(255,0,0,1)").</param>
     protected virtual void SetStroke(string color)
     {
         GetOrCreateStyleOptions<StyleOptions.StrokeOptions>().Color = color;
     }
 
+    /// <summary>
+    /// Gets the current stroke color of the shape.
+    /// </summary>
+    /// <returns>The stroke color, or null if not set.</returns>
     protected virtual string? GetStroke()
     {
         if (HasStyleOptions<StyleOptions.StrokeOptions>())
@@ -173,18 +223,29 @@ public class Shape : Feature, IDisposable
         return null;
     }
 
+    /// <summary>
+    ///     Gets or sets the stroke thickness (line width).
+    /// </summary>
     [Parameter]
     public double? StrokeThickness
     {
         get => GetStrokeThickness();
-        set => SetStrokeThickness((double)value);
+        set => SetStrokeThickness(value ?? 0);
     }
 
+    /// <summary>
+    /// Sets the stroke thickness (line width) for the shape outline.
+    /// </summary>
+    /// <param name="value">The line width in pixels.</param>
     protected virtual void SetStrokeThickness(double value)
     {
         GetOrCreateStyleOptions<StyleOptions.StrokeOptions>().Width = value;
     }
 
+    /// <summary>
+    /// Gets the current stroke thickness of the shape.
+    /// </summary>
+    /// <returns>The line width, or null if not set.</returns>
     protected virtual double? GetStrokeThickness()
     {
         if (HasStyleOptions<StyleOptions.StrokeOptions>())
@@ -192,18 +253,29 @@ public class Shape : Feature, IDisposable
         return null;
     }
 
+    /// <summary>
+    ///     Gets or sets the fill color for the shape interior.
+    /// </summary>
     [Parameter]
     public string? Fill
     {
         get => GetFill();
-        set => SetFill(value);
+        set => SetFill(value!);
     }
 
+    /// <summary>
+    /// Sets the fill color for the shape interior.
+    /// </summary>
+    /// <param name="color">The color value (e.g., "blue", "#0000FF", "rgba(0,0,255,0.5)").</param>
     protected virtual void SetFill(string color)
     {
         GetOrCreateStyleOptions<StyleOptions.FillOptions>().Color = color;
     }
 
+    /// <summary>
+    /// Gets the current fill color of the shape.
+    /// </summary>
+    /// <returns>The fill color, or null if not set.</returns>
     protected virtual string? GetFill()
     {
         if (HasStyleOptions<StyleOptions.FillOptions>())
@@ -211,6 +283,9 @@ public class Shape : Feature, IDisposable
         return null;
     }
 
+    /// <summary>
+    ///     Gets or sets the scale factor for the shape.
+    /// </summary>
     [Parameter]
     public double? Scale
     {
@@ -218,11 +293,19 @@ public class Shape : Feature, IDisposable
         set => SetScale(value);
     }
 
+    /// <summary>
+    /// Sets the scale factor for the shape.
+    /// </summary>
+    /// <param name="value">The scale factor (1.0 = normal size, 2.0 = double size, etc.).</param>
     protected virtual void SetScale(double? value)
     {
         GetOrCreateStyleOptions<StyleOptions.IconStyleOptions>().Scale = value;
     }
 
+    /// <summary>
+    /// Gets the current scale factor of the shape.
+    /// </summary>
+    /// <returns>The scale factor, or null if not set.</returns>
     protected virtual double? GetScale()
     {
         if (HasStyleOptions<StyleOptions.IconStyleOptions>())
@@ -230,6 +313,9 @@ public class Shape : Feature, IDisposable
         return null;
     }
 
+    /// <summary>
+    ///     Gets or sets the scale factor for text labels.
+    /// </summary>
     [Parameter]
     public double? TextScale
     {
@@ -237,6 +323,9 @@ public class Shape : Feature, IDisposable
         set => GetOrCreateStyleOptions<StyleOptions.TextOptions>().Scale = value;
     }
 
+    /// <summary>
+    ///     Gets or sets the z-index for shape layering.
+    /// </summary>
     [Parameter]
     public int? ZIndex
     {
@@ -244,6 +333,9 @@ public class Shape : Feature, IDisposable
         set => GetOrCreateStyleOptions<StyleOptions>().ZIndex = value;
     }
 
+    /// <summary>
+    ///     Gets or sets flat style options. See https://openlayers.org/en/latest/apidoc/module-ol_style_flat.html#~FlatStyleLike
+    /// </summary>
     [Parameter]
     public Dictionary<string, object>? FlatStyle
     {
@@ -251,6 +343,9 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.FlatStyle = value;
     }
 
+    /// <summary>
+    ///     Gets or sets a list of style options for multi-style shapes.
+    /// </summary>
     [Parameter]
     public List<StyleOptions>? Styles
     {
@@ -258,6 +353,13 @@ public class Shape : Feature, IDisposable
         set => InternalFeature.Styles = value;
     }
 
+    /// <summary>
+    /// GetOrCreateStyleOptions
+    /// </summary>
+    /// <param name="index"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     protected T GetOrCreateStyleOptions<T>(int? index = null) where T : class
     {
         if (Styles == null)
@@ -277,40 +379,46 @@ public class Shape : Feature, IDisposable
         if (typeof(T) == typeof(StyleOptions.StrokeOptions))
         {
             style.Stroke ??= new StyleOptions.StrokeOptions();
-            return style.Stroke as T;
+            return (style.Stroke as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.FillOptions))
         {
             style.Fill ??= new StyleOptions.FillOptions();
-            return style.Fill as T;
+            return (style.Fill as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.TextOptions))
         {
             style.Text ??= new StyleOptions.TextOptions();
-            return style.Text as T;
+            return (style.Text as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.CircleStyleOptions))
         {
             style.Circle ??= new StyleOptions.CircleStyleOptions();
-            return style.Circle as T;
+            return (style.Circle as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.TextOptions))
         {
             style.Text ??= new StyleOptions.TextOptions();
-            return style.Text as T;
+            return (style.Text as T)!;
         }
         if (typeof(T) == typeof(StyleOptions.IconStyleOptions))
         {
             style.Icon ??= new StyleOptions.IconStyleOptions();
-            return style.Icon as T;
+            return (style.Icon as T)!;
         }
         if (typeof(T) == typeof(StyleOptions))
         {
-            return style as T;
+            return (style as T)!;
         }
         throw new ArgumentException("Invalid style option type");
     }
 
+    /// <summary>
+    /// Checks if a style options object of the specified type exists at the given index.
+    /// </summary>
+    /// <typeparam name="T">The type of style options to check for.</typeparam>
+    /// <param name="index">The style index, or null to check the last style.</param>
+    /// <returns>True if the style options exist, false otherwise.</returns>
     protected bool HasStyleOptions<T>(int? index = null) where T : class
     {
         if (Styles == null)
@@ -340,11 +448,15 @@ public class Shape : Feature, IDisposable
         throw new ArgumentException("Invalid style option type");
     }
 
+    /// <summary>
+    /// Disposes the shape and removes it from its layer.
+    /// </summary>
     public void Dispose()
     {
         Layer?.ShapesList.Remove(this);
     }
 
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
         if (Map != null && Layer == null) // just added to map/features
@@ -368,6 +480,7 @@ public class Shape : Feature, IDisposable
         base.OnInitialized();
     }
 
+    /// <inheritdoc/>
     public override Task SetParametersAsync(ParameterView parameters)
     {
         if (parameters.TryGetValue(nameof(Fill), out string? bg) && bg != Fill)
@@ -390,12 +503,13 @@ public class Shape : Feature, IDisposable
             _updateableParametersChanged = true;
         if (parameters.TryGetValue(nameof(Font), out string? font) && font != Font)
             _updateableParametersChanged = true;
-        if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c != Coordinates)
+        if (parameters.TryGetValue(nameof(Coordinates), out Coordinates? c) && c! != Coordinates)
             _coordinatesParametersChanged = true;
 
         return base.SetParametersAsync(parameters);
     }
 
+    /// <inheritdoc/>
     protected override async Task OnParametersSetAsync()
     {
         if (_updateableParametersChanged)

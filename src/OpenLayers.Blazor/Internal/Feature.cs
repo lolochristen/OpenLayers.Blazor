@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Components;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace OpenLayers.Blazor.Internal;
 
@@ -19,7 +19,7 @@ public class Feature
     public string? Type
     {
         get => GetProperty<string>("type");
-        set => Properties["type"] = value;
+        set => Properties["type"] = value!;
     }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]

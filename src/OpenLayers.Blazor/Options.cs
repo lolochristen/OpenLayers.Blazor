@@ -2,6 +2,9 @@
 
 namespace OpenLayers.Blazor;
 
+/// <summary>
+/// Provides configuration options for the map component.
+/// </summary>
 public class Options
 {
     /// <summary>
@@ -22,7 +25,17 @@ public class Options
     /// <summary>
     ///     Projection code how the coordinates are represented. Default is EPSG:4326.
     /// </summary>
-    public string CoordinatesProjection { get; set; } = "EPSG:4326";
+    public string CoordinatesProjection
+    {
+        get => _coordinatesProjection;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("CoordinatesProjection cannot be null or empty", nameof(value));
+            _coordinatesProjection = value;
+        }
+    }
+    private string _coordinatesProjection = "EPSG:4326";
 
     /// <summary>
     ///     Code of the view of the map shall be projected. If not given, the default view of the first layer is used.
@@ -39,7 +52,17 @@ public class Options
     ///     Sets or gets the limit whenever the list of coordinates of a feature shall be included in events to improve
     ///     response times.
     /// </summary>
-    public int SerializationCoordinatesLimit { get; set; } = 512;
+    public int SerializationCoordinatesLimit
+    {
+        get => _serializationCoordinatesLimit;
+        set
+        {
+            if (value < 0)
+                throw new ArgumentOutOfRangeException(nameof(value), "SerializationCoordinatesLimit must be non-negative");
+            _serializationCoordinatesLimit = value;
+        }
+    }
+    private int _serializationCoordinatesLimit = 512;
 
     /// <summary>
     ///     Get or sets if the zoom control is visible
@@ -79,12 +102,32 @@ public class Options
     /// <summary>
     ///    Gets or sets the minimal zoom level.
     /// </summary>
-    public double MinZoom { get; set; } = 0;
+    public double MinZoom
+    {
+        get => _minZoom;
+        set
+        {
+            if (value < 0 || value > MaxZoom)
+                throw new ArgumentOutOfRangeException(nameof(value), "MinZoom must be between 0 and MaxZoom");
+            _minZoom = value;
+        }
+    }
+    private double _minZoom = 0;
 
     /// <summary>
     ///    Gets or sets the maximal zoom level.
     /// </summary>
-    public double MaxZoom { get; set; } = 28;
+    public double MaxZoom
+    {
+        get => _maxZoom;
+        set
+        {
+            if (value < MinZoom || value > 50)
+                throw new ArgumentOutOfRangeException(nameof(value), "MaxZoom must be between MinZoom and 50");
+            _maxZoom = value;
+        }
+    }
+    private double _maxZoom = 28;
 
     /// <summary>
     ///    Gets or sets whenever popups shall allow events like click forward to the map. Defaults to false.

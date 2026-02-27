@@ -72,7 +72,12 @@ public class Feature : ComponentBase
         set => InternalFeature.Coordinates = value;
     }
 
-    [JsonIgnore] [Parameter] public EventCallback OnClick { get; set; }
+    /// <summary>
+    ///     Gets or sets the event callback when the feature is clicked.
+    /// </summary>
+    [JsonIgnore]
+    [Parameter]
+    public EventCallback OnClick { get; set; }
 
     /// <summary>
     ///     Gets or sets the attached parent map.

@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace OpenLayers.Blazor;
@@ -39,7 +40,6 @@ public struct Coordinate : IEquatable<Coordinate>
     /// <summary>
     ///     Initializes a new instance of <see cref="Coordinate" />.
     /// </summary>
-    /// <param name="coordinates">X/Longitude, Y/Latitude</param>
     /// <param name="x"></param>
     /// <param name="y"></param>
     public Coordinate(double x, double y)
@@ -84,7 +84,15 @@ public struct Coordinate : IEquatable<Coordinate>
     public double Longitude => X;
 
     /// <inheritdoc />
-    public bool Equals(Coordinate other)
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+        if (obj is Coordinate other)
+            return Equals(other);
+        return base.Equals(obj);
+    }
+
+    /// <inheritdoc />
+    public  bool Equals(Coordinate other)
     {
         var precision = 0.0000001;
         return Math.Abs(X - other.X) < precision && Math.Abs(Y - other.Y) < precision;

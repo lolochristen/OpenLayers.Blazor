@@ -74,7 +74,7 @@ public class Marker : Shape
     ///     Type of the marker: <see cref="MarkerType" />
     /// </summary>
     [Parameter]
-    public MarkerType Type
+    public new MarkerType Type
     {
         get => InternalFeature.GetProperty<string>("markerstyle") != null ? Enum.Parse<MarkerType>(InternalFeature.GetProperty<string>("markerstyle")) : MarkerType.MarkerPin;
         set

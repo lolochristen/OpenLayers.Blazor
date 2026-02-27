@@ -30,7 +30,7 @@ public class SwissMap : Map
     /// <inheritdoc/>
     protected override Task OnParametersSetAsync()
     {
-        if (LayersList.Count > 0 && LayersList[0].SourceParameters["LAYERS"] != LayerId)
+        if (LayersList.Count > 0 && LayersList[0].SourceParameters["LAYERS"].ToString() != LayerId)
             SetBaseLayer(LayerId);
         return base.OnParametersSetAsync();
     }

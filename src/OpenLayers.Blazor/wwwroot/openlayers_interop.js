@@ -772,10 +772,31 @@ MapOL.prototype.prepareLayers = function(layers) {
                     var features;
 
                     if (l.useStyleCallback) {
-                        l.style = function (feature, resolution) {
-                            that.getShapeStyleAsync(feature, l.id)
-                            .then(style => feature.setStyle(style));
-                        };
+                        if (l.layerType == "VectorTile") {
+                            // VectorTile layers render ol.render.Feature objects which have no setStyle();
+                            // the style function must return a style synchronously during the tile render pass.
+                            // Cache styles per feature and trigger a re-render once the async callback resolves.
+                            const tileStyleCache = new Map();
+                            l.style = function (feature, resolution) {
+                                // StyleCallback depends only on feature properties (not resolution),
+                                // so the properties form a correct cache key. Prefer the feature id when set.
+                                const key = feature.getId() != null ? feature.getId() : JSON.stringify(feature.getProperties());
+                                if (tileStyleCache.has(key))
+                                    return tileStyleCache.get(key); // hit (incl. pending null) -> no re-invoke
+                                tileStyleCache.set(key, null); // mark pending to avoid duplicate callbacks
+                                that.getShapeStyleAsync(feature, l.id).then(function (style) {
+                                    tileStyleCache.set(key, style);
+                                    const layer = that.getLayer(l.id);
+                                    if (layer) layer.changed(); // re-render so the cached style is applied
+                                });
+                                return null; // not styled on this pass
+                            };
+                        } else {
+                            l.style = function (feature, resolution) {
+                                that.getShapeStyleAsync(feature, l.id)
+                                .then(style => feature.setStyle(style));
+                            };
+                        }
                     } else if (l.style) {
                         l.style = that.mapStyleOptionsToStyle(l.style);
                     } else if (l.flatStyle) {

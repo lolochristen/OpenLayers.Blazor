@@ -28,6 +28,7 @@
 		<EmbeddedResource Include="Pages\EventsDemo.razor" />
 		<EmbeddedResource Include="Pages\SwissBaseMapDemo.razor" />
 		<EmbeddedResource Include="Pages\MapBoxDemo.razor" />
+		<EmbeddedResource Include="Pages\VectorTileDemo.razor" />
   </ItemGroup>
 
 	<ItemGroup>

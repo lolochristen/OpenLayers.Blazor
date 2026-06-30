@@ -1,0 +1,55 @@
+@page "/vectortiledemo"
+@rendermode Components.RenderMode.DefaultRenderMode
+@using Shape = OpenLayers.Blazor.Shape
+
+<div class="card mt-2 mb-2">
+    <div class="card-header">
+        <h3 class="card-title">Vector Tiles (MVT)</h3>
+    </div>
+    <div class="card-body">
+        A <code>SourceType.VectorMVT</code> layer (rendered as <code>LayerType.VectorTile</code>) with a
+        custom <code>StyleCallback</code>. Country polygons are filled based on a feature property,
+        demonstrating per-feature styling on vector tiles (see issue #134).
+    </div>
+</div>
+
+<OpenStreetMap Style="height: 800px;" Class="card" @bind-Center="_center" Zoom="3">
+    <Layers>
+        <Layer LayerType="LayerType.VectorTile"
+               SourceType="SourceType.VectorMVT"
+               Url="@_url"
+               Id="mvt"
+               StyleCallback="GetShapeStyle"
+               RaiseShapeEvents/>
+    </Layers>
+</OpenStreetMap>
+
+<CodeView Source="VectorTileDemo.razor"/>
+
+@code {
+    private Coordinate _center = new(0, 30);
+
+    // Natural Earth country polygons as Mapbox Vector Tiles (TMS scheme -> {-y}).
+    private readonly string _url = "https://ahocevar.com/geoserver/gwc/service/tms/1.0.0/ne:ne_10m_admin_0_countries@EPSG%3A900913@pbf/{z}/{x}/{-y}.pbf";
+
+    private StyleOptions? GetShapeStyle(Shape shape)
+    {
+        // Alternate the fill colour by the first letter of the country name so the
+        // StyleCallback result is clearly visible across the map.
+        var name = shape.Properties.TryGetValue("name", out var n) ? n?.ToString() ?? "" : "";
+        var even = name.Length > 0 && char.ToUpperInvariant(name[0]) % 2 == 0;
+
+        return new StyleOptions()
+        {
+            Stroke = new StyleOptions.StrokeOptions()
+            {
+                Color = "rgba(0, 0, 0, 0.6)",
+                Width = 1
+            },
+            Fill = new StyleOptions.FillOptions()
+            {
+                Color = even ? "rgba(0, 128, 255, 0.4)" : "rgba(255, 128, 0, 0.4)"
+            }
+        };
+    }
+}
